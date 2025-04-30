@@ -20,7 +20,20 @@ import (
 
 	"github.com/mark3labs/mcp-go/server"
 	examplev1 "github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/proto/example/v1"
+	"github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/proto/example/v1/examplev1connect"
 	"github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/proto/example/v1/examplev1mcp"
+)
+
+// Ensure our interface and the official gRPC interface are grpcClient
+var (
+	grpcClient examplev1.ExampleServiceClient
+	mcpClient  = examplev1mcp.ExampleServiceClient(grpcClient)
+)
+
+// Ensure our interface and the official connect-go interface are compatible
+var (
+	connectClient    examplev1connect.ExampleServiceClient
+	connectMcpClient = examplev1mcp.ConnectExampleServiceClient(connectClient)
 )
 
 func main() {
@@ -34,9 +47,13 @@ func main() {
 
 	examplev1mcp.RegisterExampleServiceHandler(s, &srv)
 
+	examplev1mcp.ForwardToConnectExampleServiceClient(s, connectClient)
+	examplev1mcp.ForwardToExampleServiceClient(s, grpcClient)
+
 	if err := server.ServeStdio(s); err != nil {
 		fmt.Printf("Server error: %v\n", err)
 	}
+
 }
 
 type exampleServer struct {

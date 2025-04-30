@@ -14,6 +14,7 @@ import (
 	"encoding/json"
 	"google.golang.org/protobuf/encoding/protojson"
 	"connectrpc.com/connect"
+	grpc "google.golang.org/grpc"
 )
 
 var (
@@ -50,12 +51,17 @@ func RegisterExampleServiceHandler(s *mcpserver.MCPServer, srv ExampleServiceSer
 	})
 }
 
+// ExampleServiceClient is compatible with the grpc-go client interface.
+type ExampleServiceClient interface {
+	CreateExample(ctx context.Context, req *v1.CreateExampleRequest, opts ...grpc.CallOption) (*v1.CreateExampleResponse, error)
+}
+
 // ConnectExampleServiceClient is compatible with the connectrpc-go client interface.
 type ConnectExampleServiceClient interface {
 	CreateExample(ctx context.Context, req *connect.Request[v1.CreateExampleRequest]) (*connect.Response[v1.CreateExampleResponse], error)
 }
 
-// Register connectrpc handler, to forward MCP calls to it.
+// ForwardToConnectExampleServiceClient registers a connectrpc client, to forward MCP calls to it.
 func ForwardToConnectExampleServiceClient(s *mcpserver.MCPServer, client ConnectExampleServiceClient) {
 	s.AddTool(ExampleService_CreateExampleTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		marshaled, err := json.Marshal(request.Params.Arguments)
@@ -74,6 +80,32 @@ func ForwardToConnectExampleServiceClient(s *mcpserver.MCPServer, client Connect
 		}
 
 		marshaled, err = (protojson.MarshalOptions{UseProtoNames: true, EmitDefaultValues: true}).Marshal(resp.Msg)
+		if err != nil {
+			return nil, err
+		}
+		return mcp.NewToolResultText(string(marshaled)), nil
+	})
+}
+
+// ForwardToExampleServiceClient registers a gRPC client, to forward MCP calls to it.
+func ForwardToExampleServiceClient(s *mcpserver.MCPServer, client ExampleServiceClient) {
+	s.AddTool(ExampleService_CreateExampleTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		marshaled, err := json.Marshal(request.Params.Arguments)
+		if err != nil {
+			return nil, err
+		}
+
+		var req v1.CreateExampleRequest
+		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+			return nil, err
+		}
+
+		resp, err := client.CreateExample(ctx, &req)
+		if err != nil {
+			return nil, err
+		}
+
+		marshaled, err = (protojson.MarshalOptions{UseProtoNames: true, EmitDefaultValues: true}).Marshal(resp)
 		if err != nil {
 			return nil, err
 		}
