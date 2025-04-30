@@ -61,12 +61,18 @@ Each RPC method in your protobuf service becomes an MCP tool.
 
 ➡️ See the [full example](./example) for details.
 
-### Wiring up with connectrpc client
+### Wiring up with grpc and connectrpc client
 
-It is also possible to directly forward MCP tool calls to connectrpc clients. 
+It is also possible to directly forward MCP tool calls to gRPC clients. 
 
 ```go
-examplev1mcp.ForwardToConnectExampleServiceClient(mcpServer, &srv)
+examplev1mcp.ForwardToExampleServiceClient(mcpServer, myGrpcClient)
+```
+
+Same for connectrpc:
+
+```go
+examplev1mcp.ForwardToConnectExampleServiceClient(mcpServer, myConnectClient)
 ```
 
 This directly connects the MCP handler to the connectrpc client, requiring zero boilerplate.
@@ -78,7 +84,6 @@ This directly connects the MCP handler to the connectrpc client, requiring zero 
 
 ## 🗺️ Roadmap
 
-- gRPC client forwarding (currently only server-side or ConnectRPC client)
 - Reflection/proxy mode
 - Interceptor middleware support in gRPC server mode
 - Support for the official Go MCP SDK (once published)

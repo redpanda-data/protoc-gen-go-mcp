@@ -87,6 +87,7 @@ import (
 	"encoding/json"
 	"google.golang.org/protobuf/encoding/protojson"
 	"connectrpc.com/connect"
+	grpc "google.golang.org/grpc"
 )
 
 var (
@@ -134,6 +135,16 @@ func Register{{$key}}Handler(s *mcpserver.MCPServer, srv {{$key}}Server) {
 {{- end }}
 
 {{- range $serviceName, $methods := .Services }}
+// {{$serviceName}}Client is compatible with the grpc-go client interface.
+type {{$serviceName}}Client interface {
+  {{- range $methodName, $tool := $methods }}
+  {{$methodName}}(ctx context.Context, req *{{$tool.RequestType}}, opts ...grpc.CallOption) (*{{$tool.ResponseType}}, error)
+  {{- end }}
+}
+{{ end }}
+
+
+{{- range $serviceName, $methods := .Services }}
 // Connect{{$serviceName}}Client is compatible with the connectrpc-go client interface.
 type Connect{{$serviceName}}Client interface {
   {{- range $methodName, $tool := $methods }}
@@ -142,8 +153,8 @@ type Connect{{$serviceName}}Client interface {
 }
 {{ end }}
 
-// Register connectrpc handler, to forward MCP calls to it.
 {{- range $key, $val := .Services }}
+// ForwardToConnect{{$key}}Client registers a connectrpc client, to forward MCP calls to it.
 func ForwardToConnect{{$key}}Client(s *mcpserver.MCPServer, client Connect{{$key}}Client) {
   {{- range $tool_name, $tool_val := $val }}
   s.AddTool({{$key}}_{{$tool_name}}Tool,func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -171,6 +182,37 @@ func ForwardToConnect{{$key}}Client(s *mcpserver.MCPServer, client Connect{{$key
   {{- end }}
 }
 {{- end }}
+
+{{- range $key, $val := .Services }}
+// ForwardTo{{$key}}Client registers a gRPC client, to forward MCP calls to it.
+func ForwardTo{{$key}}Client(s *mcpserver.MCPServer, client {{$key}}Client) {
+  {{- range $tool_name, $tool_val := $val }}
+  s.AddTool({{$key}}_{{$tool_name}}Tool,func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		marshaled, err := json.Marshal(request.Params.Arguments)
+		if err != nil {
+			return nil, err
+		}
+
+		var req {{$tool_val.RequestType}}
+		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+			return nil, err
+		}
+
+		resp, err := client.{{$tool_name}}(ctx, &req)
+		if err != nil {
+			return nil, err
+		}
+
+		marshaled, err = (protojson.MarshalOptions{UseProtoNames: true, EmitDefaultValues: true}).Marshal(resp)
+		if err != nil {
+			return nil, err
+		}
+		return mcp.NewToolResultText(string(marshaled)), nil
+  })
+  {{- end }}
+}
+{{- end }}
+
 
 `
 
