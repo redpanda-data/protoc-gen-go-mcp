@@ -77,6 +77,11 @@ examplev1mcp.ForwardToConnectExampleServiceClient(mcpServer, myConnectClient)
 
 This directly connects the MCP handler to the connectrpc client, requiring zero boilerplate.
 
+## Compatibility
+
+OpenAI imposes some limitations, because it does not support JSON Schema features like additionalProperties, anyOf, oneOf.
+Use the protoc opt `openai_compat=true` (false by default) to make the generator emit OpenAI compatible schemas.
+
 ## ⚠️ Limitations
 
 - No interceptor support (yet). Registering with a gRPC server bypasses interceptors.
