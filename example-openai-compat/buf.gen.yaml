@@ -23,5 +23,5 @@ plugins:
     out: ./gen/go
     opt:
       - paths=source_relative
-      # - openai_compat=true
+      - openai_compat=true
 
