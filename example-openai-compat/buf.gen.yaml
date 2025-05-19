@@ -3,7 +3,7 @@ managed:
   enabled: true
   override:
     - file_option: go_package_prefix
-      value: github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go
+      value: github.com/redpanda-data/protoc-gen-go-mcp/example-openai-compat/gen/go
   disable:
     - file_option: go_package
       module: buf.build/googleapis/googleapis
@@ -23,5 +23,5 @@ plugins:
     out: ./gen/go
     opt:
       - paths=source_relative
-      # - openai_compat=true
+      - openai_compat=true
 
