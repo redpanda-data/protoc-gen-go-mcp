@@ -382,30 +382,19 @@ func (g *fileGenerator) messageSchema(md protoreflect.MessageDescriptor) map[str
 }
 
 func (g *fileGenerator) getType(fd protoreflect.FieldDescriptor) map[string]any {
-	var schema map[string]any
 	if fd.IsMap() {
-		// Add key constraints. Map keys in protobuf can have different primitive types, where JSON can use only string.
 		keyType := fd.MapKey().Kind()
-		keyConstraints := map[string]any{
-			"type": "string",
-		}
+		keyConstraints := map[string]any{"type": "string"}
+
 		switch keyType {
 		case protoreflect.BoolKind:
 			keyConstraints["enum"] = []string{"true", "false"}
-		case protoreflect.Uint32Kind, protoreflect.Fixed32Kind,
-			protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
-			keyConstraints["pattern"] = "^(0|[1-9]\\d*)$" // unsigned integers, no leading zeros
-		case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind,
-			protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
-			keyConstraints["pattern"] = "^-?(0|[1-9]\\d*)$" // signed integers, no leading zeros
-		default:
+		case protoreflect.Uint32Kind, protoreflect.Fixed32Kind, protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
+			keyConstraints["pattern"] = "^(0|[1-9]\\d*)$"
+		case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind, protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
+			keyConstraints["pattern"] = "^-?(0|[1-9]\\d*)$"
 		}
 
-		// Use special case for OpenAI compatibility mode,
-		// where dynamic maps are replaced by array-of-key-value.
-		// This is needed, because OpenAI does not support dynamic maps.
-		// The array is converted back before parsing an MCP message with
-		// protojson (part of generated code)
 		if g.openAICompat {
 			return map[string]any{
 				"type":        "array",
@@ -413,9 +402,7 @@ func (g *fileGenerator) getType(fd protoreflect.FieldDescriptor) map[string]any 
 				"items": map[string]any{
 					"type": "object",
 					"properties": map[string]any{
-						"key": map[string]any{
-							"type": "string",
-						},
+						"key": map[string]any{"type": "string"},
 						"value": map[string]any{
 							"type": g.getType(fd.MapValue())["type"],
 						},
@@ -425,123 +412,98 @@ func (g *fileGenerator) getType(fd protoreflect.FieldDescriptor) map[string]any 
 				},
 			}
 		}
+
 		return map[string]any{
 			"type":                 "object",
 			"propertyNames":        keyConstraints,
 			"additionalProperties": g.getType(fd.MapValue()),
 		}
-	} else if fd.Kind() == protoreflect.MessageKind {
-		if fd.Kind() == protoreflect.MessageKind {
-			fullName := string(fd.Message().FullName())
+	}
 
-			switch fullName {
-			case "google.protobuf.Timestamp":
-				return map[string]any{
-					"type":   "string",
-					"format": "date-time",
+	var schema map[string]any
+
+	switch fd.Kind() {
+	case protoreflect.MessageKind:
+		fullName := string(fd.Message().FullName())
+		switch fullName {
+		case "google.protobuf.Timestamp":
+			schema = map[string]any{"type": "string", "format": "date-time"}
+		case "google.protobuf.Duration":
+			schema = map[string]any{"type": "string", "pattern": `^-?[0-9]+(\.[0-9]+)?s$`}
+		case "google.protobuf.Struct":
+			if g.openAICompat {
+				schema = map[string]any{
+					"type":        "string",
+					"description": "string representation of any JSON object. represents a google.protobuf.Struct, a dynamic JSON object.",
 				}
-			case "google.protobuf.Duration":
-				return map[string]any{
-					"type":    "string",
-					"pattern": `^-?[0-9]+(\.[0-9]+)?s$`,
-				}
-			case "google.protobuf.Struct":
-				if g.openAICompat {
-					return map[string]any{
-						"type":        "string",
-						"description": "string representation of any JSON object. represents a google.protobuf.Struct, a dynamic JSON object.",
-					}
-				}
-				return map[string]any{
+			} else {
+				schema = map[string]any{
 					"type":                 "object",
 					"additionalProperties": true,
 				}
-			case "google.protobuf.Value":
-				return map[string]any{
-					"type":        "string",
-					"description": "string representation of any JSON value. represents a google.protobuf.Value, a dynamic JSON value (string, number, boolean, array, object).",
-				}
-			case "google.protobuf.FieldMask":
-				if g.openAICompat {
-					return map[string]any{
-						"type": []string{"string", "null"},
-					}
-				}
-				return map[string]any{
-					"type": "string",
-				}
-			case "google.protobuf.Any":
-				return map[string]any{
-					"type": "object",
-					"properties": map[string]any{
-						"@type": map[string]any{
-							"type": "string",
-						},
-						"value": map[string]any{},
-					},
-					"required": []string{"@type"},
-				}
-			case "google.protobuf.DoubleValue", "google.protobuf.FloatValue",
-				"google.protobuf.Int32Value", "google.protobuf.UInt32Value":
-				return map[string]any{
-					"type":     "number",
-					"nullable": true,
-				}
-			case "google.protobuf.Int64Value", "google.protobuf.UInt64Value":
-				return map[string]any{
-					"type":     "string",
-					"nullable": true,
-				}
-			case "google.protobuf.StringValue":
-				return map[string]any{
-					"type":     "string",
-					"nullable": true,
-				}
-			case "google.protobuf.BoolValue":
-				return map[string]any{
-					"type":     "boolean",
-					"nullable": true,
-				}
-			case "google.protobuf.BytesValue":
-				if g.openAICompat {
-					return map[string]any{
-						"type":     "string",
-						"nullable": true,
-					}
-				}
-				return map[string]any{
-					"type":     "string",
-					"format":   "byte",
-					"nullable": true,
-				}
 			}
+		case "google.protobuf.Value":
+			schema = map[string]any{
+				"type":        "string",
+				"description": "string representation of any JSON value. represents a google.protobuf.Value, a dynamic JSON value (string, number, boolean, array, object).",
+			}
+		case "google.protobuf.FieldMask":
+			if g.openAICompat {
+				schema = map[string]any{"type": []string{"string", "null"}}
+			} else {
+				schema = map[string]any{"type": "string"}
+			}
+		case "google.protobuf.Any":
+			schema = map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"@type": map[string]any{"type": "string"},
+					"value": map[string]any{},
+				},
+				"required": []string{"@type"},
+			}
+		case "google.protobuf.DoubleValue", "google.protobuf.FloatValue",
+			"google.protobuf.Int32Value", "google.protobuf.UInt32Value":
+			schema = map[string]any{"type": "number", "nullable": true}
+		case "google.protobuf.Int64Value", "google.protobuf.UInt64Value":
+			schema = map[string]any{"type": "string", "nullable": true}
+		case "google.protobuf.StringValue":
+			schema = map[string]any{"type": "string", "nullable": true}
+		case "google.protobuf.BoolValue":
+			schema = map[string]any{"type": "boolean", "nullable": true}
+		case "google.protobuf.BytesValue":
+			if g.openAICompat {
+				schema = map[string]any{"type": "string", "nullable": true}
+			} else {
+				schema = map[string]any{"type": "string", "format": "byte", "nullable": true}
+			}
+		default:
+			schema = g.messageSchema(fd.Message())
 		}
-		return g.messageSchema(fd.Message())
-	} else if fd.Kind() == protoreflect.EnumKind {
-		var values []string
 
+	case protoreflect.EnumKind:
+		var values []string
 		for i := 0; i < fd.Enum().Values().Len(); i++ {
-			ev := fd.Enum().Values().Get(i)
-			values = append(values, string(ev.Name()))
+			values = append(values, string(fd.Enum().Values().Get(i).Name()))
 		}
-		return map[string]any{
+		schema = map[string]any{
 			"type": "string",
 			"enum": values,
 		}
-	} else {
+
+	default:
 		schema = map[string]any{
 			"type": kindToType(fd.Kind()),
 		}
-	}
-
-	if fd.Kind() == protoreflect.BytesKind {
-		schema["contentEncoding"] = "base64"
-		if !g.openAICompat {
-			schema["format"] = "byte"
+		if fd.Kind() == protoreflect.BytesKind {
+			schema["contentEncoding"] = "base64"
+			if !g.openAICompat {
+				schema["format"] = "byte"
+			}
 		}
 	}
 
-	// If array, wrap it with array type (and put actual schema into "items"
+	// Handle repeated fields here, wrapping the actual schema in an array.
 	if fd.IsList() {
 		return map[string]any{
 			"type":  "array",
