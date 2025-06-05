@@ -400,9 +400,9 @@ func (g *FileGenerator) getType(fd protoreflect.FieldDescriptor) map[string]any 
 		fullName := string(fd.Message().FullName())
 		switch fullName {
 		case "google.protobuf.Timestamp":
-			schema = map[string]any{"type": "string", "format": "date-time"}
+			schema = map[string]any{"type": []string{"string", "null"}, "format": "date-time"}
 		case "google.protobuf.Duration":
-			schema = map[string]any{"type": "string", "pattern": `^-?[0-9]+(\.[0-9]+)?s$`}
+			schema = map[string]any{"type": []string{"string", "null"}, "pattern": `^-?[0-9]+(\.[0-9]+)?s$`}
 		case "google.protobuf.Struct":
 			if g.openAICompat {
 				schema = map[string]any{
@@ -447,7 +447,7 @@ func (g *FileGenerator) getType(fd protoreflect.FieldDescriptor) map[string]any 
 			}
 		case "google.protobuf.Any":
 			schema = map[string]any{
-				"type": "object",
+				"type": []string{"object", "null"},
 				"properties": map[string]any{
 					"@type": map[string]any{"type": "string"},
 					"value": map[string]any{},
