@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package openai
+package runtime
 
 import (
 	"encoding/json"
@@ -56,11 +56,11 @@ func FixMap(descriptor protoreflect.MessageDescriptor, args map[string]any) {
 	rewrite(descriptor, nil, args)
 }
 
-// Fix applies all OpenAI compatibility transformations to convert OpenAI-formatted JSON
+// FixOpenAI applies all OpenAI compatibility transformations to convert OpenAI-formatted JSON
 // back to standard protobuf-compatible JSON. This includes:
 // - Converting map arrays back to objects (FixMap)
 // - Converting string representations back to proper JSON for google.protobuf.Value/ListValue/Struct
-func Fix(descriptor protoreflect.MessageDescriptor, args map[string]any) {
+func FixOpenAI(descriptor protoreflect.MessageDescriptor, args map[string]any) {
 	var rewrite func(msg protoreflect.MessageDescriptor, path []string, obj map[string]any)
 
 	rewrite = func(msg protoreflect.MessageDescriptor, path []string, obj map[string]any) {

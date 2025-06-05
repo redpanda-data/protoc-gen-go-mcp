@@ -66,7 +66,7 @@ import (
   "connectrpc.com/connect"
   grpc "google.golang.org/grpc"
   {{- if .OpenAICompat }}
-  "github.com/redpanda-data/protoc-gen-go-mcp/pkg/openai"
+  "github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
   {{- end }}
 )
 
@@ -93,7 +93,7 @@ func Register{{$key}}Handler(s *mcpserver.MCPServer, srv {{$key}}Server) {
 
     message := request.Params.Arguments
     {{- if $.OpenAICompat }}
-    openai.FixMap(req.ProtoReflect().Descriptor(), message)
+    runtime.FixOpenAI(req.ProtoReflect().Descriptor(), message)
     {{- end }}
 
     marshaled, err := json.Marshal(message)
@@ -149,7 +149,7 @@ func ForwardToConnect{{$key}}Client(s *mcpserver.MCPServer, client Connect{{$key
 
     message := request.Params.Arguments
     {{- if $.OpenAICompat }}
-    openai.FixMap(req.ProtoReflect().Descriptor(), message)
+    runtime.FixMap(req.ProtoReflect().Descriptor(), message)
     {{- end }}
 
     marshaled, err := json.Marshal(message)
@@ -185,7 +185,7 @@ func ForwardTo{{$key}}Client(s *mcpserver.MCPServer, client {{$key}}Client) {
 
     message := request.Params.Arguments
     {{- if $.OpenAICompat }}
-    openai.FixMap(req.ProtoReflect().Descriptor(), request.Params.Arguments)
+    runtime.FixOpenAI(req.ProtoReflect().Descriptor(), message)
     {{- end }}
 
     marshaled, err := json.Marshal(message)

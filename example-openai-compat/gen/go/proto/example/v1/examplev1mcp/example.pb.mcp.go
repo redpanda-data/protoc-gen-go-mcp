@@ -15,7 +15,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"connectrpc.com/connect"
 	grpc "google.golang.org/grpc"
-	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/openai"
+	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
 )
 
 var (
@@ -32,7 +32,7 @@ func RegisterExampleServiceHandler(s *mcpserver.MCPServer, srv ExampleServiceSer
 		var req v1.CreateExampleRequest
 
 		message := request.Params.Arguments
-		openai.FixMap(req.ProtoReflect().Descriptor(), message)
+		runtime.FixOpenAI(req.ProtoReflect().Descriptor(), message)
 
 		marshaled, err := json.Marshal(message)
 		if err != nil {
@@ -73,7 +73,7 @@ func ForwardToConnectExampleServiceClient(s *mcpserver.MCPServer, client Connect
 		var req v1.CreateExampleRequest
 
 		message := request.Params.Arguments
-		openai.FixMap(req.ProtoReflect().Descriptor(), message)
+		runtime.FixMap(req.ProtoReflect().Descriptor(), message)
 
 		marshaled, err := json.Marshal(message)
 		if err != nil {
@@ -103,7 +103,7 @@ func ForwardToExampleServiceClient(s *mcpserver.MCPServer, client ExampleService
 		var req v1.CreateExampleRequest
 
 		message := request.Params.Arguments
-		openai.FixMap(req.ProtoReflect().Descriptor(), request.Params.Arguments)
+		runtime.FixOpenAI(req.ProtoReflect().Descriptor(), message)
 
 		marshaled, err := json.Marshal(message)
 		if err != nil {
