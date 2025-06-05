@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package generator
 
 import (
 	"bytes"
@@ -150,7 +150,9 @@ func TestCompat(t *testing.T) {
 				input = tt.rawJsonInput
 			}
 
-			schemaMap := messageSchema(tt.input.ProtoReflect().Descriptor())
+			// Create a generator instance to access messageSchema method
+			fg := &FileGenerator{openAICompat: false}
+			schemaMap := fg.messageSchema(tt.input.ProtoReflect().Descriptor())
 			schemaJSON, err := json.Marshal(schemaMap)
 			g.Expect(err).ToNot(HaveOccurred())
 
