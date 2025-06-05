@@ -149,7 +149,7 @@ func ForwardToConnect{{$key}}Client(s *mcpserver.MCPServer, client Connect{{$key
 
     message := request.Params.Arguments
     {{- if $.OpenAICompat }}
-    runtime.FixMap(req.ProtoReflect().Descriptor(), message)
+    runtime.FixOpenAI(req.ProtoReflect().Descriptor(), message)
     {{- end }}
 
     marshaled, err := json.Marshal(message)

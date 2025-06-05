@@ -38,7 +38,7 @@ func TestFix(t *testing.T) {
 	err := json.Unmarshal([]byte(in), &inMap)
 	g.Expect(err).ToNot(HaveOccurred())
 
-	FixMap(new(examplev1.CreateExampleRequest).ProtoReflect().Descriptor(), inMap)
+	FixOpenAI(new(examplev1.CreateExampleRequest).ProtoReflect().Descriptor(), inMap)
 
 	jzon, err := json.Marshal(inMap)
 	g.Expect(err).ToNot(HaveOccurred())
