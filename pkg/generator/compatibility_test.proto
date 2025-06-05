@@ -47,3 +47,7 @@ message WktTestMessage {
   google.protobuf.BoolValue bool_value = 11;
   google.protobuf.BytesValue bytes_value = 12;
 }
+
+message MapTestMessage {
+  map<string, string> string_map = 1;
+}
