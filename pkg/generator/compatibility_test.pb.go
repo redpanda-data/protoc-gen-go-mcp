@@ -262,6 +262,50 @@ func (x *WktTestMessage) GetBytesValue() *wrapperspb.BytesValue {
 	return nil
 }
 
+type MapTestMessage struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StringMap     map[string]string      `protobuf:"bytes,1,rep,name=string_map,json=stringMap,proto3" json:"string_map,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MapTestMessage) Reset() {
+	*x = MapTestMessage{}
+	mi := &file_compatibility_test_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MapTestMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MapTestMessage) ProtoMessage() {}
+
+func (x *MapTestMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_compatibility_test_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MapTestMessage.ProtoReflect.Descriptor instead.
+func (*MapTestMessage) Descriptor() ([]byte, []int) {
+	return file_compatibility_test_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *MapTestMessage) GetStringMap() map[string]string {
+	if x != nil {
+		return x.StringMap
+	}
+	return nil
+}
+
 var File_compatibility_test_proto protoreflect.FileDescriptor
 
 const file_compatibility_test_proto_rawDesc = "" +
@@ -292,7 +336,13 @@ const file_compatibility_test_proto_rawDesc = "" +
 	"\n" +
 	"bool_value\x18\v \x01(\v2\x1a.google.protobuf.BoolValueR\tboolValue\x12<\n" +
 	"\vbytes_value\x18\f \x01(\v2\x1b.google.protobuf.BytesValueR\n" +
-	"bytesValueB\x8c\x01\n" +
+	"bytesValue\"\x92\x01\n" +
+	"\x0eMapTestMessage\x12B\n" +
+	"\n" +
+	"string_map\x18\x01 \x03(\v2#.main.MapTestMessage.StringMapEntryR\tstringMap\x1a<\n" +
+	"\x0eStringMapEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x8c\x01\n" +
 	"\bcom.mainB\x16CompatibilityTestProtoP\x01Z8github.com/redpanda-data/protoc-gen-go-mcp/pkg/generator\xa2\x02\x03MXX\xaa\x02\x04Main\xca\x02\x04Main\xe2\x02\x10Main\\GPBMetadata\xea\x02\x04Mainb\x06proto3"
 
 var (
@@ -307,42 +357,45 @@ func file_compatibility_test_proto_rawDescGZIP() []byte {
 	return file_compatibility_test_proto_rawDescData
 }
 
-var file_compatibility_test_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_compatibility_test_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_compatibility_test_proto_goTypes = []any{
 	(*TestMessage)(nil),            // 0: main.TestMessage
 	(*RequiredFieldTest)(nil),      // 1: main.RequiredFieldTest
 	(*WktTestMessage)(nil),         // 2: main.WktTestMessage
-	(*timestamppb.Timestamp)(nil),  // 3: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),    // 4: google.protobuf.Duration
-	(*structpb.Struct)(nil),        // 5: google.protobuf.Struct
-	(*structpb.Value)(nil),         // 6: google.protobuf.Value
-	(*structpb.ListValue)(nil),     // 7: google.protobuf.ListValue
-	(*fieldmaskpb.FieldMask)(nil),  // 8: google.protobuf.FieldMask
-	(*anypb.Any)(nil),              // 9: google.protobuf.Any
-	(*wrapperspb.StringValue)(nil), // 10: google.protobuf.StringValue
-	(*wrapperspb.Int32Value)(nil),  // 11: google.protobuf.Int32Value
-	(*wrapperspb.Int64Value)(nil),  // 12: google.protobuf.Int64Value
-	(*wrapperspb.BoolValue)(nil),   // 13: google.protobuf.BoolValue
-	(*wrapperspb.BytesValue)(nil),  // 14: google.protobuf.BytesValue
+	(*MapTestMessage)(nil),         // 3: main.MapTestMessage
+	nil,                            // 4: main.MapTestMessage.StringMapEntry
+	(*timestamppb.Timestamp)(nil),  // 5: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),    // 6: google.protobuf.Duration
+	(*structpb.Struct)(nil),        // 7: google.protobuf.Struct
+	(*structpb.Value)(nil),         // 8: google.protobuf.Value
+	(*structpb.ListValue)(nil),     // 9: google.protobuf.ListValue
+	(*fieldmaskpb.FieldMask)(nil),  // 10: google.protobuf.FieldMask
+	(*anypb.Any)(nil),              // 11: google.protobuf.Any
+	(*wrapperspb.StringValue)(nil), // 12: google.protobuf.StringValue
+	(*wrapperspb.Int32Value)(nil),  // 13: google.protobuf.Int32Value
+	(*wrapperspb.Int64Value)(nil),  // 14: google.protobuf.Int64Value
+	(*wrapperspb.BoolValue)(nil),   // 15: google.protobuf.BoolValue
+	(*wrapperspb.BytesValue)(nil),  // 16: google.protobuf.BytesValue
 }
 var file_compatibility_test_proto_depIdxs = []int32{
-	3,  // 0: main.WktTestMessage.timestamp:type_name -> google.protobuf.Timestamp
-	4,  // 1: main.WktTestMessage.duration:type_name -> google.protobuf.Duration
-	5,  // 2: main.WktTestMessage.struct_field:type_name -> google.protobuf.Struct
-	6,  // 3: main.WktTestMessage.value_field:type_name -> google.protobuf.Value
-	7,  // 4: main.WktTestMessage.list_value:type_name -> google.protobuf.ListValue
-	8,  // 5: main.WktTestMessage.field_mask:type_name -> google.protobuf.FieldMask
-	9,  // 6: main.WktTestMessage.any:type_name -> google.protobuf.Any
-	10, // 7: main.WktTestMessage.string_value:type_name -> google.protobuf.StringValue
-	11, // 8: main.WktTestMessage.int32_value:type_name -> google.protobuf.Int32Value
-	12, // 9: main.WktTestMessage.int64_value:type_name -> google.protobuf.Int64Value
-	13, // 10: main.WktTestMessage.bool_value:type_name -> google.protobuf.BoolValue
-	14, // 11: main.WktTestMessage.bytes_value:type_name -> google.protobuf.BytesValue
-	12, // [12:12] is the sub-list for method output_type
-	12, // [12:12] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	5,  // 0: main.WktTestMessage.timestamp:type_name -> google.protobuf.Timestamp
+	6,  // 1: main.WktTestMessage.duration:type_name -> google.protobuf.Duration
+	7,  // 2: main.WktTestMessage.struct_field:type_name -> google.protobuf.Struct
+	8,  // 3: main.WktTestMessage.value_field:type_name -> google.protobuf.Value
+	9,  // 4: main.WktTestMessage.list_value:type_name -> google.protobuf.ListValue
+	10, // 5: main.WktTestMessage.field_mask:type_name -> google.protobuf.FieldMask
+	11, // 6: main.WktTestMessage.any:type_name -> google.protobuf.Any
+	12, // 7: main.WktTestMessage.string_value:type_name -> google.protobuf.StringValue
+	13, // 8: main.WktTestMessage.int32_value:type_name -> google.protobuf.Int32Value
+	14, // 9: main.WktTestMessage.int64_value:type_name -> google.protobuf.Int64Value
+	15, // 10: main.WktTestMessage.bool_value:type_name -> google.protobuf.BoolValue
+	16, // 11: main.WktTestMessage.bytes_value:type_name -> google.protobuf.BytesValue
+	4,  // 12: main.MapTestMessage.string_map:type_name -> main.MapTestMessage.StringMapEntry
+	13, // [13:13] is the sub-list for method output_type
+	13, // [13:13] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_compatibility_test_proto_init() }
@@ -356,7 +409,7 @@ func file_compatibility_test_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_compatibility_test_proto_rawDesc), len(file_compatibility_test_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

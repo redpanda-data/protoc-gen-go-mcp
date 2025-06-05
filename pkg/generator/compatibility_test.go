@@ -21,6 +21,7 @@ import (
 	"time"
 
 	. "github.com/onsi/gomega"
+	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/openai"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -47,7 +48,6 @@ func TestCompat(t *testing.T) {
 		rawJsonInput  json.RawMessage
 		errorExpected bool
 		errorContains string
-		openAICompat  bool
 	}{
 		{
 			name: "any containing struct",
@@ -137,73 +137,19 @@ func TestCompat(t *testing.T) {
 			errorExpected: true,
 			errorContains: `missing properties: 'required_field'`,
 		},
-		// OpenAI Compatibility test cases
-		{
-			name: "openai compat: google.protobuf.Value/ListValue/Struct as strings",
-			input: &WktTestMessage{
-				Timestamp:   timestamppb.New(time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC)),
-				Duration:    durationpb.New(3 * time.Second),
-				StructField: &structpb.Struct{Fields: map[string]*structpb.Value{"foo": structpb.NewStringValue("bar")}},
-				ValueField:  structpb.NewNumberValue(42),
-				ListValue:   &structpb.ListValue{Values: []*structpb.Value{structpb.NewBoolValue(true)}},
-				FieldMask:   &fieldmaskpb.FieldMask{Paths: []string{"foo", "bar"}},
-				StringValue: wrapperspb.String("hello"),
-				Int32Value:  wrapperspb.Int32(123),
-				Int64Value:  wrapperspb.Int64(1234567890123),
-				BoolValue:   wrapperspb.Bool(true),
-				BytesValue:  wrapperspb.Bytes([]byte("hi")),
-			},
-			rawJsonInput: json.RawMessage(`{
-				"timestamp": "2023-01-01T12:00:00Z",
-				"duration": "3s",
-				"struct_field": "{\"foo\":\"bar\"}",
-				"value_field": "42",
-				"list_value": "[true]",
-				"field_mask": "foo,bar",
-				"any": {"@type": "type.googleapis.com/google.protobuf.StringValue", "value": "test"},
-				"string_value": "hello",
-				"int32_value": 123,
-				"int64_value": "1234567890123",
-				"bool_value": true,
-				"bytes_value": "aGk="
-			}`),
-			openAICompat: true,
-		},
-		{
-			name: "openai compat: all fields required",
-			input: &WktTestMessage{
-				Timestamp:   timestamppb.New(time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC)),
-				Duration:    durationpb.New(3 * time.Second),
-				StructField: &structpb.Struct{Fields: map[string]*structpb.Value{"foo": structpb.NewStringValue("bar")}},
-				ValueField:  structpb.NewNumberValue(42),
-				ListValue:   &structpb.ListValue{Values: []*structpb.Value{structpb.NewBoolValue(true)}},
-				FieldMask:   &fieldmaskpb.FieldMask{Paths: []string{"foo", "bar"}},
-				StringValue: wrapperspb.String("hello"),
-				Int32Value:  wrapperspb.Int32(123),
-				Int64Value:  wrapperspb.Int64(1234567890123),
-				BoolValue:   wrapperspb.Bool(true),
-				BytesValue:  wrapperspb.Bytes([]byte("hi")),
-			},
-			rawJsonInput: json.RawMessage(`{
-				"timestamp": "2023-01-01T12:00:00Z",
-				"duration": "3s",
-				"struct_field": "{\"foo\":\"bar\"}",
-				"value_field": "42",
-				"list_value": "[true]",
-				"field_mask": "foo,bar",
-				"any": {"@type": "type.googleapis.com/google.protobuf.StringValue", "value": "test"},
-				"string_value": "hello",
-				"int32_value": 123,
-				"int64_value": "1234567890123",
-				"bool_value": true,
-				"bytes_value": "aGk="
-			}`),
-			openAICompat: true,
-		},
 		{
 			name:         "nullable timestamp as null",
 			input:        &WktTestMessage{}, // Empty message, timestamp is nil
 			rawJsonInput: json.RawMessage(`{"timestamp": null}`),
+		},
+		{
+			name: "map as object",
+			input: &MapTestMessage{
+				StringMap: map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+				},
+			},
 		},
 	}
 
@@ -220,7 +166,7 @@ func TestCompat(t *testing.T) {
 			}
 
 			// Create a generator instance to access messageSchema method
-			fg := &FileGenerator{openAICompat: tt.openAICompat}
+			fg := &FileGenerator{openAICompat: false}
 			schemaMap := fg.messageSchema(tt.input.ProtoReflect().Descriptor())
 			schemaJSON, err := json.Marshal(schemaMap)
 			g.Expect(err).ToNot(HaveOccurred())
@@ -253,5 +199,168 @@ func TestCompat(t *testing.T) {
 
 		})
 	}
+}
 
+func TestCompatOpenAI(t *testing.T) {
+	tests := []struct {
+		name  string
+		input proto.Message
+		// If rawJsonInput is set, it's preferred over input.
+		// It can be used to simulate a wrong input, eg. not using base64 for byte fields.
+		// input must still be provided, so we know the proto type.
+		rawJsonInput  json.RawMessage
+		errorExpected bool
+		errorContains string
+	}{
+		{
+			name: "google.protobuf.Value/ListValue/Struct as strings",
+			input: &WktTestMessage{
+				Timestamp:   timestamppb.New(time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC)),
+				Duration:    durationpb.New(3 * time.Second),
+				StructField: &structpb.Struct{Fields: map[string]*structpb.Value{"foo": structpb.NewStringValue("bar")}},
+				ValueField:  structpb.NewNumberValue(42),
+				ListValue:   &structpb.ListValue{Values: []*structpb.Value{structpb.NewBoolValue(true)}},
+				FieldMask:   &fieldmaskpb.FieldMask{Paths: []string{"foo", "bar"}},
+				StringValue: wrapperspb.String("hello"),
+				Int32Value:  wrapperspb.Int32(123),
+				Int64Value:  wrapperspb.Int64(1234567890123),
+				BoolValue:   wrapperspb.Bool(true),
+				BytesValue:  wrapperspb.Bytes([]byte("hi")),
+			},
+			rawJsonInput: json.RawMessage(`{
+				"timestamp": "2023-01-01T12:00:00Z",
+				"duration": "3s",
+				"struct_field": "{\"foo\":\"bar\"}",
+				"value_field": "42",
+				"list_value": "[true]",
+				"field_mask": "foo,bar",
+				"any": {"@type": "type.googleapis.com/google.protobuf.StringValue", "value": "test"},
+				"string_value": "hello",
+				"int32_value": 123,
+				"int64_value": "1234567890123",
+				"bool_value": true,
+				"bytes_value": "aGk="
+			}`),
+		},
+		{
+			name: "all fields required",
+			input: &WktTestMessage{
+				Timestamp:   timestamppb.New(time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC)),
+				Duration:    durationpb.New(3 * time.Second),
+				StructField: &structpb.Struct{Fields: map[string]*structpb.Value{"foo": structpb.NewStringValue("bar")}},
+				ValueField:  structpb.NewNumberValue(42),
+				ListValue:   &structpb.ListValue{Values: []*structpb.Value{structpb.NewBoolValue(true)}},
+				FieldMask:   &fieldmaskpb.FieldMask{Paths: []string{"foo", "bar"}},
+				StringValue: wrapperspb.String("hello"),
+				Int32Value:  wrapperspb.Int32(123),
+				Int64Value:  wrapperspb.Int64(1234567890123),
+				BoolValue:   wrapperspb.Bool(true),
+				BytesValue:  wrapperspb.Bytes([]byte("hi")),
+			},
+			rawJsonInput: json.RawMessage(`{
+				"timestamp": "2023-01-01T12:00:00Z",
+				"duration": "3s",
+				"struct_field": "{\"foo\":\"bar\"}",
+				"value_field": "42",
+				"list_value": "[true]",
+				"field_mask": "foo,bar",
+				"any": {"@type": "type.googleapis.com/google.protobuf.StringValue", "value": "test"},
+				"string_value": "hello",
+				"int32_value": 123,
+				"int64_value": "1234567890123",
+				"bool_value": true,
+				"bytes_value": "aGk="
+			}`),
+		},
+		{
+			name: "map as array of key-value pairs",
+			input: &MapTestMessage{
+				StringMap: map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+				},
+			},
+			rawJsonInput: json.RawMessage(`{
+				"string_map": [
+					{"key": "key1", "value": "value1"},
+					{"key": "key2", "value": "value2"}
+				]
+			}`),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := NewWithT(t)
+			var input []byte
+			if tt.rawJsonInput == nil {
+				marshaled, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(tt.input)
+				g.Expect(err).ToNot(HaveOccurred())
+				input = marshaled
+			} else {
+				input = tt.rawJsonInput
+			}
+
+			// Create a generator instance to access messageSchema method with OpenAI compatibility
+			fg := &FileGenerator{openAICompat: true}
+			schemaMap := fg.messageSchema(tt.input.ProtoReflect().Descriptor())
+			schemaJSON, err := json.Marshal(schemaMap)
+			g.Expect(err).ToNot(HaveOccurred())
+
+			// Step 4: Validate the marshaled JSON against the schema
+			compiler := jsonschema.NewCompiler()
+			// This is required, so it can assert that strings are base64.
+			compiler.AssertContent = true
+
+			err = compiler.AddResource("schema.json", bytes.NewReader(schemaJSON))
+			g.Expect(err).ToNot(HaveOccurred())
+
+			schema, err := compiler.Compile("schema.json")
+			g.Expect(err).ToNot(HaveOccurred())
+
+			var jsonData interface{}
+			err = json.Unmarshal(input, &jsonData)
+			g.Expect(err).ToNot(HaveOccurred())
+
+			// First validate against the schema (expects array format for maps in OpenAI mode)
+			err = schema.Validate(jsonData)
+			if tt.errorExpected {
+				g.Expect(err).To(HaveOccurred())
+			} else {
+				g.Expect(err).ToNot(HaveOccurred())
+			}
+
+			// Then apply Fix for OpenAI compatibility mode (converts all OpenAI format back to protobuf format)
+			// This is what would happen in the actual MCP tool execution before protojson.Unmarshal
+			if rawData, ok := jsonData.(map[string]interface{}); ok {
+				openai.Fix(tt.input.ProtoReflect().Descriptor(), rawData)
+				
+				// Verify that the converted data can be unmarshaled into the proto message
+				fixedJSON, err := json.Marshal(rawData)
+				g.Expect(err).ToNot(HaveOccurred())
+				
+				var testProto proto.Message
+				switch tt.input.(type) {
+				case *MapTestMessage:
+					testProto = &MapTestMessage{}
+				case *WktTestMessage:
+					testProto = &WktTestMessage{}
+				}
+				
+				if testProto != nil {
+					err = protojson.Unmarshal(fixedJSON, testProto)
+					g.Expect(err).ToNot(HaveOccurred())
+				}
+			}
+			if tt.errorExpected {
+				g.Expect(err).To(HaveOccurred())
+			} else {
+				g.Expect(err).ToNot(HaveOccurred())
+			}
+
+			if tt.errorContains != "" {
+				g.Expect(err).To(MatchError(ContainSubstring(tt.errorContains)))
+			}
+		})
+	}
 }
