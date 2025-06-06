@@ -73,7 +73,7 @@ func ForwardToConnectExampleServiceClient(s *mcpserver.MCPServer, client Connect
 		var req v1.CreateExampleRequest
 
 		message := request.Params.Arguments
-		runtime.FixMap(req.ProtoReflect().Descriptor(), message)
+		runtime.FixOpenAI(req.ProtoReflect().Descriptor(), message)
 
 		marshaled, err := json.Marshal(message)
 		if err != nil {
