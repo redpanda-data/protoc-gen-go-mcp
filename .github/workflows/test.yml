@@ -113,6 +113,9 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Install protoc-gen-go
+      run: go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+
     - name: Check golden files are up to date
       run: |
         # Generate fresh files
