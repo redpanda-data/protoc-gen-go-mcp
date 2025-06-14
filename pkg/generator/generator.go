@@ -195,7 +195,7 @@ type Connect{{$serviceName}}Client interface {
 // ForwardToConnect{{$key}}Client registers a connectrpc client, to forward MCP calls to it.
 func ForwardToConnect{{$key}}Client(s *mcpserver.MCPServer, client Connect{{$key}}Client) {
   {{- range $tool_name, $tool_val := $val }}
-  s.AddTool({{$key}}_{{$tool_name}}Tool,func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+  s.AddTool({{$key}}_{{$tool_name}}Tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
 
     message := request.Params.Arguments
@@ -228,7 +228,7 @@ func ForwardToConnect{{$key}}Client(s *mcpserver.MCPServer, client Connect{{$key
 // ForwardTo{{$key}}Client registers a gRPC client, to forward MCP calls to it.
 func ForwardTo{{$key}}Client(s *mcpserver.MCPServer, client {{$key}}Client) {
   {{- range $tool_name, $tool_val := $val }}
-  s.AddTool({{$key}}_{{$tool_name}}Tool,func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+  s.AddTool({{$key}}_{{$tool_name}}Tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
 
     message := request.Params.Arguments
