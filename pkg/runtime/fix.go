@@ -54,21 +54,21 @@ func FixOpenAI(descriptor protoreflect.MessageDescriptor, args map[string]any) {
 				switch fullName {
 				case "google.protobuf.Value":
 					if str, ok := obj[name].(string); ok {
-						var value interface{}
+						var value any
 						if err := json.Unmarshal([]byte(str), &value); err == nil {
 							obj[name] = value
 						}
 					}
 				case "google.protobuf.ListValue":
 					if str, ok := obj[name].(string); ok {
-						var listValue []interface{}
+						var listValue []any
 						if err := json.Unmarshal([]byte(str), &listValue); err == nil {
 							obj[name] = listValue
 						}
 					}
 				case "google.protobuf.Struct":
 					if str, ok := obj[name].(string); ok {
-						var structValue map[string]interface{}
+						var structValue map[string]any
 						if err := json.Unmarshal([]byte(str), &structValue); err == nil {
 							obj[name] = structValue
 						}

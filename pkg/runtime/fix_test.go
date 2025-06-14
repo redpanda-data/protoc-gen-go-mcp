@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
 	examplev1 "github.com/redpanda-data/protoc-gen-go-mcp/examples/openai-compat/gen/go/proto/example/v1"
@@ -26,12 +27,11 @@ import (
 
 func TestFixOpenAI(t *testing.T) {
 	tests := []struct {
-		name        string
-		descriptor  proto.Message
-		input       map[string]any
-		expected    map[string]any
-		expectJSON  bool
-		expectedOut string
+		name                 string
+		descriptor           proto.Message
+		input                map[string]any
+		expected             map[string]any
+		expectUnmarshalError bool
 	}{
 		// Basic map transformation test
 		{
@@ -54,8 +54,6 @@ func TestFixOpenAI(t *testing.T) {
 					},
 				},
 			},
-			expectJSON:  true,
-			expectedOut: `{"nested":{"labels":{"my-key":"my-value"}}}`,
 		},
 		// Well-known types tests
 		{
@@ -80,6 +78,7 @@ func TestFixOpenAI(t *testing.T) {
 			expected: map[string]any{
 				"struct_field": `{invalid json}`,
 			},
+			expectUnmarshalError: true,
 		},
 		{
 			name:       "struct: non-string value remains unchanged",
@@ -100,6 +99,7 @@ func TestFixOpenAI(t *testing.T) {
 			expected: map[string]any{
 				"struct_field": "",
 			},
+			expectUnmarshalError: true,
 		},
 		{
 			name:       "struct: empty JSON object string converts correctly",
@@ -120,6 +120,7 @@ func TestFixOpenAI(t *testing.T) {
 			expected: map[string]any{
 				"struct_field": `[1, 2, 3]`,
 			},
+			expectUnmarshalError: true,
 		},
 		{
 			name:       "value: valid JSON string converts to value",
@@ -182,6 +183,7 @@ func TestFixOpenAI(t *testing.T) {
 			expected: map[string]any{
 				"value_field": `{invalid json}`,
 			},
+			expectUnmarshalError: false,
 		},
 		{
 			name:       "value: non-string value remains unchanged",
@@ -202,6 +204,7 @@ func TestFixOpenAI(t *testing.T) {
 			expected: map[string]any{
 				"value_field": "",
 			},
+			expectUnmarshalError: false,
 		},
 		{
 			name:       "list: valid JSON array string converts to list",
@@ -245,6 +248,7 @@ func TestFixOpenAI(t *testing.T) {
 			expected: map[string]any{
 				"list_value": `[invalid json}`,
 			},
+			expectUnmarshalError: true,
 		},
 		{
 			name:       "list: JSON object string remains unchanged",
@@ -255,6 +259,7 @@ func TestFixOpenAI(t *testing.T) {
 			expected: map[string]any{
 				"list_value": `{"not": "array"}`,
 			},
+			expectUnmarshalError: true,
 		},
 		{
 			name:       "list: non-string value remains unchanged",
@@ -275,6 +280,7 @@ func TestFixOpenAI(t *testing.T) {
 			expected: map[string]any{
 				"list_value": "",
 			},
+			expectUnmarshalError: true,
 		},
 		// Map edge cases
 		{
@@ -388,6 +394,7 @@ func TestFixOpenAI(t *testing.T) {
 					},
 				},
 			},
+			expectUnmarshalError: true,
 		},
 		{
 			name:       "duplicate keys overwrite",
@@ -432,6 +439,53 @@ func TestFixOpenAI(t *testing.T) {
 				},
 			},
 		},
+		// Realistic JSON payload tests - simulating actual OpenAI requests
+		{
+			name:       "realistic: OpenAI sends invalid JSON in struct field",
+			descriptor: new(generator.WktTestMessage),
+			input: func() map[string]any {
+				// Simulate unmarshaling a real OpenAI JSON payload
+				jsonPayload := `{"struct_field": "{invalid json}"}`
+				var args map[string]any
+				json.Unmarshal([]byte(jsonPayload), &args)
+				return args
+			}(),
+			expected: map[string]any{
+				"struct_field": "{invalid json}", // Should remain unchanged - not FixOpenAI's job to fix broken input
+			},
+			expectUnmarshalError: true, // protojson.Unmarshal should fail with invalid JSON - this is correct behavior
+		},
+		{
+			name:       "realistic: OpenAI sends valid JSON in struct field",
+			descriptor: new(generator.WktTestMessage),
+			input: func() map[string]any {
+				jsonPayload := `{"struct_field": "{\"foo\": \"bar\", \"num\": 42}"}`
+				var args map[string]any
+				json.Unmarshal([]byte(jsonPayload), &args)
+				return args
+			}(),
+			expected: map[string]any{
+				"struct_field": map[string]any{
+					"foo": "bar",
+					"num": float64(42),
+				},
+			},
+			expectUnmarshalError: false,
+		},
+		{
+			name:       "realistic: OpenAI sends empty string in value field",
+			descriptor: new(generator.WktTestMessage),
+			input: func() map[string]any {
+				jsonPayload := `{"value_field": ""}`
+				var args map[string]any
+				json.Unmarshal([]byte(jsonPayload), &args)
+				return args
+			}(),
+			expected: map[string]any{
+				"value_field": "", // Should remain unchanged
+			},
+			expectUnmarshalError: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -439,13 +493,18 @@ func TestFixOpenAI(t *testing.T) {
 			g := NewWithT(t)
 
 			FixOpenAI(tt.descriptor.ProtoReflect().Descriptor(), tt.input)
-
 			g.Expect(tt.input).To(Equal(tt.expected))
 
-			if tt.expectJSON {
-				jzon, err := json.Marshal(tt.input)
-				g.Expect(err).ToNot(HaveOccurred())
-				g.Expect(jzon).To(MatchJSON([]byte(tt.expectedOut)))
+			// Test protojson unmarshaling with the fixed data
+			jzon, err := json.Marshal(tt.input)
+			g.Expect(err).ToNot(HaveOccurred())
+
+			testMsg := tt.descriptor.ProtoReflect().New().Interface()
+			err = protojson.Unmarshal(jzon, testMsg)
+			if tt.expectUnmarshalError {
+				g.Expect(err).To(HaveOccurred(), "protojson.Unmarshal should fail for invalid input")
+			} else {
+				g.Expect(err).ToNot(HaveOccurred(), "protojson.Unmarshal should succeed after FixOpenAI processing")
 			}
 		})
 	}
