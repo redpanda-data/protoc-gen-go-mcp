@@ -12,6 +12,7 @@ It generates `*.pb.mcp.go` files for each protobuf service, enabling you to dele
 - 📦 Outputs JSON Schema for method inputs  
 - 🔄 Wire up to gRPC or ConnectRPC servers/clients  
 - 🧩 Easy integration with [`buf`](https://buf.build)  
+- 🎯 **Runtime LLM provider selection** - Choose between standard MCP and OpenAI-compatible schemas at runtime  
 
 ## 🔧 Usage
 
@@ -59,6 +60,39 @@ examplev1mcp.RegisterExampleServiceHandler(mcpServer, &srv)
 
 Each RPC method in your protobuf service becomes an MCP tool.
 
+### Runtime LLM Provider Selection
+
+**New!** You can now choose LLM compatibility at runtime without regenerating code:
+
+```go
+// Option 1: Use convenience function with runtime provider selection
+provider := examplev1mcp.LLMProviderOpenAI // or LLMProviderStandard
+examplev1mcp.RegisterExampleServiceHandlerWithProvider(mcpServer, &srv, provider)
+
+// Option 2: Register specific handlers directly
+examplev1mcp.RegisterExampleServiceHandler(mcpServer, &srv)        // Standard MCP
+examplev1mcp.RegisterExampleServiceHandlerOpenAI(mcpServer, &srv)  // OpenAI-compatible
+
+// Option 3: Register both for different tool names
+examplev1mcp.RegisterExampleServiceHandler(mcpServer, &srv)
+examplev1mcp.RegisterExampleServiceHandlerOpenAI(mcpServer, &srv)
+```
+
+**Environment variable example:**
+```go
+providerStr := os.Getenv("LLM_PROVIDER")
+var provider examplev1mcp.LLMProvider
+switch providerStr {
+case "openai":
+    provider = examplev1mcp.LLMProviderOpenAI
+case "standard":
+    fallthrough
+default:
+    provider = examplev1mcp.LLMProviderStandard
+}
+examplev1mcp.RegisterExampleServiceHandlerWithProvider(mcpServer, &srv, provider)
+```
+
 ➡️ See the [full example](./example) for details.
 
 ### Wiring up with grpc and connectrpc client
@@ -77,10 +111,39 @@ examplev1mcp.ForwardToConnectExampleServiceClient(mcpServer, myConnectClient)
 
 This directly connects the MCP handler to the connectrpc client, requiring zero boilerplate.
 
-## Compatibility
+## LLM Provider Compatibility
 
-OpenAI imposes some limitations, because it does not support JSON Schema features like additionalProperties, anyOf, oneOf.
-Use the protoc opt `openai_compat=true` (false by default) to make the generator emit OpenAI compatible schemas.
+The generator now creates both standard MCP and OpenAI-compatible handlers automatically. You can choose which to use at runtime:
+
+### Standard MCP
+- Full JSON Schema support (additionalProperties, anyOf, oneOf)
+- Maps represented as JSON objects
+- Well-known types use native JSON representations
+
+### OpenAI Compatible  
+- Restricted JSON Schema (no additionalProperties, anyOf, oneOf)
+- Maps converted to arrays of key-value pairs
+- Well-known types (Struct, Value, ListValue) encoded as JSON strings
+- All fields marked as required with nullable unions
+
+### Migration from openai_compat flag
+
+The old `openai_compat=true` protoc option is **deprecated but still supported** for backward compatibility. With the new approach:
+
+**Before (compile-time):**
+```yaml
+# buf.gen.yaml
+plugins:
+  - local: [.../protoc-gen-go-mcp]
+    out: ./gen/go
+    opt: paths=source_relative,openai_compat=true
+```
+
+**After (runtime):**
+```go
+// Choose at runtime
+examplev1mcp.RegisterExampleServiceHandlerWithProvider(server, srv, examplev1mcp.LLMProviderOpenAI)
+```
 
 ## ⚠️ Limitations
 

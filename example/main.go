@@ -17,6 +17,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/mark3labs/mcp-go/server"
 	examplev1 "github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/proto/example/v1"
@@ -39,13 +40,36 @@ var (
 func main() {
 	// Create MCP server
 	s := server.NewMCPServer(
-		"Example auto-generated gRPC-MCP",
+		"Example auto-generated gRPC-MCP with runtime LLM provider selection",
 		"1.0.0",
 	)
 
 	srv := exampleServer{}
 
-	examplev1mcp.RegisterExampleServiceHandler(s, &srv)
+	// Get LLM provider from environment variable, default to standard
+	providerStr := os.Getenv("LLM_PROVIDER")
+	var provider examplev1mcp.LLMProvider
+	switch providerStr {
+	case "openai":
+		provider = examplev1mcp.LLMProviderOpenAI
+		fmt.Printf("Using OpenAI-compatible MCP handlers\n")
+	case "standard":
+		fallthrough
+	default:
+		provider = examplev1mcp.LLMProviderStandard
+		fmt.Printf("Using standard MCP handlers\n")
+	}
+
+	// Register handlers for the selected provider
+	examplev1mcp.RegisterExampleServiceHandlerWithProvider(s, &srv, provider)
+
+	// Alternative: Register specific handlers directly
+	// examplev1mcp.RegisterExampleServiceHandler(s, &srv)        // Standard
+	// examplev1mcp.RegisterExampleServiceHandlerOpenAI(s, &srv)  // OpenAI
+
+	// Alternative: Register both for different tool names
+	// examplev1mcp.RegisterExampleServiceHandler(s, &srv)
+	// examplev1mcp.RegisterExampleServiceHandlerOpenAI(s, &srv)
 
 	examplev1mcp.ForwardToConnectExampleServiceClient(s, connectClient)
 	examplev1mcp.ForwardToExampleServiceClient(s, grpcClient)

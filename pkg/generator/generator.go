@@ -65,14 +65,23 @@ import (
   "google.golang.org/protobuf/encoding/protojson"
   "connectrpc.com/connect"
   grpc "google.golang.org/grpc"
-  {{- if .OpenAICompat }}
   "github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
-  {{- end }}
+)
+
+// LLMProvider represents different LLM providers for runtime selection
+type LLMProvider string
+
+const (
+  LLMProviderStandard LLMProvider = "standard"
+  LLMProviderOpenAI   LLMProvider = "openai"
 )
 
 var (
 {{- range $key, $val := .Tools }}
   {{$key}}Tool = {{ printf "%#v" $val }}
+{{- end }}
+{{- range $key, $val := .ToolsOpenAI }}
+  {{$key}}ToolOpenAI = {{ printf "%#v" $val }}
 {{- end }}
 )
 
@@ -86,15 +95,13 @@ type {{$serviceName}}Server interface {
 {{ end }}
 
 {{- range $key, $val := .Services }}
+// Register{{$key}}Handler registers standard MCP handlers for {{$key}}
 func Register{{$key}}Handler(s *mcpserver.MCPServer, srv {{$key}}Server) {
   {{- range $tool_name, $tool_val := $val }}
   s.AddTool({{$key}}_{{$tool_name}}Tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
 
     message := request.Params.Arguments
-    {{- if $.OpenAICompat }}
-    runtime.FixOpenAI(req.ProtoReflect().Descriptor(), message)
-    {{- end }}
 
     marshaled, err := json.Marshal(message)
     if err != nil {
@@ -118,6 +125,51 @@ func Register{{$key}}Handler(s *mcpserver.MCPServer, srv {{$key}}Server) {
     return mcp.NewToolResultText(string(marshaled)), nil
   })
   {{- end }}
+}
+
+// Register{{$key}}HandlerOpenAI registers OpenAI-compatible MCP handlers for {{$key}}
+func Register{{$key}}HandlerOpenAI(s *mcpserver.MCPServer, srv {{$key}}Server) {
+  {{- range $tool_name, $tool_val := $val }}
+  s.AddTool({{$key}}_{{$tool_name}}ToolOpenAI, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+    var req {{$tool_val.RequestType}}
+
+    message := request.Params.Arguments
+    runtime.FixOpenAI(req.ProtoReflect().Descriptor(), message)
+
+    marshaled, err := json.Marshal(message)
+    if err != nil {
+      return nil, err
+    }
+
+    if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+      return nil, err
+    }
+
+    resp, err := srv.{{$tool_name}}(ctx, &req)
+    if err != nil {
+      return nil, err
+    }
+
+    marshaled, err = (protojson.MarshalOptions{UseProtoNames: true, EmitDefaultValues: true}).Marshal(resp)
+    if err != nil {
+      return nil, err
+    }
+
+    return mcp.NewToolResultText(string(marshaled)), nil
+  })
+  {{- end }}
+}
+
+// Register{{$key}}HandlerWithProvider registers handlers for the specified LLM provider
+func Register{{$key}}HandlerWithProvider(s *mcpserver.MCPServer, srv {{$key}}Server, provider LLMProvider) {
+  switch provider {
+  case LLMProviderOpenAI:
+    Register{{$key}}HandlerOpenAI(s, srv)
+  case LLMProviderStandard:
+    fallthrough
+  default:
+    Register{{$key}}Handler(s, srv)
+  }
 }
 {{- end }}
 
@@ -148,9 +200,6 @@ func ForwardToConnect{{$key}}Client(s *mcpserver.MCPServer, client Connect{{$key
     var req {{$tool_val.RequestType}}
 
     message := request.Params.Arguments
-    {{- if $.OpenAICompat }}
-    runtime.FixOpenAI(req.ProtoReflect().Descriptor(), message)
-    {{- end }}
 
     marshaled, err := json.Marshal(message)
     if err != nil {
@@ -184,9 +233,6 @@ func ForwardTo{{$key}}Client(s *mcpserver.MCPServer, client {{$key}}Client) {
     var req {{$tool_val.RequestType}}
 
     message := request.Params.Arguments
-    {{- if $.OpenAICompat }}
-    runtime.FixOpenAI(req.ProtoReflect().Descriptor(), message)
-    {{- end }}
 
     marshaled, err := json.Marshal(message)
     if err != nil {
@@ -220,14 +266,15 @@ type TplParams struct {
 	SourcePath   string
 	GoPackage    string
 	Tools        map[string]mcp.Tool
+	ToolsOpenAI  map[string]mcp.Tool
 	Services     map[string]map[string]Tool
-	OpenAICompat bool
 }
 
 type Tool struct {
-	RequestType  string
-	ResponseType string
-	MCPTool      mcp.Tool
+	RequestType     string
+	ResponseType    string
+	MCPTool         mcp.Tool
+	MCPToolOpenAI   mcp.Tool
 }
 
 func kindToType(kind protoreflect.Kind) string {
@@ -547,8 +594,7 @@ func MangleHeadIfTooLong(name string, maxLen int) string {
 	return hashPrefix + "_" + tail
 }
 
-func (g *FileGenerator) Generate(packageSuffix string, openaiCompat bool) {
-	g.openAICompat = openaiCompat
+func (g *FileGenerator) Generate(packageSuffix string) {
 	file := g.f
 	if len(g.f.Services) == 0 {
 		return
@@ -589,6 +635,7 @@ func (g *FileGenerator) Generate(packageSuffix string, openaiCompat bool) {
 
 	services := map[string]map[string]Tool{}
 	tools := map[string]mcp.Tool{}
+	toolsOpenAI := map[string]mcp.Tool{}
 
 	for _, svc := range g.f.Services {
 		s := map[string]Tool{}
@@ -597,29 +644,47 @@ func (g *FileGenerator) Generate(packageSuffix string, openaiCompat bool) {
 			if meth.Desc.IsStreamingClient() || meth.Desc.IsStreamingServer() {
 				continue
 			}
-			tool := mcp.Tool{
+			
+			// Generate standard tool
+			toolStandard := mcp.Tool{
 				Name:        MangleHeadIfTooLong(strings.ReplaceAll(string(meth.Desc.FullName()), ".", "_"), 64),
 				Description: cleanComment(string(meth.Comments.Leading)),
 			}
 
-			m := g.messageSchema(meth.Input.Desc)
-
-			// In OpenAI mode, we use type ["my-type", "null"] to make it nullable, but many tools don't like this for the top-level schema object.
-			if g.openAICompat {
-				m["type"] = "object"
-			}
-			marshaled, err := json.Marshal(m)
+			// Generate standard schema
+			g.openAICompat = false
+			standardSchema := g.messageSchema(meth.Input.Desc)
+			marshaledStandard, err := json.Marshal(standardSchema)
 			if err != nil {
 				panic(err)
 			}
-			tool.RawInputSchema = json.RawMessage(marshaled)
+			toolStandard.RawInputSchema = json.RawMessage(marshaledStandard)
+
+			// Generate OpenAI tool
+			toolOpenAI := mcp.Tool{
+				Name:        MangleHeadIfTooLong(strings.ReplaceAll(string(meth.Desc.FullName()), ".", "_"), 64),
+				Description: cleanComment(string(meth.Comments.Leading)),
+			}
+
+			// Generate OpenAI schema
+			g.openAICompat = true
+			openAISchema := g.messageSchema(meth.Input.Desc)
+			// In OpenAI mode, we use type ["my-type", "null"] to make it nullable, but many tools don't like this for the top-level schema object.
+			openAISchema["type"] = "object"
+			marshaledOpenAI, err := json.Marshal(openAISchema)
+			if err != nil {
+				panic(err)
+			}
+			toolOpenAI.RawInputSchema = json.RawMessage(marshaledOpenAI)
 
 			s[meth.GoName] = Tool{
-				RequestType:  g.gf.QualifiedGoIdent(meth.Input.GoIdent),
-				ResponseType: g.gf.QualifiedGoIdent(meth.Output.GoIdent),
-				MCPTool:      tool,
+				RequestType:   g.gf.QualifiedGoIdent(meth.Input.GoIdent),
+				ResponseType:  g.gf.QualifiedGoIdent(meth.Output.GoIdent),
+				MCPTool:       toolStandard,
+				MCPToolOpenAI: toolOpenAI,
 			}
-			tools[svc.GoName+"_"+meth.GoName] = tool
+			tools[svc.GoName+"_"+meth.GoName] = toolStandard
+			toolsOpenAI[svc.GoName+"_"+meth.GoName] = toolOpenAI
 		}
 		services[string(svc.Desc.Name())] = s
 	}
@@ -630,7 +695,7 @@ func (g *FileGenerator) Generate(packageSuffix string, openaiCompat bool) {
 		GoPackage:    string(g.f.GoPackageName),
 		Services:     services,
 		Tools:        tools,
-		OpenAICompat: openaiCompat,
+		ToolsOpenAI:  toolsOpenAI,
 	}
 	err = tpl.Execute(g.gf, params)
 	if err != nil {
