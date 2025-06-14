@@ -40,7 +40,7 @@ jobs:
       run: go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 
     - name: Run tests
-      run: go test -v -race -coverprofile=coverage.out ./...
+      run: go test -v -race ./...
 
     - name: Check examples build
       run: |
@@ -49,14 +49,6 @@ jobs:
 
     - name: Generate examples
       run: make examples
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage.out
-        flags: unittests
-        name: codecov-umbrella
-        token: ${{ secrets.CODECOV_TOKEN }}
 
   lint:
     runs-on: ubuntu-latest
