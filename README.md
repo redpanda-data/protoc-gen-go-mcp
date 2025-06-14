@@ -31,12 +31,12 @@ plugins:
 ```
 
 You need to generate the standard `*.pb.go` files as well. `protoc-gen-go-mcp` by defaults uses a separate subfolder `{$servicename}mcp`, and imports the `*pb.go` files - similar to connectrpc-go.
-See [here](./example/buf.gen.yaml) for a complete example.
+See [here](./examples/basic/buf.gen.yaml) for a complete example.
 
 After running `buf generate`, you will see a new folder for each package with protobuf Service definitions:
 
 ```
-tree example/gen/
+tree examples/basic/gen/
 gen
 └── go
     └── proto
@@ -93,7 +93,7 @@ default:
 examplev1mcp.RegisterExampleServiceHandlerWithProvider(mcpServer, &srv, provider)
 ```
 
-➡️ See the [full example](./example) for details.
+➡️ See the [full example](./examples/basic) for details.
 
 ### Wiring up with grpc and connectrpc client
 

@@ -18,8 +18,8 @@ update-golden:
 
 # Generate examples
 examples:
-	cd example && buf generate
-	cd example-openai-compat && buf generate
+	cd examples/basic && buf generate
+	cd examples/openai-compat && buf generate
 
 # Clean build artifacts
 clean:

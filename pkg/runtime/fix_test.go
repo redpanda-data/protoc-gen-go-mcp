@@ -19,7 +19,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	examplev1 "github.com/redpanda-data/protoc-gen-go-mcp/example-openai-compat/gen/go/proto/example/v1"
+	examplev1 "github.com/redpanda-data/protoc-gen-go-mcp/examples/openai-compat/gen/go/proto/example/v1"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/generator"
 )
 
