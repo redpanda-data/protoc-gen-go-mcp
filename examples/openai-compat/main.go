@@ -27,13 +27,13 @@ import (
 // Ensure our interface and the official gRPC interface are grpcClient
 var (
 	grpcClient examplev1.ExampleServiceClient
-	mcpClient  = examplev1mcp.ExampleServiceClient(grpcClient)
+	_          = examplev1mcp.ExampleServiceClient(grpcClient)
 )
 
 // Ensure our interface and the official connect-go interface are compatible
 var (
-	connectClient    examplev1connect.ExampleServiceClient
-	connectMcpClient = examplev1mcp.ConnectExampleServiceClient(connectClient)
+	connectClient examplev1connect.ExampleServiceClient
+	_             = examplev1mcp.ConnectExampleServiceClient(connectClient)
 )
 
 func main() {

@@ -41,7 +41,6 @@ type FileGenerator struct {
 	f   *protogen.File
 	gen *protogen.Plugin
 
-	allConsts    map[string]struct{}
 	gf           *protogen.GeneratedFile
 	openAICompat bool
 }
