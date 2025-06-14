@@ -492,13 +492,24 @@ func (g *FileGenerator) getType(fd protoreflect.FieldDescriptor) map[string]any 
 				schema = map[string]any{"type": "string"}
 			}
 		case "google.protobuf.Any":
-			schema = map[string]any{
-				"type": []string{"object", "null"},
-				"properties": map[string]any{
-					"@type": map[string]any{"type": "string"},
-					"value": map[string]any{},
-				},
-				"required": []string{"@type"},
+			if g.openAICompat {
+				schema = map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"@type": map[string]any{"type": "string"},
+						"value": map[string]any{},
+					},
+					"required": []string{"@type"},
+				}
+			} else {
+				schema = map[string]any{
+					"type": []string{"object", "null"},
+					"properties": map[string]any{
+						"@type": map[string]any{"type": "string"},
+						"value": map[string]any{},
+					},
+					"required": []string{"@type"},
+				}
 			}
 		case "google.protobuf.DoubleValue", "google.protobuf.FloatValue",
 			"google.protobuf.Int32Value", "google.protobuf.UInt32Value":

@@ -21,6 +21,18 @@ examples:
 	cd examples/basic && buf generate
 	cd examples/openai-compat && buf generate
 
+# Generate integration test code
+integrationtest-generate:
+	cd integrationtest && buf generate
+
+# Run integration tests (requires OPENAI_API_KEY)
+integrationtest: integrationtest-generate
+	@if [ -f .env ]; then \
+		export $$(cat .env | xargs) && go test -tags=integration ./integrationtest -v; \
+	else \
+		go test -tags=integration ./integrationtest -v; \
+	fi
+
 # Clean build artifacts
 clean:
 	rm -f protoc-gen-go-mcp
@@ -77,4 +89,6 @@ help:
 	@echo "  check-fmt      - Check if code is formatted"
 	@echo "  buf-lint       - Lint protobuf files"
 	@echo "  ci             - Run all CI checks locally"
+	@echo "  integrationtest - Run OpenAI integration tests (requires OPENAI_API_KEY)"
+	@echo "  integrationtest-generate - Generate integration test code"
 	@echo "  help           - Show this help"
