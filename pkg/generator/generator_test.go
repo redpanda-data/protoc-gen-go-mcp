@@ -15,7 +15,13 @@
 package generator
 
 import (
+	"bytes"
 	"encoding/json"
+	"flag"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -263,5 +269,94 @@ func TestSchemaMarshaling(t *testing.T) {
 	// Verify it's valid JSON
 	var unmarshaled map[string]any
 	err = json.Unmarshal(marshaled, &unmarshaled)
+	g.Expect(err).ToNot(HaveOccurred())
+}
+
+var updateGolden = flag.Bool("update-golden", false, "Update golden files")
+
+func TestFullGeneration(t *testing.T) {
+	g := NewWithT(t)
+	
+	// Get current directory and change to testdata
+	originalDir, err := os.Getwd()
+	g.Expect(err).ToNot(HaveOccurred())
+	defer os.Chdir(originalDir)
+	
+	testdataDir := filepath.Join("testdata")
+	err = os.Chdir(testdataDir)
+	g.Expect(err).ToNot(HaveOccurred())
+
+	if *updateGolden {
+		// Generate golden files
+		t.Logf("Generating golden files...")
+		cmd := exec.Command("buf", "generate", "--template", "buf.gen.golden.yaml")
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("Failed to generate golden files: %v\nOutput: %s", err, output)
+		}
+		t.Logf("Updated golden files")
+		return
+	}
+
+	// Generate current files
+	t.Logf("Generating current files...")
+	cmd := exec.Command("buf", "generate")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("Failed to generate current files: %v\nOutput: %s", err, output)
+	}
+
+	// Find all .pb.mcp.go files in actual/ and compare with golden/
+	err = filepath.Walk("actual", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		
+		// Only check .pb.mcp.go files
+		if !strings.HasSuffix(path, ".pb.mcp.go") {
+			return nil
+		}
+		
+		// Get corresponding golden file path
+		goldenPath := strings.Replace(path, "actual/", "golden/", 1)
+		
+		// Check that golden file exists
+		if _, err := os.Stat(goldenPath); os.IsNotExist(err) {
+			// Create golden file if it doesn't exist
+			t.Logf("Golden file doesn't exist, creating it...")
+			goldenCmd := exec.Command("buf", "generate", "--template", "buf.gen.golden.yaml")
+			goldenOutput, goldenErr := goldenCmd.CombinedOutput()
+			if goldenErr != nil {
+				t.Fatalf("Failed to generate golden files: %v\nOutput: %s", goldenErr, goldenOutput)
+			}
+			t.Logf("Created golden files")
+			return filepath.SkipDir // Skip further comparison since we just created golden files
+		}
+		
+		// Read and compare files
+		generatedContent, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		
+		expectedContent, err := os.ReadFile(goldenPath)
+		if err != nil {
+			return err
+		}
+		
+		// Compare content
+		if !bytes.Equal(expectedContent, generatedContent) {
+			t.Errorf("Generated content differs from golden file.\n"+
+				"Generated: %s\n"+
+				"Golden: %s\n"+
+				"To update golden files, run: go test -update-golden\n"+
+				"Expected length: %d, Got length: %d",
+				path, goldenPath,
+				len(expectedContent), len(generatedContent))
+		}
+		
+		return nil
+	})
+	
 	g.Expect(err).ToNot(HaveOccurred())
 }

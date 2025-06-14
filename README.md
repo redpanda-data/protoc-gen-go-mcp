@@ -145,6 +145,75 @@ plugins:
 examplev1mcp.RegisterExampleServiceHandlerWithProvider(server, srv, examplev1mcp.LLMProviderOpenAI)
 ```
 
+## 🧪 Development & Testing
+
+### Quick Commands
+
+```bash
+# Run all tests
+make test
+
+# Build the binary
+make build
+
+# Install to GOPATH/bin
+make install
+
+# Update golden test files
+make update-golden
+
+# Generate examples
+make examples
+
+# View all available commands
+make help
+```
+
+### Manual Commands
+
+```bash
+# Run tests
+go test ./...
+
+# Update golden files
+./tools/update-golden.sh
+# Or manually for specific packages
+go test ./pkg/generator -update-golden
+
+# Build from source
+go build -o protoc-gen-go-mcp ./cmd/protoc-gen-go-mcp
+```
+
+### Golden File Testing
+
+The generator uses golden file testing to ensure output consistency. The test structure in `pkg/generator/testdata/` is organized as:
+
+```
+testdata/
+├── *.proto          # Input proto files (just drop new ones here!)
+├── buf.gen.yaml     # Generates into actual/
+├── buf.gen.golden.yaml # Generates into golden/
+├── actual/          # Current generated output (committed to track changes)
+└── golden/          # Expected output (committed as test baseline)
+```
+
+**To add new tests:** Simply drop a `.proto` file in `pkg/generator/testdata/` and run the tests. The framework automatically:
+1. Discovers all `.proto` files
+2. Generates code into `actual/` using `buf generate`
+3. Compares with expected output in `golden/`
+4. Creates missing golden files on first run
+
+**To update golden files after generator changes:**
+```bash
+# Update all golden files
+./tools/update-golden.sh
+
+# Or update specific package
+go test ./pkg/generator -update-golden
+```
+
+The `actual/` directory is committed to git so you can track how generator changes affect output over time.
+
 ## ⚠️ Limitations
 
 - No interceptor support (yet). Registering with a gRPC server bypasses interceptors.
