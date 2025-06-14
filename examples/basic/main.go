@@ -77,11 +77,9 @@ func main() {
 	if err := server.ServeStdio(s); err != nil {
 		fmt.Printf("Server error: %v\n", err)
 	}
-
 }
 
-type exampleServer struct {
-}
+type exampleServer struct{}
 
 func (t *exampleServer) CreateExample(ctx context.Context, in *examplev1.CreateExampleRequest) (*examplev1.CreateExampleResponse, error) {
 	return &examplev1.CreateExampleResponse{

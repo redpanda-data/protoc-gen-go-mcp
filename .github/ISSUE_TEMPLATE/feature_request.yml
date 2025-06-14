@@ -1,0 +1,71 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["enhancement"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! Please fill out this form to help us understand your request.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Feature Summary
+      description: A brief summary of the feature you'd like to see
+      placeholder: Briefly describe the feature...
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why would this feature be useful? What problem does it solve?
+      placeholder: Explain the motivation for this feature...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How would you like this feature to work?
+      placeholder: Describe your proposed solution...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What alternative solutions or features have you considered?
+      placeholder: Describe any alternatives you've considered...
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples
+      description: Provide examples of how this feature would be used
+      placeholder: |
+        Example usage:
+        ```go
+        // Your example here
+        ```
+
+  - type: checkboxes
+    id: breaking
+    attributes:
+      label: Breaking Change
+      description: Would this feature require breaking changes?
+      options:
+        - label: This feature would require breaking changes
+        - label: This feature can be implemented without breaking changes
+        - label: I'm not sure about breaking changes
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context, screenshots, or examples about the feature request here.

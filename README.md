@@ -1,5 +1,9 @@
 # `protoc-gen-go-mcp`
 
+[![Test](https://github.com/redpanda-data/protoc-gen-go-mcp/actions/workflows/test.yml/badge.svg)](https://github.com/redpanda-data/protoc-gen-go-mcp/actions/workflows/test.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/redpanda-data/protoc-gen-go-mcp)](https://goreportcard.com/report/github.com/redpanda-data/protoc-gen-go-mcp)
+[![codecov](https://codecov.io/gh/redpanda-data/protoc-gen-go-mcp/branch/main/graph/badge.svg)](https://codecov.io/gh/redpanda-data/protoc-gen-go-mcp)
+
 **`protoc-gen-go-mcp`** is a [Protocol Buffers](https://protobuf.dev) compiler plugin that generates [Model Context Protocol (MCP)](https://modelcontextprotocol.io) servers for your `gRPC` or `ConnectRPC` APIs.
 
 It generates `*.pb.mcp.go` files for each protobuf service, enabling you to delegate handlers directly to gRPC servers or clients. Under the hood, MCP uses JSON Schema for tool inputs—`protoc-gen-go-mcp` auto-generates these schemas from your method input descriptors.
@@ -182,6 +186,25 @@ go test ./pkg/generator -update-golden
 
 # Build from source
 go build -o protoc-gen-go-mcp ./cmd/protoc-gen-go-mcp
+
+# Run all CI checks locally
+make ci
+```
+
+### Development Workflow
+
+```bash
+# Format code
+make fmt
+
+# Run linting
+make lint
+
+# Run protobuf linting
+make buf-lint
+
+# Run all checks (same as CI)
+make ci
 ```
 
 ### Golden File Testing

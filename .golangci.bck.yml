@@ -1,0 +1,23 @@
+run:
+  timeout: 5m
+
+linters-settings:
+  misspell:
+    locale: US
+
+linters:
+  enable:
+    - gofmt
+    - goimports
+    - misspell
+    - unconvert
+    - govet
+    - staticcheck
+    - ineffassign
+    - unused
+
+issues:
+  exclude-dirs:
+    - examples/*/gen
+    - pkg/generator/testdata/actual
+    - pkg/generator/testdata/golden

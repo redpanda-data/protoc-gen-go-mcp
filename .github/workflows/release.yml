@@ -1,0 +1,89 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            suffix: ''
+          - goos: linux
+            goarch: arm64
+            suffix: ''
+          - goos: darwin
+            goarch: amd64
+            suffix: ''
+          - goos: darwin
+            goarch: arm64
+            suffix: ''
+          - goos: windows
+            goarch: amd64
+            suffix: '.exe'
+          - goos: windows
+            goarch: arm64
+            suffix: '.exe'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23'
+
+    - name: Build binary
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
+      run: |
+        output="protoc-gen-go-mcp-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}"
+        go build -ldflags="-s -w" -o "$output" ./cmd/protoc-gen-go-mcp
+        
+        # Create archive
+        if [ "${{ matrix.goos }}" = "windows" ]; then
+          zip "${output%.exe}.zip" "$output"
+        else
+          tar czf "${output}.tar.gz" "$output"
+        fi
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: protoc-gen-go-mcp-${{ matrix.goos }}-${{ matrix.goarch }}
+        path: |
+          protoc-gen-go-mcp-*
+          !protoc-gen-go-mcp-*.tar.gz
+          !protoc-gen-go-mcp-*.zip
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+
+    - name: Create checksums
+      run: |
+        find . -name "protoc-gen-go-mcp-*" -type f -exec sha256sum {} \; > checksums.txt
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          protoc-gen-go-mcp-*/protoc-gen-go-mcp-*
+          checksums.txt
+        generate_release_notes: true
+        draft: false
+        prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}

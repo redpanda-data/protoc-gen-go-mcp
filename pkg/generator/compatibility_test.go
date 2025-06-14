@@ -22,7 +22,7 @@ import (
 
 	. "github.com/onsi/gomega"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
-	"github.com/santhosh-tekuri/jsonschema/v5"
+	jsonschema "github.com/santhosh-tekuri/jsonschema/v5"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	anypb "google.golang.org/protobuf/types/known/anypb"
@@ -196,7 +196,6 @@ func TestCompat(t *testing.T) {
 			if tt.errorContains != "" {
 				g.Expect(err).To(MatchError(ContainSubstring(tt.errorContains)))
 			}
-
 		})
 	}
 }
@@ -334,11 +333,11 @@ func TestCompatOpenAI(t *testing.T) {
 			// This is what would happen in the actual MCP tool execution before protojson.Unmarshal
 			if rawData, ok := jsonData.(map[string]interface{}); ok {
 				runtime.FixOpenAI(tt.input.ProtoReflect().Descriptor(), rawData)
-				
+
 				// Verify that the converted data can be unmarshaled into the proto message
 				fixedJSON, err := json.Marshal(rawData)
 				g.Expect(err).ToNot(HaveOccurred())
-				
+
 				var testProto proto.Message
 				switch tt.input.(type) {
 				case *MapTestMessage:
@@ -346,7 +345,7 @@ func TestCompatOpenAI(t *testing.T) {
 				case *WktTestMessage:
 					testProto = &WktTestMessage{}
 				}
-				
+
 				if testProto != nil {
 					err = protojson.Unmarshal(fixedJSON, testProto)
 					g.Expect(err).ToNot(HaveOccurred())

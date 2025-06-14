@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//  http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,9 +15,9 @@ package runtime
 
 import (
 	"encoding/json"
+
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
-
 
 // FixOpenAI applies all OpenAI compatibility transformations to convert OpenAI-formatted JSON
 // back to standard protobuf-compatible JSON. This includes:
@@ -49,7 +49,7 @@ func FixOpenAI(descriptor protoreflect.MessageDescriptor, args map[string]any) {
 				}
 			} else if field.Kind() == protoreflect.MessageKind {
 				fullName := string(field.Message().FullName())
-				
+
 				// Handle OpenAI string representations of special protobuf types
 				switch fullName {
 				case "google.protobuf.Value":

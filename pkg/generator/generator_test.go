@@ -100,14 +100,14 @@ func TestGetTypeStandard(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewWithT(t)
-			
+
 			fg := &FileGenerator{
 				openAICompat: false,
 			}
-			
+
 			field := tt.setupField()
 			schema := fg.getType(field)
-			
+
 			tt.wantSchema(g, schema)
 		})
 	}
@@ -175,14 +175,14 @@ func TestGetTypeOpenAI(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewWithT(t)
-			
+
 			fg := &FileGenerator{
 				openAICompat: true,
 			}
-			
+
 			field := tt.setupField()
 			schema := fg.getType(field)
-			
+
 			tt.wantSchema(g, schema)
 		})
 	}
@@ -190,14 +190,14 @@ func TestGetTypeOpenAI(t *testing.T) {
 
 func TestMessageSchemaStandard(t *testing.T) {
 	g := NewWithT(t)
-	
+
 	fg := &FileGenerator{
 		openAICompat: false,
 	}
-	
+
 	msgDesc := (&WktTestMessage{}).ProtoReflect().Descriptor()
 	schema := fg.messageSchema(msgDesc)
-	
+
 	g.Expect(schema["type"]).To(Equal("object"))
 	g.Expect(schema).To(HaveKey("properties"))
 	g.Expect(schema).To(HaveKey("required"))
@@ -207,21 +207,21 @@ func TestMessageSchemaStandard(t *testing.T) {
 
 func TestMessageSchemaOpenAI(t *testing.T) {
 	g := NewWithT(t)
-	
+
 	fg := &FileGenerator{
 		openAICompat: true,
 	}
-	
+
 	msgDesc := (&WktTestMessage{}).ProtoReflect().Descriptor()
 	schema := fg.messageSchema(msgDesc)
-	
+
 	// In OpenAI mode, the type becomes ["object", "null"]
 	g.Expect(schema["type"]).To(Equal([]string{"object", "null"}))
 	g.Expect(schema).To(HaveKey("properties"))
 	g.Expect(schema).To(HaveKey("required"))
 	// OpenAI mode should have additionalProperties: false
 	g.Expect(schema["additionalProperties"]).To(Equal(false))
-	
+
 	// In OpenAI mode, all fields should be required
 	required := schema["required"].([]string)
 	props := schema["properties"].(map[string]any)
@@ -253,19 +253,19 @@ func TestKindToType(t *testing.T) {
 
 func TestSchemaMarshaling(t *testing.T) {
 	g := NewWithT(t)
-	
+
 	fg := &FileGenerator{
 		openAICompat: false,
 	}
-	
+
 	// Test that generated schemas can be marshaled to JSON
 	msg := &WktTestMessage{}
 	schema := fg.messageSchema(msg.ProtoReflect().Descriptor())
-	
+
 	marshaled, err := json.Marshal(schema)
 	g.Expect(err).ToNot(HaveOccurred())
 	g.Expect(marshaled).ToNot(BeEmpty())
-	
+
 	// Verify it's valid JSON
 	var unmarshaled map[string]any
 	err = json.Unmarshal(marshaled, &unmarshaled)
@@ -276,12 +276,12 @@ var updateGolden = flag.Bool("update-golden", false, "Update golden files")
 
 func TestFullGeneration(t *testing.T) {
 	g := NewWithT(t)
-	
+
 	// Get current directory and change to testdata
 	originalDir, err := os.Getwd()
 	g.Expect(err).ToNot(HaveOccurred())
-	defer os.Chdir(originalDir)
-	
+	defer func() { _ = os.Chdir(originalDir) }()
+
 	testdataDir := filepath.Join("testdata")
 	err = os.Chdir(testdataDir)
 	g.Expect(err).ToNot(HaveOccurred())
@@ -311,15 +311,15 @@ func TestFullGeneration(t *testing.T) {
 		if err != nil {
 			return err
 		}
-		
+
 		// Only check .pb.mcp.go files
 		if !strings.HasSuffix(path, ".pb.mcp.go") {
 			return nil
 		}
-		
+
 		// Get corresponding golden file path
 		goldenPath := strings.Replace(path, "actual/", "golden/", 1)
-		
+
 		// Check that golden file exists
 		if _, err := os.Stat(goldenPath); os.IsNotExist(err) {
 			// Create golden file if it doesn't exist
@@ -332,18 +332,18 @@ func TestFullGeneration(t *testing.T) {
 			t.Logf("Created golden files")
 			return filepath.SkipDir // Skip further comparison since we just created golden files
 		}
-		
+
 		// Read and compare files
 		generatedContent, err := os.ReadFile(path)
 		if err != nil {
 			return err
 		}
-		
+
 		expectedContent, err := os.ReadFile(goldenPath)
 		if err != nil {
 			return err
 		}
-		
+
 		// Compare content
 		if !bytes.Equal(expectedContent, generatedContent) {
 			t.Errorf("Generated content differs from golden file.\n"+
@@ -354,9 +354,9 @@ func TestFullGeneration(t *testing.T) {
 				path, goldenPath,
 				len(expectedContent), len(generatedContent))
 		}
-		
+
 		return nil
 	})
-	
+
 	g.Expect(err).ToNot(HaveOccurred())
 }

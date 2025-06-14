@@ -262,19 +262,19 @@ func ForwardTo{{$key}}Client(s *mcpserver.MCPServer, client {{$key}}Client) {
 `
 
 type TplParams struct {
-	PackageName  string
-	SourcePath   string
-	GoPackage    string
-	Tools        map[string]mcp.Tool
-	ToolsOpenAI  map[string]mcp.Tool
-	Services     map[string]map[string]Tool
+	PackageName string
+	SourcePath  string
+	GoPackage   string
+	Tools       map[string]mcp.Tool
+	ToolsOpenAI map[string]mcp.Tool
+	Services    map[string]map[string]Tool
 }
 
 type Tool struct {
-	RequestType     string
-	ResponseType    string
-	MCPTool         mcp.Tool
-	MCPToolOpenAI   mcp.Tool
+	RequestType   string
+	ResponseType  string
+	MCPTool       mcp.Tool
+	MCPToolOpenAI mcp.Tool
 }
 
 func kindToType(kind protoreflect.Kind) string {
@@ -644,7 +644,7 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 			if meth.Desc.IsStreamingClient() || meth.Desc.IsStreamingServer() {
 				continue
 			}
-			
+
 			// Generate standard tool
 			toolStandard := mcp.Tool{
 				Name:        MangleHeadIfTooLong(strings.ReplaceAll(string(meth.Desc.FullName()), ".", "_"), 64),
@@ -690,12 +690,12 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 	}
 
 	params := TplParams{
-		PackageName:  string(g.f.Desc.Package()),
-		SourcePath:   g.f.Desc.Path(),
-		GoPackage:    string(g.f.GoPackageName),
-		Services:     services,
-		Tools:        tools,
-		ToolsOpenAI:  toolsOpenAI,
+		PackageName: string(g.f.Desc.Package()),
+		SourcePath:  g.f.Desc.Path(),
+		GoPackage:   string(g.f.GoPackageName),
+		Services:    services,
+		Tools:       tools,
+		ToolsOpenAI: toolsOpenAI,
 	}
 	err = tpl.Execute(g.gf, params)
 	if err != nil {
