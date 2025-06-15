@@ -22,7 +22,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	examplev1 "github.com/redpanda-data/protoc-gen-go-mcp/examples/openai-compat/gen/go/proto/example/v1"
-	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/generator"
+	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go"
 )
 
 func TestFixOpenAI(t *testing.T) {

@@ -22,7 +22,7 @@ import (
 
 	. "github.com/onsi/gomega"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
-	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/generator"
+	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go"
 	jsonschema "github.com/santhosh-tekuri/jsonschema/v5"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"

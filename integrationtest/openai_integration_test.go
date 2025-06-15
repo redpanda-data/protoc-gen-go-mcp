@@ -14,7 +14,7 @@ import (
 	"github.com/openai/openai-go/option"
 
 	// Generated code (will be created by buf generate)
-	integrationtestv1mcp "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/integrationtest/v1/v1mcp"
+	testdatamcp "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/_gomcp"
 )
 
 func TestOpenAIIntegration(t *testing.T) {
@@ -34,7 +34,7 @@ func TestOpenAIIntegration(t *testing.T) {
 
 	t.Run("CreateItem with OpenAI compatibility", func(t *testing.T) {
 		// 2. Get the generated OpenAI-compatible tool
-		tool := integrationtestv1mcp.TestService_CreateItemToolOpenAI
+		tool := testdatamcp.TestService_CreateItemToolOpenAI
 
 		// 3. Create a function tool from our MCP tool
 		var params map[string]interface{}
@@ -108,7 +108,7 @@ func TestOpenAIIntegration(t *testing.T) {
 
 	t.Run("ProcessWellKnownTypes with OpenAI compatibility", func(t *testing.T) {
 		// Test well-known types handling
-		tool := integrationtestv1mcp.TestService_ProcessWellKnownTypesToolOpenAI
+		tool := testdatamcp.TestService_ProcessWellKnownTypesToolOpenAI
 
 		var params map[string]interface{}
 		err := json.Unmarshal(tool.RawInputSchema, &params)
@@ -173,7 +173,7 @@ func TestSchemaValidation(t *testing.T) {
 	g := NewWithT(t)
 
 	t.Run("CreateItem schema validation", func(t *testing.T) {
-		tool := integrationtestv1mcp.TestService_CreateItemToolOpenAI
+		tool := testdatamcp.TestService_CreateItemToolOpenAI
 
 		var schema map[string]any
 		err := json.Unmarshal(tool.RawInputSchema, &schema)
@@ -205,7 +205,7 @@ func TestSchemaValidation(t *testing.T) {
 	})
 
 	t.Run("ProcessWellKnownTypes schema validation", func(t *testing.T) {
-		tool := integrationtestv1mcp.TestService_ProcessWellKnownTypesToolOpenAI
+		tool := testdatamcp.TestService_ProcessWellKnownTypesToolOpenAI
 
 		var schema map[string]any
 		err := json.Unmarshal(tool.RawInputSchema, &schema)

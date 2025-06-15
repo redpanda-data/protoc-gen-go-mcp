@@ -14,11 +14,12 @@
 
 syntax = "proto3";
 
-package testservice.v1;
+package testdata;
 
 import "google/protobuf/timestamp.proto";
-
-option go_package = "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/generator";
+import "google/protobuf/struct.proto";
+import "google/protobuf/any.proto";
+import "google/api/field_behavior.proto";
 
 // TestService provides test operations
 service TestService {
@@ -27,18 +28,47 @@ service TestService {
   
   // GetItem retrieves an item by ID
   rpc GetItem(GetItemRequest) returns (GetItemResponse);
+  
+  // Test well-known types handling
+  rpc ProcessWellKnownTypes(ProcessWellKnownTypesRequest) returns (ProcessWellKnownTypesResponse);
 }
 
 message CreateItemRequest {
-  string name = 1;
-  string description = 2;
+  // Required field
+  string name = 1 [(google.api.field_behavior) = REQUIRED];
+  
+  // Optional field
+  optional string description = 2;
+  
+  // Map field (becomes array in OpenAI mode)
   map<string, string> labels = 3;
-  google.protobuf.Timestamp created_at = 4;
+  
+  // Repeated field
+  repeated string tags = 4;
+  
+  // Oneof field
+  oneof item_type {
+    ProductDetails product = 5;
+    ServiceDetails service = 6;
+  }
+  
+  // Bytes field (has format: byte that should be removed in OpenAI)
+  bytes thumbnail = 7;
+}
+
+message ProductDetails {
+  double price = 1;
+  int32 quantity = 2;
+}
+
+message ServiceDetails {
+  string duration = 1;
+  bool recurring = 2;
 }
 
 message CreateItemResponse {
   string id = 1;
-  Item item = 2;
+  google.protobuf.Timestamp created_at = 2;
 }
 
 message GetItemRequest {
@@ -56,4 +86,17 @@ message Item {
   map<string, string> labels = 4;
   google.protobuf.Timestamp created_at = 5;
   google.protobuf.Timestamp updated_at = 6;
+}
+
+message ProcessWellKnownTypesRequest {
+  // Well-known types that need special handling in OpenAI mode
+  google.protobuf.Struct metadata = 1;
+  google.protobuf.Value config = 2;
+  google.protobuf.Any payload = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+message ProcessWellKnownTypesResponse {
+  bool success = 1;
+  string message = 2;
 }

@@ -22,9 +22,7 @@ import "google/protobuf/wrappers.proto";
 import "google/protobuf/any.proto";
 import "google/api/field_behavior.proto";
 
-package main;
-
-option go_package = "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/generator";
+package testdata;
 
 message TestMessage {
   bytes some_bytes = 1;
