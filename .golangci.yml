@@ -1,0 +1,35 @@
+version: "2"
+linters:
+  enable:
+    - misspell
+    - unconvert
+  settings:
+    misspell:
+      locale: US
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - examples/*/gen
+      - pkg/generator/testdata/actual
+      - pkg/generator/testdata/golden
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - examples/*/gen
+      - pkg/generator/testdata/actual
+      - pkg/generator/testdata/golden
+      - third_party$
+      - builtin$
+      - examples$
