@@ -36,20 +36,13 @@ jobs:
     - name: Download dependencies
       run: go mod download
 
-    - name: Install protoc-gen-go
-      run: go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-
     - name: Run tests
-      run: go test -v -race ./...
+      run: ./taskw test
 
     - name: Check examples build
       run: |
         cd examples/basic && go build .
         cd ../openai-compat && go build .
-
-    - name: Generate examples
-      run: make examples
-
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -112,7 +105,7 @@ jobs:
         
         # Check if any files changed
         if ! git diff --quiet; then
-          echo "Golden files are out of date. Please run: make update-golden"
+          echo "Golden files are out of date. Please run: task generate-golden"
           git diff
           exit 1
         fi

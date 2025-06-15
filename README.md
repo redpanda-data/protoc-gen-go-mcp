@@ -35,20 +35,19 @@ plugins:
 ```
 
 You need to generate the standard `*.pb.go` files as well. `protoc-gen-go-mcp` by defaults uses a separate subfolder `{$servicename}mcp`, and imports the `*pb.go` files - similar to connectrpc-go.
-See [here](./examples/basic/buf.gen.yaml) for a complete example.
 
 After running `buf generate`, you will see a new folder for each package with protobuf Service definitions:
 
 ```
-tree examples/basic/gen/
+tree pkg/testdata/gen/
 gen
 └── go
-    └── proto
-        └── example
-            └── v1
-                ├── example.pb.go
-                └── examplev1mcp
-                    └── example.pb.mcp.go
+    └── testdata
+        ├── test_service.pb.go
+        ├── testdataconnect/
+        │   └── test_service.connect.go
+        └── testdatamcp/
+            └── test_service.pb.mcp.go
 ```
 
 ### Wiring Up MCP with gRPC server (in-process)
@@ -56,10 +55,10 @@ gen
 Example for in-process registration:
 
 ```go
-srv := exampleServer{} // your gRPC implementation
+srv := testServer{} // your gRPC implementation
 
 // Register all RPC methods as tools on the MCP server
-examplev1mcp.RegisterExampleServiceHandler(mcpServer, &srv)
+testdatamcp.RegisterTestServiceHandler(mcpServer, &srv)
 ```
 
 Each RPC method in your protobuf service becomes an MCP tool.
@@ -70,31 +69,31 @@ Each RPC method in your protobuf service becomes an MCP tool.
 
 ```go
 // Option 1: Use convenience function with runtime provider selection
-provider := examplev1mcp.LLMProviderOpenAI // or LLMProviderStandard
-examplev1mcp.RegisterExampleServiceHandlerWithProvider(mcpServer, &srv, provider)
+provider := testdatamcp.LLMProviderOpenAI // or LLMProviderStandard
+testdatamcp.RegisterTestServiceHandlerWithProvider(mcpServer, &srv, provider)
 
 // Option 2: Register specific handlers directly
-examplev1mcp.RegisterExampleServiceHandler(mcpServer, &srv)        // Standard MCP
-examplev1mcp.RegisterExampleServiceHandlerOpenAI(mcpServer, &srv)  // OpenAI-compatible
+testdatamcp.RegisterTestServiceHandler(mcpServer, &srv)        // Standard MCP
+testdatamcp.RegisterTestServiceHandlerOpenAI(mcpServer, &srv)  // OpenAI-compatible
 
 // Option 3: Register both for different tool names
-examplev1mcp.RegisterExampleServiceHandler(mcpServer, &srv)
-examplev1mcp.RegisterExampleServiceHandlerOpenAI(mcpServer, &srv)
+testdatamcp.RegisterTestServiceHandler(mcpServer, &srv)
+testdatamcp.RegisterTestServiceHandlerOpenAI(mcpServer, &srv)
 ```
 
 **Environment variable example:**
 ```go
 providerStr := os.Getenv("LLM_PROVIDER")
-var provider examplev1mcp.LLMProvider
+var provider testdatamcp.LLMProvider
 switch providerStr {
 case "openai":
-    provider = examplev1mcp.LLMProviderOpenAI
+    provider = testdatamcp.LLMProviderOpenAI
 case "standard":
     fallthrough
 default:
-    provider = examplev1mcp.LLMProviderStandard
+    provider = testdatamcp.LLMProviderStandard
 }
-examplev1mcp.RegisterExampleServiceHandlerWithProvider(mcpServer, &srv, provider)
+testdatamcp.RegisterTestServiceHandlerWithProvider(mcpServer, &srv, provider)
 ```
 
 ➡️ See the [full example](./examples/basic) for details.
@@ -104,13 +103,13 @@ examplev1mcp.RegisterExampleServiceHandlerWithProvider(mcpServer, &srv, provider
 It is also possible to directly forward MCP tool calls to gRPC clients. 
 
 ```go
-examplev1mcp.ForwardToExampleServiceClient(mcpServer, myGrpcClient)
+testdatamcp.ForwardToTestServiceClient(mcpServer, myGrpcClient)
 ```
 
 Same for connectrpc:
 
 ```go
-examplev1mcp.ForwardToConnectExampleServiceClient(mcpServer, myConnectClient)
+testdatamcp.ForwardToConnectTestServiceClient(mcpServer, myConnectClient)
 ```
 
 This directly connects the MCP handler to the connectrpc client, requiring zero boilerplate.
@@ -146,7 +145,7 @@ plugins:
 **After (runtime):**
 ```go
 // Choose at runtime
-examplev1mcp.RegisterExampleServiceHandlerWithProvider(server, srv, examplev1mcp.LLMProviderOpenAI)
+testdatamcp.RegisterTestServiceHandlerWithProvider(server, srv, testdatamcp.LLMProviderOpenAI)
 ```
 
 ## 🧪 Development & Testing
@@ -155,22 +154,20 @@ examplev1mcp.RegisterExampleServiceHandlerWithProvider(server, srv, examplev1mcp
 
 ```bash
 # Run all tests
-make test
+task test
 
 # Build the binary
-make build
+task build
 
 # Install to GOPATH/bin
-make install
+task install
 
 # Update golden test files
-make update-golden
+task generate-golden
 
-# Generate examples
-make examples
 
 # View all available commands
-make help
+task --list
 ```
 
 ### Manual Commands
@@ -187,24 +184,26 @@ go test ./pkg/generator -update-golden
 # Build from source
 go build -o protoc-gen-go-mcp ./cmd/protoc-gen-go-mcp
 
-# Run all CI checks locally
-make ci
+# Run integration tests (requires OPENAI_API_KEY)
+# Either export OPENAI_API_KEY or add to .env file
+export OPENAI_API_KEY="your-api-key"
+task integrationtest
 ```
 
 ### Development Workflow
 
 ```bash
 # Format code
-make fmt
+task fmt
+
+# Check code formatting
+task check-fmt
 
 # Run linting
-make lint
+task lint
 
-# Run protobuf linting
-make buf-lint
-
-# Run all checks (same as CI)
-make ci
+# Generate protobuf files for testdata
+task generate
 ```
 
 ### Golden File Testing
@@ -220,16 +219,16 @@ testdata/
 └── golden/          # Expected output (committed as test baseline)
 ```
 
-**To add new tests:** Simply drop a `.proto` file in `pkg/generator/testdata/` and run the tests. The framework automatically:
+**To add new tests:** Simply drop a `.proto` file in `pkg/testdata/proto/testdata/` and run the tests. The framework automatically:
 1. Discovers all `.proto` files
-2. Generates code into `actual/` using `buf generate`
-3. Compares with expected output in `golden/`
+2. Generates code using `task generate`
+3. Compares with expected output
 4. Creates missing golden files on first run
 
 **To update golden files after generator changes:**
 ```bash
 # Update all golden files
-./tools/update-golden.sh
+task generate-golden
 
 # Or update specific package
 go test ./pkg/generator -update-golden

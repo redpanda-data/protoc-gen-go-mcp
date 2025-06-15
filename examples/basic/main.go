@@ -20,21 +20,21 @@ import (
 	"os"
 
 	"github.com/mark3labs/mcp-go/server"
-	examplev1 "github.com/redpanda-data/protoc-gen-go-mcp/examples/basic/gen/go/proto/example/v1"
-	"github.com/redpanda-data/protoc-gen-go-mcp/examples/basic/gen/go/proto/example/v1/examplev1connect"
-	"github.com/redpanda-data/protoc-gen-go-mcp/examples/basic/gen/go/proto/example/v1/examplev1mcp"
+	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
+	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdataconnect"
+	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdatamcp"
 )
 
 // Ensure our interface and the official gRPC interface are grpcClient
 var (
-	grpcClient examplev1.ExampleServiceClient
-	_          = examplev1mcp.ExampleServiceClient(grpcClient)
+	grpcClient testdata.TestServiceClient
+	_          = testdatamcp.TestServiceClient(grpcClient)
 )
 
 // Ensure our interface and the official connect-go interface are compatible
 var (
-	connectClient examplev1connect.ExampleServiceClient
-	_             = examplev1mcp.ConnectExampleServiceClient(connectClient)
+	connectClient testdataconnect.TestServiceClient
+	_             = testdatamcp.ConnectTestServiceClient(connectClient)
 )
 
 func main() {
@@ -44,45 +44,60 @@ func main() {
 		"1.0.0",
 	)
 
-	srv := exampleServer{}
+	srv := testServer{}
 
 	// Get LLM provider from environment variable, default to standard
 	providerStr := os.Getenv("LLM_PROVIDER")
-	var provider examplev1mcp.LLMProvider
+	var provider testdatamcp.LLMProvider
 	switch providerStr {
 	case "openai":
-		provider = examplev1mcp.LLMProviderOpenAI
+		provider = testdatamcp.LLMProviderOpenAI
 		fmt.Printf("Using OpenAI-compatible MCP handlers\n")
 	case "standard":
 		fallthrough
 	default:
-		provider = examplev1mcp.LLMProviderStandard
+		provider = testdatamcp.LLMProviderStandard
 		fmt.Printf("Using standard MCP handlers\n")
 	}
 
 	// Register handlers for the selected provider
-	examplev1mcp.RegisterExampleServiceHandlerWithProvider(s, &srv, provider)
+	testdatamcp.RegisterTestServiceHandlerWithProvider(s, &srv, provider)
 
 	// Alternative: Register specific handlers directly
-	// examplev1mcp.RegisterExampleServiceHandler(s, &srv)        // Standard
-	// examplev1mcp.RegisterExampleServiceHandlerOpenAI(s, &srv)  // OpenAI
+	// testdatamcp.RegisterTestServiceHandler(s, &srv)        // Standard
+	// testdatamcp.RegisterTestServiceHandlerOpenAI(s, &srv)  // OpenAI
 
 	// Alternative: Register both for different tool names
-	// examplev1mcp.RegisterExampleServiceHandler(s, &srv)
-	// examplev1mcp.RegisterExampleServiceHandlerOpenAI(s, &srv)
+	// testdatamcp.RegisterTestServiceHandler(s, &srv)
+	// testdatamcp.RegisterTestServiceHandlerOpenAI(s, &srv)
 
-	examplev1mcp.ForwardToConnectExampleServiceClient(s, connectClient)
-	examplev1mcp.ForwardToExampleServiceClient(s, grpcClient)
+	testdatamcp.ForwardToConnectTestServiceClient(s, connectClient)
+	testdatamcp.ForwardToTestServiceClient(s, grpcClient)
 
 	if err := server.ServeStdio(s); err != nil {
 		fmt.Printf("Server error: %v\n", err)
 	}
 }
 
-type exampleServer struct{}
+type testServer struct{}
 
-func (t *exampleServer) CreateExample(ctx context.Context, in *examplev1.CreateExampleRequest) (*examplev1.CreateExampleResponse, error) {
-	return &examplev1.CreateExampleResponse{
-		SomeString: "HAHA " + in.GetNested().GetNested2().GetNested3().GetOptionalString(),
+func (t *testServer) CreateItem(ctx context.Context, in *testdata.CreateItemRequest) (*testdata.CreateItemResponse, error) {
+	return &testdata.CreateItemResponse{
+		Id: "item-123",
+	}, nil
+}
+
+func (t *testServer) GetItem(ctx context.Context, in *testdata.GetItemRequest) (*testdata.GetItemResponse, error) {
+	return &testdata.GetItemResponse{
+		Item: &testdata.Item{
+			Id:   in.GetId(),
+			Name: "Retrieved item",
+		},
+	}, nil
+}
+
+func (t *testServer) ProcessWellKnownTypes(ctx context.Context, in *testdata.ProcessWellKnownTypesRequest) (*testdata.ProcessWellKnownTypesResponse, error) {
+	return &testdata.ProcessWellKnownTypesResponse{
+		Message: "Processed well-known types",
 	}, nil
 }

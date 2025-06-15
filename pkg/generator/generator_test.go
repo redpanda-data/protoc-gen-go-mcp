@@ -25,7 +25,7 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
-	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go"
+	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
@@ -307,6 +307,12 @@ func TestFullGeneration(t *testing.T) {
 		t.Fatalf("Failed to generate current files: %v\nOutput: %s", err, output)
 	}
 
+	cmd = exec.Command("task", "fmt")
+	output, err = cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("Failed to generate current files: %v\nOutput: %s", err, output)
+	}
+
 	// Find all .pb.mcp.go files in gen/go and compare with golden/
 	err = filepath.Walk("gen/go", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -319,19 +325,11 @@ func TestFullGeneration(t *testing.T) {
 		}
 
 		// Get corresponding golden file path
-		goldenPath := strings.Replace(path, "gen/go/", "golden/", 1)
+		goldenPath := strings.Replace(path, "gen/go/", "gen/go-golden/", 1)
 
 		// Check that golden file exists
 		if _, err := os.Stat(goldenPath); os.IsNotExist(err) {
-			// Create golden file if it doesn't exist
-			t.Logf("Golden file doesn't exist, creating it...")
-			goldenCmd := exec.Command("buf", "generate", "--template", "buf.gen.golden.yaml")
-			goldenOutput, goldenErr := goldenCmd.CombinedOutput()
-			if goldenErr != nil {
-				t.Fatalf("Failed to generate golden files: %v\nOutput: %s", goldenErr, goldenOutput)
-			}
-			t.Logf("Created golden files")
-			return filepath.SkipDir // Skip further comparison since we just created golden files
+			t.Fatalf("Golden file %s missing\n", goldenPath)
 		}
 
 		// Read and compare files
@@ -346,7 +344,7 @@ func TestFullGeneration(t *testing.T) {
 		}
 
 		// Compare content
-		if !bytes.Equal(expectedContent, generatedContent) {
+		if !bytes.Equal(bytes.ReplaceAll(expectedContent, []byte("gen/go-golden"), []byte("gen/go")), generatedContent) {
 			t.Errorf("Generated content differs from golden file.\n"+
 				"Generated: %s\n"+
 				"Golden: %s\n"+
