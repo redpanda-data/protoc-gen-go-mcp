@@ -16,7 +16,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        (unknown)
-// source: compatibility_test.proto
+// source: generator/compatibility_test.proto
 
 package generator
 
@@ -51,7 +51,7 @@ type TestMessage struct {
 
 func (x *TestMessage) Reset() {
 	*x = TestMessage{}
-	mi := &file_compatibility_test_proto_msgTypes[0]
+	mi := &file_generator_compatibility_test_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -63,7 +63,7 @@ func (x *TestMessage) String() string {
 func (*TestMessage) ProtoMessage() {}
 
 func (x *TestMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_compatibility_test_proto_msgTypes[0]
+	mi := &file_generator_compatibility_test_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -76,7 +76,7 @@ func (x *TestMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestMessage.ProtoReflect.Descriptor instead.
 func (*TestMessage) Descriptor() ([]byte, []int) {
-	return file_compatibility_test_proto_rawDescGZIP(), []int{0}
+	return file_generator_compatibility_test_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *TestMessage) GetSomeBytes() []byte {
@@ -95,7 +95,7 @@ type RequiredFieldTest struct {
 
 func (x *RequiredFieldTest) Reset() {
 	*x = RequiredFieldTest{}
-	mi := &file_compatibility_test_proto_msgTypes[1]
+	mi := &file_generator_compatibility_test_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -107,7 +107,7 @@ func (x *RequiredFieldTest) String() string {
 func (*RequiredFieldTest) ProtoMessage() {}
 
 func (x *RequiredFieldTest) ProtoReflect() protoreflect.Message {
-	mi := &file_compatibility_test_proto_msgTypes[1]
+	mi := &file_generator_compatibility_test_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -120,7 +120,7 @@ func (x *RequiredFieldTest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RequiredFieldTest.ProtoReflect.Descriptor instead.
 func (*RequiredFieldTest) Descriptor() ([]byte, []int) {
-	return file_compatibility_test_proto_rawDescGZIP(), []int{1}
+	return file_generator_compatibility_test_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *RequiredFieldTest) GetRequiredField() string {
@@ -150,7 +150,7 @@ type WktTestMessage struct {
 
 func (x *WktTestMessage) Reset() {
 	*x = WktTestMessage{}
-	mi := &file_compatibility_test_proto_msgTypes[2]
+	mi := &file_generator_compatibility_test_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -162,7 +162,7 @@ func (x *WktTestMessage) String() string {
 func (*WktTestMessage) ProtoMessage() {}
 
 func (x *WktTestMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_compatibility_test_proto_msgTypes[2]
+	mi := &file_generator_compatibility_test_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -175,7 +175,7 @@ func (x *WktTestMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WktTestMessage.ProtoReflect.Descriptor instead.
 func (*WktTestMessage) Descriptor() ([]byte, []int) {
-	return file_compatibility_test_proto_rawDescGZIP(), []int{2}
+	return file_generator_compatibility_test_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *WktTestMessage) GetTimestamp() *timestamppb.Timestamp {
@@ -271,7 +271,7 @@ type MapTestMessage struct {
 
 func (x *MapTestMessage) Reset() {
 	*x = MapTestMessage{}
-	mi := &file_compatibility_test_proto_msgTypes[3]
+	mi := &file_generator_compatibility_test_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -283,7 +283,7 @@ func (x *MapTestMessage) String() string {
 func (*MapTestMessage) ProtoMessage() {}
 
 func (x *MapTestMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_compatibility_test_proto_msgTypes[3]
+	mi := &file_generator_compatibility_test_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -296,7 +296,7 @@ func (x *MapTestMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MapTestMessage.ProtoReflect.Descriptor instead.
 func (*MapTestMessage) Descriptor() ([]byte, []int) {
-	return file_compatibility_test_proto_rawDescGZIP(), []int{3}
+	return file_generator_compatibility_test_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *MapTestMessage) GetStringMap() map[string]string {
@@ -306,11 +306,11 @@ func (x *MapTestMessage) GetStringMap() map[string]string {
 	return nil
 }
 
-var File_compatibility_test_proto protoreflect.FileDescriptor
+var File_generator_compatibility_test_proto protoreflect.FileDescriptor
 
-const file_compatibility_test_proto_rawDesc = "" +
+const file_generator_compatibility_test_proto_rawDesc = "" +
 	"\n" +
-	"\x18compatibility_test.proto\x12\x04main\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a google/protobuf/field_mask.proto\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x19google/protobuf/any.proto\x1a\x1fgoogle/api/field_behavior.proto\",\n" +
+	"\"generator/compatibility_test.proto\x12\x04main\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a google/protobuf/field_mask.proto\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x19google/protobuf/any.proto\x1a\x1fgoogle/api/field_behavior.proto\",\n" +
 	"\vTestMessage\x12\x1d\n" +
 	"\n" +
 	"some_bytes\x18\x01 \x01(\fR\tsomeBytes\"?\n" +
@@ -342,23 +342,22 @@ const file_compatibility_test_proto_rawDesc = "" +
 	"string_map\x18\x01 \x03(\v2#.main.MapTestMessage.StringMapEntryR\tstringMap\x1a<\n" +
 	"\x0eStringMapEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x8c\x01\n" +
-	"\bcom.mainB\x16CompatibilityTestProtoP\x01Z8github.com/redpanda-data/protoc-gen-go-mcp/pkg/generator\xa2\x02\x03MXX\xaa\x02\x04Main\xca\x02\x04Main\xe2\x02\x10Main\\GPBMetadata\xea\x02\x04Mainb\x06proto3"
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01BJZHgithub.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/generatorb\x06proto3"
 
 var (
-	file_compatibility_test_proto_rawDescOnce sync.Once
-	file_compatibility_test_proto_rawDescData []byte
+	file_generator_compatibility_test_proto_rawDescOnce sync.Once
+	file_generator_compatibility_test_proto_rawDescData []byte
 )
 
-func file_compatibility_test_proto_rawDescGZIP() []byte {
-	file_compatibility_test_proto_rawDescOnce.Do(func() {
-		file_compatibility_test_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_compatibility_test_proto_rawDesc), len(file_compatibility_test_proto_rawDesc)))
+func file_generator_compatibility_test_proto_rawDescGZIP() []byte {
+	file_generator_compatibility_test_proto_rawDescOnce.Do(func() {
+		file_generator_compatibility_test_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_generator_compatibility_test_proto_rawDesc), len(file_generator_compatibility_test_proto_rawDesc)))
 	})
-	return file_compatibility_test_proto_rawDescData
+	return file_generator_compatibility_test_proto_rawDescData
 }
 
-var file_compatibility_test_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
-var file_compatibility_test_proto_goTypes = []any{
+var file_generator_compatibility_test_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_generator_compatibility_test_proto_goTypes = []any{
 	(*TestMessage)(nil),            // 0: main.TestMessage
 	(*RequiredFieldTest)(nil),      // 1: main.RequiredFieldTest
 	(*WktTestMessage)(nil),         // 2: main.WktTestMessage
@@ -377,7 +376,7 @@ var file_compatibility_test_proto_goTypes = []any{
 	(*wrapperspb.BoolValue)(nil),   // 15: google.protobuf.BoolValue
 	(*wrapperspb.BytesValue)(nil),  // 16: google.protobuf.BytesValue
 }
-var file_compatibility_test_proto_depIdxs = []int32{
+var file_generator_compatibility_test_proto_depIdxs = []int32{
 	5,  // 0: main.WktTestMessage.timestamp:type_name -> google.protobuf.Timestamp
 	6,  // 1: main.WktTestMessage.duration:type_name -> google.protobuf.Duration
 	7,  // 2: main.WktTestMessage.struct_field:type_name -> google.protobuf.Struct
@@ -398,26 +397,26 @@ var file_compatibility_test_proto_depIdxs = []int32{
 	0,  // [0:13] is the sub-list for field type_name
 }
 
-func init() { file_compatibility_test_proto_init() }
-func file_compatibility_test_proto_init() {
-	if File_compatibility_test_proto != nil {
+func init() { file_generator_compatibility_test_proto_init() }
+func file_generator_compatibility_test_proto_init() {
+	if File_generator_compatibility_test_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_compatibility_test_proto_rawDesc), len(file_compatibility_test_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_generator_compatibility_test_proto_rawDesc), len(file_generator_compatibility_test_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_compatibility_test_proto_goTypes,
-		DependencyIndexes: file_compatibility_test_proto_depIdxs,
-		MessageInfos:      file_compatibility_test_proto_msgTypes,
+		GoTypes:           file_generator_compatibility_test_proto_goTypes,
+		DependencyIndexes: file_generator_compatibility_test_proto_depIdxs,
+		MessageInfos:      file_generator_compatibility_test_proto_msgTypes,
 	}.Build()
-	File_compatibility_test_proto = out.File
-	file_compatibility_test_proto_goTypes = nil
-	file_compatibility_test_proto_depIdxs = nil
+	File_generator_compatibility_test_proto = out.File
+	file_generator_compatibility_test_proto_goTypes = nil
+	file_generator_compatibility_test_proto_depIdxs = nil
 }

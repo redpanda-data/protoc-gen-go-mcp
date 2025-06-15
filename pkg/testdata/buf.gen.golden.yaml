@@ -3,6 +3,6 @@ plugins:
   - local: protoc-gen-go
     out: golden
     opt: paths=source_relative
-  - local: ["go", "run", "../../../cmd/protoc-gen-go-mcp"]
+  - local: ["go", "run", "../../cmd/protoc-gen-go-mcp"]
     out: golden
     opt: paths=source_relative

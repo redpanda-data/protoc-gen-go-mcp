@@ -16,9 +16,9 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        (unknown)
-// source: test_service.proto
+// source: generator/test_service.proto
 
-package testdata
+package generator
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -48,7 +48,7 @@ type CreateItemRequest struct {
 
 func (x *CreateItemRequest) Reset() {
 	*x = CreateItemRequest{}
-	mi := &file_test_service_proto_msgTypes[0]
+	mi := &file_generator_test_service_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -60,7 +60,7 @@ func (x *CreateItemRequest) String() string {
 func (*CreateItemRequest) ProtoMessage() {}
 
 func (x *CreateItemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_test_service_proto_msgTypes[0]
+	mi := &file_generator_test_service_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -73,7 +73,7 @@ func (x *CreateItemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateItemRequest.ProtoReflect.Descriptor instead.
 func (*CreateItemRequest) Descriptor() ([]byte, []int) {
-	return file_test_service_proto_rawDescGZIP(), []int{0}
+	return file_generator_test_service_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *CreateItemRequest) GetName() string {
@@ -114,7 +114,7 @@ type CreateItemResponse struct {
 
 func (x *CreateItemResponse) Reset() {
 	*x = CreateItemResponse{}
-	mi := &file_test_service_proto_msgTypes[1]
+	mi := &file_generator_test_service_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -126,7 +126,7 @@ func (x *CreateItemResponse) String() string {
 func (*CreateItemResponse) ProtoMessage() {}
 
 func (x *CreateItemResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_test_service_proto_msgTypes[1]
+	mi := &file_generator_test_service_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -139,7 +139,7 @@ func (x *CreateItemResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateItemResponse.ProtoReflect.Descriptor instead.
 func (*CreateItemResponse) Descriptor() ([]byte, []int) {
-	return file_test_service_proto_rawDescGZIP(), []int{1}
+	return file_generator_test_service_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *CreateItemResponse) GetId() string {
@@ -165,7 +165,7 @@ type GetItemRequest struct {
 
 func (x *GetItemRequest) Reset() {
 	*x = GetItemRequest{}
-	mi := &file_test_service_proto_msgTypes[2]
+	mi := &file_generator_test_service_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -177,7 +177,7 @@ func (x *GetItemRequest) String() string {
 func (*GetItemRequest) ProtoMessage() {}
 
 func (x *GetItemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_test_service_proto_msgTypes[2]
+	mi := &file_generator_test_service_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -190,7 +190,7 @@ func (x *GetItemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetItemRequest.ProtoReflect.Descriptor instead.
 func (*GetItemRequest) Descriptor() ([]byte, []int) {
-	return file_test_service_proto_rawDescGZIP(), []int{2}
+	return file_generator_test_service_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GetItemRequest) GetId() string {
@@ -209,7 +209,7 @@ type GetItemResponse struct {
 
 func (x *GetItemResponse) Reset() {
 	*x = GetItemResponse{}
-	mi := &file_test_service_proto_msgTypes[3]
+	mi := &file_generator_test_service_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -221,7 +221,7 @@ func (x *GetItemResponse) String() string {
 func (*GetItemResponse) ProtoMessage() {}
 
 func (x *GetItemResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_test_service_proto_msgTypes[3]
+	mi := &file_generator_test_service_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -234,7 +234,7 @@ func (x *GetItemResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetItemResponse.ProtoReflect.Descriptor instead.
 func (*GetItemResponse) Descriptor() ([]byte, []int) {
-	return file_test_service_proto_rawDescGZIP(), []int{3}
+	return file_generator_test_service_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetItemResponse) GetItem() *Item {
@@ -258,7 +258,7 @@ type Item struct {
 
 func (x *Item) Reset() {
 	*x = Item{}
-	mi := &file_test_service_proto_msgTypes[4]
+	mi := &file_generator_test_service_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -270,7 +270,7 @@ func (x *Item) String() string {
 func (*Item) ProtoMessage() {}
 
 func (x *Item) ProtoReflect() protoreflect.Message {
-	mi := &file_test_service_proto_msgTypes[4]
+	mi := &file_generator_test_service_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -283,7 +283,7 @@ func (x *Item) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Item.ProtoReflect.Descriptor instead.
 func (*Item) Descriptor() ([]byte, []int) {
-	return file_test_service_proto_rawDescGZIP(), []int{4}
+	return file_generator_test_service_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Item) GetId() string {
@@ -328,11 +328,11 @@ func (x *Item) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-var File_test_service_proto protoreflect.FileDescriptor
+var File_generator_test_service_proto protoreflect.FileDescriptor
 
-const file_test_service_proto_rawDesc = "" +
+const file_generator_test_service_proto_rawDesc = "" +
 	"\n" +
-	"\x12test_service.proto\x12\x0etestservice.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x86\x02\n" +
+	"\x1cgenerator/test_service.proto\x12\x0etestservice.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x86\x02\n" +
 	"\x11CreateItemRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12E\n" +
@@ -364,22 +364,22 @@ const file_test_service_proto_rawDesc = "" +
 	"\vTestService\x12S\n" +
 	"\n" +
 	"CreateItem\x12!.testservice.v1.CreateItemRequest\x1a\".testservice.v1.CreateItemResponse\x12J\n" +
-	"\aGetItem\x12\x1e.testservice.v1.GetItemRequest\x1a\x1f.testservice.v1.GetItemResponseBCZAgithub.com/redpanda-data/protoc-gen-go-mcp/pkg/generator/testdatab\x06proto3"
+	"\aGetItem\x12\x1e.testservice.v1.GetItemRequest\x1a\x1f.testservice.v1.GetItemResponseBJZHgithub.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/generatorb\x06proto3"
 
 var (
-	file_test_service_proto_rawDescOnce sync.Once
-	file_test_service_proto_rawDescData []byte
+	file_generator_test_service_proto_rawDescOnce sync.Once
+	file_generator_test_service_proto_rawDescData []byte
 )
 
-func file_test_service_proto_rawDescGZIP() []byte {
-	file_test_service_proto_rawDescOnce.Do(func() {
-		file_test_service_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_test_service_proto_rawDesc), len(file_test_service_proto_rawDesc)))
+func file_generator_test_service_proto_rawDescGZIP() []byte {
+	file_generator_test_service_proto_rawDescOnce.Do(func() {
+		file_generator_test_service_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_generator_test_service_proto_rawDesc), len(file_generator_test_service_proto_rawDesc)))
 	})
-	return file_test_service_proto_rawDescData
+	return file_generator_test_service_proto_rawDescData
 }
 
-var file_test_service_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
-var file_test_service_proto_goTypes = []any{
+var file_generator_test_service_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_generator_test_service_proto_goTypes = []any{
 	(*CreateItemRequest)(nil),     // 0: testservice.v1.CreateItemRequest
 	(*CreateItemResponse)(nil),    // 1: testservice.v1.CreateItemResponse
 	(*GetItemRequest)(nil),        // 2: testservice.v1.GetItemRequest
@@ -389,7 +389,7 @@ var file_test_service_proto_goTypes = []any{
 	nil,                           // 6: testservice.v1.Item.LabelsEntry
 	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
 }
-var file_test_service_proto_depIdxs = []int32{
+var file_generator_test_service_proto_depIdxs = []int32{
 	5, // 0: testservice.v1.CreateItemRequest.labels:type_name -> testservice.v1.CreateItemRequest.LabelsEntry
 	7, // 1: testservice.v1.CreateItemRequest.created_at:type_name -> google.protobuf.Timestamp
 	4, // 2: testservice.v1.CreateItemResponse.item:type_name -> testservice.v1.Item
@@ -408,26 +408,26 @@ var file_test_service_proto_depIdxs = []int32{
 	0, // [0:7] is the sub-list for field type_name
 }
 
-func init() { file_test_service_proto_init() }
-func file_test_service_proto_init() {
-	if File_test_service_proto != nil {
+func init() { file_generator_test_service_proto_init() }
+func file_generator_test_service_proto_init() {
+	if File_generator_test_service_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_test_service_proto_rawDesc), len(file_test_service_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_generator_test_service_proto_rawDesc), len(file_generator_test_service_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_test_service_proto_goTypes,
-		DependencyIndexes: file_test_service_proto_depIdxs,
-		MessageInfos:      file_test_service_proto_msgTypes,
+		GoTypes:           file_generator_test_service_proto_goTypes,
+		DependencyIndexes: file_generator_test_service_proto_depIdxs,
+		MessageInfos:      file_generator_test_service_proto_msgTypes,
 	}.Build()
-	File_test_service_proto = out.File
-	file_test_service_proto_goTypes = nil
-	file_test_service_proto_depIdxs = nil
+	File_generator_test_service_proto = out.File
+	file_generator_test_service_proto_goTypes = nil
+	file_generator_test_service_proto_depIdxs = nil
 }

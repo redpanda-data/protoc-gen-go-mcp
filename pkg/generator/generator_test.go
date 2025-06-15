@@ -25,6 +25,7 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
+	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/generator"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
@@ -39,7 +40,7 @@ func TestGetTypeStandard(t *testing.T) {
 			name: "map field in standard mode",
 			setupField: func() protoreflect.FieldDescriptor {
 				// Use the test proto's map field
-				msg := &MapTestMessage{}
+				msg := &testdata.MapTestMessage{}
 				return msg.ProtoReflect().Descriptor().Fields().ByName("string_map")
 			},
 			wantSchema: func(g *WithT, schema map[string]any) {
@@ -52,7 +53,7 @@ func TestGetTypeStandard(t *testing.T) {
 		{
 			name: "google.protobuf.Struct in standard mode",
 			setupField: func() protoreflect.FieldDescriptor {
-				msg := &WktTestMessage{}
+				msg := &testdata.WktTestMessage{}
 				return msg.ProtoReflect().Descriptor().Fields().ByName("struct_field")
 			},
 			wantSchema: func(g *WithT, schema map[string]any) {
@@ -63,7 +64,7 @@ func TestGetTypeStandard(t *testing.T) {
 		{
 			name: "google.protobuf.Value in standard mode",
 			setupField: func() protoreflect.FieldDescriptor {
-				msg := &WktTestMessage{}
+				msg := &testdata.WktTestMessage{}
 				return msg.ProtoReflect().Descriptor().Fields().ByName("value_field")
 			},
 			wantSchema: func(g *WithT, schema map[string]any) {
@@ -74,7 +75,7 @@ func TestGetTypeStandard(t *testing.T) {
 		{
 			name: "google.protobuf.ListValue in standard mode",
 			setupField: func() protoreflect.FieldDescriptor {
-				msg := &WktTestMessage{}
+				msg := &testdata.WktTestMessage{}
 				return msg.ProtoReflect().Descriptor().Fields().ByName("list_value")
 			},
 			wantSchema: func(g *WithT, schema map[string]any) {
@@ -87,7 +88,7 @@ func TestGetTypeStandard(t *testing.T) {
 		{
 			name: "timestamp field",
 			setupField: func() protoreflect.FieldDescriptor {
-				msg := &WktTestMessage{}
+				msg := &testdata.WktTestMessage{}
 				return msg.ProtoReflect().Descriptor().Fields().ByName("timestamp")
 			},
 			wantSchema: func(g *WithT, schema map[string]any) {
@@ -122,7 +123,7 @@ func TestGetTypeOpenAI(t *testing.T) {
 		{
 			name: "map field in OpenAI mode",
 			setupField: func() protoreflect.FieldDescriptor {
-				msg := &MapTestMessage{}
+				msg := &testdata.MapTestMessage{}
 				return msg.ProtoReflect().Descriptor().Fields().ByName("string_map")
 			},
 			wantSchema: func(g *WithT, schema map[string]any) {
@@ -140,7 +141,7 @@ func TestGetTypeOpenAI(t *testing.T) {
 		{
 			name: "google.protobuf.Struct in OpenAI mode",
 			setupField: func() protoreflect.FieldDescriptor {
-				msg := &WktTestMessage{}
+				msg := &testdata.WktTestMessage{}
 				return msg.ProtoReflect().Descriptor().Fields().ByName("struct_field")
 			},
 			wantSchema: func(g *WithT, schema map[string]any) {
@@ -151,7 +152,7 @@ func TestGetTypeOpenAI(t *testing.T) {
 		{
 			name: "google.protobuf.Value in OpenAI mode",
 			setupField: func() protoreflect.FieldDescriptor {
-				msg := &WktTestMessage{}
+				msg := &testdata.WktTestMessage{}
 				return msg.ProtoReflect().Descriptor().Fields().ByName("value_field")
 			},
 			wantSchema: func(g *WithT, schema map[string]any) {
@@ -162,7 +163,7 @@ func TestGetTypeOpenAI(t *testing.T) {
 		{
 			name: "google.protobuf.ListValue in OpenAI mode",
 			setupField: func() protoreflect.FieldDescriptor {
-				msg := &WktTestMessage{}
+				msg := &testdata.WktTestMessage{}
 				return msg.ProtoReflect().Descriptor().Fields().ByName("list_value")
 			},
 			wantSchema: func(g *WithT, schema map[string]any) {
@@ -195,7 +196,7 @@ func TestMessageSchemaStandard(t *testing.T) {
 		openAICompat: false,
 	}
 
-	msgDesc := (&WktTestMessage{}).ProtoReflect().Descriptor()
+	msgDesc := (&testdata.WktTestMessage{}).ProtoReflect().Descriptor()
 	schema := fg.messageSchema(msgDesc)
 
 	g.Expect(schema["type"]).To(Equal("object"))
@@ -212,7 +213,7 @@ func TestMessageSchemaOpenAI(t *testing.T) {
 		openAICompat: true,
 	}
 
-	msgDesc := (&WktTestMessage{}).ProtoReflect().Descriptor()
+	msgDesc := (&testdata.WktTestMessage{}).ProtoReflect().Descriptor()
 	schema := fg.messageSchema(msgDesc)
 
 	// In OpenAI mode, the type becomes ["object", "null"]
@@ -259,7 +260,7 @@ func TestSchemaMarshaling(t *testing.T) {
 	}
 
 	// Test that generated schemas can be marshaled to JSON
-	msg := &WktTestMessage{}
+	msg := &testdata.WktTestMessage{}
 	schema := fg.messageSchema(msg.ProtoReflect().Descriptor())
 
 	marshaled, err := json.Marshal(schema)
@@ -282,7 +283,7 @@ func TestFullGeneration(t *testing.T) {
 	g.Expect(err).ToNot(HaveOccurred())
 	defer func() { _ = os.Chdir(originalDir) }()
 
-	testdataDir := filepath.Join("testdata")
+	testdataDir := filepath.Join("..", "testdata")
 	err = os.Chdir(testdataDir)
 	g.Expect(err).ToNot(HaveOccurred())
 
@@ -306,8 +307,8 @@ func TestFullGeneration(t *testing.T) {
 		t.Fatalf("Failed to generate current files: %v\nOutput: %s", err, output)
 	}
 
-	// Find all .pb.mcp.go files in actual/ and compare with golden/
-	err = filepath.Walk("actual", func(path string, info os.FileInfo, err error) error {
+	// Find all .pb.mcp.go files in gen/go and compare with golden/
+	err = filepath.Walk("gen/go", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -318,7 +319,7 @@ func TestFullGeneration(t *testing.T) {
 		}
 
 		// Get corresponding golden file path
-		goldenPath := strings.Replace(path, "actual/", "golden/", 1)
+		goldenPath := strings.Replace(path, "gen/go/", "golden/", 1)
 
 		// Check that golden file exists
 		if _, err := os.Stat(goldenPath); os.IsNotExist(err) {

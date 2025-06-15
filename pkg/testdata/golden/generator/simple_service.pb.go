@@ -16,9 +16,9 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        (unknown)
-// source: simple_service.proto
+// source: generator/simple_service.proto
 
-package testdata
+package generator
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -44,7 +44,7 @@ type EchoRequest struct {
 
 func (x *EchoRequest) Reset() {
 	*x = EchoRequest{}
-	mi := &file_simple_service_proto_msgTypes[0]
+	mi := &file_generator_simple_service_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -56,7 +56,7 @@ func (x *EchoRequest) String() string {
 func (*EchoRequest) ProtoMessage() {}
 
 func (x *EchoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_simple_service_proto_msgTypes[0]
+	mi := &file_generator_simple_service_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -69,7 +69,7 @@ func (x *EchoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EchoRequest.ProtoReflect.Descriptor instead.
 func (*EchoRequest) Descriptor() ([]byte, []int) {
-	return file_simple_service_proto_rawDescGZIP(), []int{0}
+	return file_generator_simple_service_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *EchoRequest) GetMessage() string {
@@ -88,7 +88,7 @@ type EchoResponse struct {
 
 func (x *EchoResponse) Reset() {
 	*x = EchoResponse{}
-	mi := &file_simple_service_proto_msgTypes[1]
+	mi := &file_generator_simple_service_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -100,7 +100,7 @@ func (x *EchoResponse) String() string {
 func (*EchoResponse) ProtoMessage() {}
 
 func (x *EchoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_simple_service_proto_msgTypes[1]
+	mi := &file_generator_simple_service_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -113,7 +113,7 @@ func (x *EchoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EchoResponse.ProtoReflect.Descriptor instead.
 func (*EchoResponse) Descriptor() ([]byte, []int) {
-	return file_simple_service_proto_rawDescGZIP(), []int{1}
+	return file_generator_simple_service_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *EchoResponse) GetResponse() string {
@@ -123,36 +123,36 @@ func (x *EchoResponse) GetResponse() string {
 	return ""
 }
 
-var File_simple_service_proto protoreflect.FileDescriptor
+var File_generator_simple_service_proto protoreflect.FileDescriptor
 
-const file_simple_service_proto_rawDesc = "" +
+const file_generator_simple_service_proto_rawDesc = "" +
 	"\n" +
-	"\x14simple_service.proto\x12\tsimple.v1\"'\n" +
+	"\x1egenerator/simple_service.proto\x12\tsimple.v1\"'\n" +
 	"\vEchoRequest\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"*\n" +
 	"\fEchoResponse\x12\x1a\n" +
 	"\bresponse\x18\x01 \x01(\tR\bresponse2H\n" +
 	"\rSimpleService\x127\n" +
-	"\x04Echo\x12\x16.simple.v1.EchoRequest\x1a\x17.simple.v1.EchoResponseBCZAgithub.com/redpanda-data/protoc-gen-go-mcp/pkg/generator/testdatab\x06proto3"
+	"\x04Echo\x12\x16.simple.v1.EchoRequest\x1a\x17.simple.v1.EchoResponseBJZHgithub.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/generatorb\x06proto3"
 
 var (
-	file_simple_service_proto_rawDescOnce sync.Once
-	file_simple_service_proto_rawDescData []byte
+	file_generator_simple_service_proto_rawDescOnce sync.Once
+	file_generator_simple_service_proto_rawDescData []byte
 )
 
-func file_simple_service_proto_rawDescGZIP() []byte {
-	file_simple_service_proto_rawDescOnce.Do(func() {
-		file_simple_service_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_simple_service_proto_rawDesc), len(file_simple_service_proto_rawDesc)))
+func file_generator_simple_service_proto_rawDescGZIP() []byte {
+	file_generator_simple_service_proto_rawDescOnce.Do(func() {
+		file_generator_simple_service_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_generator_simple_service_proto_rawDesc), len(file_generator_simple_service_proto_rawDesc)))
 	})
-	return file_simple_service_proto_rawDescData
+	return file_generator_simple_service_proto_rawDescData
 }
 
-var file_simple_service_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_simple_service_proto_goTypes = []any{
+var file_generator_simple_service_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_generator_simple_service_proto_goTypes = []any{
 	(*EchoRequest)(nil),  // 0: simple.v1.EchoRequest
 	(*EchoResponse)(nil), // 1: simple.v1.EchoResponse
 }
-var file_simple_service_proto_depIdxs = []int32{
+var file_generator_simple_service_proto_depIdxs = []int32{
 	0, // 0: simple.v1.SimpleService.Echo:input_type -> simple.v1.EchoRequest
 	1, // 1: simple.v1.SimpleService.Echo:output_type -> simple.v1.EchoResponse
 	1, // [1:2] is the sub-list for method output_type
@@ -162,26 +162,26 @@ var file_simple_service_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_simple_service_proto_init() }
-func file_simple_service_proto_init() {
-	if File_simple_service_proto != nil {
+func init() { file_generator_simple_service_proto_init() }
+func file_generator_simple_service_proto_init() {
+	if File_generator_simple_service_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_simple_service_proto_rawDesc), len(file_simple_service_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_generator_simple_service_proto_rawDesc), len(file_generator_simple_service_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_simple_service_proto_goTypes,
-		DependencyIndexes: file_simple_service_proto_depIdxs,
-		MessageInfos:      file_simple_service_proto_msgTypes,
+		GoTypes:           file_generator_simple_service_proto_goTypes,
+		DependencyIndexes: file_generator_simple_service_proto_depIdxs,
+		MessageInfos:      file_generator_simple_service_proto_msgTypes,
 	}.Build()
-	File_simple_service_proto = out.File
-	file_simple_service_proto_goTypes = nil
-	file_simple_service_proto_depIdxs = nil
+	File_generator_simple_service_proto = out.File
+	file_generator_simple_service_proto_goTypes = nil
+	file_generator_simple_service_proto_depIdxs = nil
 }

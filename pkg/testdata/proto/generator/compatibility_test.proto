@@ -24,6 +24,8 @@ import "google/api/field_behavior.proto";
 
 package main;
 
+option go_package = "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/generator";
+
 message TestMessage {
   bytes some_bytes = 1;
 }

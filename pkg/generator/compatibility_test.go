@@ -22,6 +22,7 @@ import (
 
 	. "github.com/onsi/gomega"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
+	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/generator"
 	jsonschema "github.com/santhosh-tekuri/jsonschema/v5"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -59,32 +60,32 @@ func TestCompat(t *testing.T) {
 				}
 				any, err := anypb.New(val)
 				g.Expect(err).ToNot(HaveOccurred())
-				return &WktTestMessage{
+				return &testdata.WktTestMessage{
 					Any: any,
 				}
 			}(),
 		},
 		{
 			name: "bytes value with weird base64",
-			input: &WktTestMessage{
+			input: &testdata.WktTestMessage{
 				BytesValue: wrapperspb.Bytes([]byte{0xde, 0xad, 0xbe, 0xef}),
 			},
 		},
 		{
 			name: "negative duration",
-			input: &WktTestMessage{
+			input: &testdata.WktTestMessage{
 				Duration: durationpb.New(-5 * time.Second),
 			},
 		},
 		{
 			name: "timestamp in the future",
-			input: &WktTestMessage{
+			input: &testdata.WktTestMessage{
 				Timestamp: timestamppb.New(time.Date(3000, 1, 1, 0, 0, 0, 0, time.UTC)),
 			},
 		},
 		{
 			name: "wrapper types with default values",
-			input: &WktTestMessage{
+			input: &testdata.WktTestMessage{
 				StringValue: wrapperspb.String(""),
 				Int32Value:  wrapperspb.Int32(0),
 				Int64Value:  wrapperspb.Int64(0),
@@ -97,27 +98,27 @@ func TestCompat(t *testing.T) {
 			input: func() proto.Message {
 				any, err := anypb.New(wrapperspb.String("some-string-in-any"))
 				g.Expect(err).ToNot(HaveOccurred())
-				return &WktTestMessage{
+				return &testdata.WktTestMessage{
 					Any: any,
 				}
 			}(),
 		},
 		{
 			name: "bytes as base64 works",
-			input: &TestMessage{
+			input: &testdata.TestMessage{
 				SomeBytes: []byte{1, 200, 125},
 			},
 		},
 		{
 			name:          "bytes must be base64 - fails if it's not",
-			input:         &TestMessage{},
+			input:         &testdata.TestMessage{},
 			rawJsonInput:  json.RawMessage(`{"some_bytes":"hello this is not base64"}`),
 			errorExpected: true,
 			errorContains: "/properties/some_bytes/contentEncoding",
 		},
 		{
 			name: "a little bit of everything, required field is set",
-			input: &WktTestMessage{
+			input: &testdata.WktTestMessage{
 				Timestamp:   timestamppb.New(time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC)),
 				Duration:    durationpb.New(3 * time.Second),
 				StructField: &structpb.Struct{Fields: map[string]*structpb.Value{"foo": structpb.NewStringValue("bar")}},
@@ -133,18 +134,18 @@ func TestCompat(t *testing.T) {
 		},
 		{
 			name:          "required field absent throws error",
-			input:         &RequiredFieldTest{},
+			input:         &testdata.RequiredFieldTest{},
 			errorExpected: true,
 			errorContains: `missing properties: 'required_field'`,
 		},
 		{
 			name:         "nullable timestamp as null",
-			input:        &WktTestMessage{}, // Empty message, timestamp is nil
+			input:        &testdata.WktTestMessage{}, // Empty message, timestamp is nil
 			rawJsonInput: json.RawMessage(`{"timestamp": null}`),
 		},
 		{
 			name: "map as object",
-			input: &MapTestMessage{
+			input: &testdata.MapTestMessage{
 				StringMap: map[string]string{
 					"key1": "value1",
 					"key2": "value2",
@@ -213,7 +214,7 @@ func TestCompatOpenAI(t *testing.T) {
 	}{
 		{
 			name: "google.protobuf.Value/ListValue/Struct as strings",
-			input: &WktTestMessage{
+			input: &testdata.WktTestMessage{
 				Timestamp:   timestamppb.New(time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC)),
 				Duration:    durationpb.New(3 * time.Second),
 				StructField: &structpb.Struct{Fields: map[string]*structpb.Value{"foo": structpb.NewStringValue("bar")}},
@@ -243,7 +244,7 @@ func TestCompatOpenAI(t *testing.T) {
 		},
 		{
 			name: "all fields required",
-			input: &WktTestMessage{
+			input: &testdata.WktTestMessage{
 				Timestamp:   timestamppb.New(time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC)),
 				Duration:    durationpb.New(3 * time.Second),
 				StructField: &structpb.Struct{Fields: map[string]*structpb.Value{"foo": structpb.NewStringValue("bar")}},
@@ -273,7 +274,7 @@ func TestCompatOpenAI(t *testing.T) {
 		},
 		{
 			name: "map as array of key-value pairs",
-			input: &MapTestMessage{
+			input: &testdata.MapTestMessage{
 				StringMap: map[string]string{
 					"key1": "value1",
 					"key2": "value2",
@@ -340,10 +341,10 @@ func TestCompatOpenAI(t *testing.T) {
 
 				var testProto proto.Message
 				switch tt.input.(type) {
-				case *MapTestMessage:
-					testProto = &MapTestMessage{}
-				case *WktTestMessage:
-					testProto = &WktTestMessage{}
+				case *testdata.MapTestMessage:
+					testProto = &testdata.MapTestMessage{}
+				case *testdata.WktTestMessage:
+					testProto = &testdata.WktTestMessage{}
 				}
 
 				if testProto != nil {

@@ -22,7 +22,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	examplev1 "github.com/redpanda-data/protoc-gen-go-mcp/examples/openai-compat/gen/go/proto/example/v1"
-	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/generator"
+	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/generator"
 )
 
 func TestFixOpenAI(t *testing.T) {
@@ -58,7 +58,7 @@ func TestFixOpenAI(t *testing.T) {
 		// Well-known types tests
 		{
 			name:       "struct: valid JSON string converts to struct",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"struct_field": `{"foo": "bar", "num": 42}`,
 			},
@@ -71,7 +71,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "struct: invalid JSON string remains unchanged",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"struct_field": `{invalid json}`,
 			},
@@ -82,7 +82,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "struct: non-string value remains unchanged",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"struct_field": map[string]any{"already": "object"},
 			},
@@ -92,7 +92,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "struct: empty string remains unchanged",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"struct_field": "",
 			},
@@ -103,7 +103,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "struct: empty JSON object string converts correctly",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"struct_field": `{}`,
 			},
@@ -113,7 +113,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "struct: string with array JSON remains unchanged",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"struct_field": `[1, 2, 3]`,
 			},
@@ -124,7 +124,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "value: valid JSON string converts to value",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"value_field": `{"foo": "bar"}`,
 			},
@@ -136,7 +136,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "value: JSON number string converts to value",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"value_field": `42`,
 			},
@@ -146,7 +146,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "value: JSON boolean string converts to value",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"value_field": `true`,
 			},
@@ -156,7 +156,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "value: JSON null string converts to value",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"value_field": `null`,
 			},
@@ -166,7 +166,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "value: JSON array string converts to value",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"value_field": `[1, "two", true]`,
 			},
@@ -176,7 +176,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "value: invalid JSON string remains unchanged",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"value_field": `{invalid json}`,
 			},
@@ -187,7 +187,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "value: non-string value remains unchanged",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"value_field": 42,
 			},
@@ -197,7 +197,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "value: empty string remains unchanged",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"value_field": "",
 			},
@@ -208,7 +208,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "list: valid JSON array string converts to list",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"list_value": `[1, "two", true, null]`,
 			},
@@ -218,7 +218,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "list: empty JSON array string converts to empty list",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"list_value": `[]`,
 			},
@@ -228,7 +228,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "list: nested array string converts correctly",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"list_value": `[[1, 2], {"foo": "bar"}]`,
 			},
@@ -241,7 +241,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "list: invalid JSON string remains unchanged",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"list_value": `[invalid json}`,
 			},
@@ -252,7 +252,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "list: JSON object string remains unchanged",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"list_value": `{"not": "array"}`,
 			},
@@ -263,7 +263,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "list: non-string value remains unchanged",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"list_value": []any{"already", "array"},
 			},
@@ -273,7 +273,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "list: empty string remains unchanged",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: map[string]any{
 				"list_value": "",
 			},
@@ -442,7 +442,7 @@ func TestFixOpenAI(t *testing.T) {
 		// Realistic JSON payload tests - simulating actual OpenAI requests
 		{
 			name:       "realistic: OpenAI sends invalid JSON in struct field",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: func() map[string]any {
 				// Simulate unmarshaling a real OpenAI JSON payload
 				jsonPayload := `{"struct_field": "{invalid json}"}`
@@ -457,7 +457,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "realistic: OpenAI sends valid JSON in struct field",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: func() map[string]any {
 				jsonPayload := `{"struct_field": "{\"foo\": \"bar\", \"num\": 42}"}`
 				var args map[string]any
@@ -474,7 +474,7 @@ func TestFixOpenAI(t *testing.T) {
 		},
 		{
 			name:       "realistic: OpenAI sends empty string in value field",
-			descriptor: new(generator.WktTestMessage),
+			descriptor: new(testdata.WktTestMessage),
 			input: func() map[string]any {
 				jsonPayload := `{"value_field": ""}`
 				var args map[string]any

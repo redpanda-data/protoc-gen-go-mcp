@@ -21,12 +21,12 @@ examples:
 	cd examples/basic && buf generate
 	cd examples/openai-compat && buf generate
 
-# Generate integration test code
-integrationtest-generate:
-	cd integrationtest && buf generate
+# Generate testdata (including integration test protos)
+testdata-generate:
+	cd pkg/testdata && buf generate
 
 # Run integration tests (requires OPENAI_API_KEY)
-integrationtest: integrationtest-generate
+integrationtest: testdata-generate
 	@if [ -f .env ]; then \
 		export $$(cat .env | xargs) && go test -tags=integration ./integrationtest -v; \
 	else \

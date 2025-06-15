@@ -14,7 +14,7 @@ import (
 	"github.com/openai/openai-go/option"
 
 	// Generated code (will be created by buf generate)
-	integrationtestv1mcp "github.com/redpanda-data/protoc-gen-go-mcp/integrationtest/gen/go/integrationtest/v1/integrationtestv1mcp"
+	integrationtestv1mcp "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/integrationtest/v1/v1mcp"
 )
 
 func TestOpenAIIntegration(t *testing.T) {

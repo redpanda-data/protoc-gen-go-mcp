@@ -18,7 +18,7 @@ package testservice.v1;
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/redpanda-data/protoc-gen-go-mcp/pkg/generator/testdata";
+option go_package = "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/generator";
 
 // TestService provides test operations
 service TestService {

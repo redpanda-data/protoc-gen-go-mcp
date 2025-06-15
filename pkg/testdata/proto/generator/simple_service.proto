@@ -16,7 +16,7 @@ syntax = "proto3";
 
 package simple.v1;
 
-option go_package = "github.com/redpanda-data/protoc-gen-go-mcp/pkg/generator/testdata";
+option go_package = "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/generator";
 
 // SimpleService provides basic operations
 service SimpleService {
