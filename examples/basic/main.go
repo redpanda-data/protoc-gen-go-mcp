@@ -20,6 +20,7 @@ import (
 	"os"
 
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
 	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdataconnect"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdatamcp"
@@ -48,15 +49,15 @@ func main() {
 
 	// Get LLM provider from environment variable, default to standard
 	providerStr := os.Getenv("LLM_PROVIDER")
-	var provider testdatamcp.LLMProvider
+	var provider runtime.LLMProvider
 	switch providerStr {
 	case "openai":
-		provider = testdatamcp.LLMProviderOpenAI
+		provider = runtime.LLMProviderOpenAI
 		fmt.Printf("Using OpenAI-compatible MCP handlers\n")
 	case "standard":
 		fallthrough
 	default:
-		provider = testdatamcp.LLMProviderStandard
+		provider = runtime.LLMProviderStandard
 		fmt.Printf("Using standard MCP handlers\n")
 	}
 

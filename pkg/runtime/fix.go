@@ -19,6 +19,14 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
+// LLMProvider represents different LLM providers for runtime selection
+type LLMProvider string
+
+const (
+	LLMProviderStandard LLMProvider = "standard"
+	LLMProviderOpenAI   LLMProvider = "openai"
+)
+
 // FixOpenAI applies all OpenAI compatibility transformations to convert OpenAI-formatted JSON
 // back to standard protobuf-compatible JSON. This includes:
 // - Converting map arrays back to objects

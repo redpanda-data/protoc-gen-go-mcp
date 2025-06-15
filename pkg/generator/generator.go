@@ -67,13 +67,6 @@ import (
   "github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
 )
 
-// LLMProvider represents different LLM providers for runtime selection
-type LLMProvider string
-
-const (
-  LLMProviderStandard LLMProvider = "standard"
-  LLMProviderOpenAI   LLMProvider = "openai"
-)
 
 var (
 {{- range $key, $val := .Tools }}
@@ -160,11 +153,11 @@ func Register{{$key}}HandlerOpenAI(s *mcpserver.MCPServer, srv {{$key}}Server) {
 }
 
 // Register{{$key}}HandlerWithProvider registers handlers for the specified LLM provider
-func Register{{$key}}HandlerWithProvider(s *mcpserver.MCPServer, srv {{$key}}Server, provider LLMProvider) {
+func Register{{$key}}HandlerWithProvider(s *mcpserver.MCPServer, srv {{$key}}Server, provider runtime.LLMProvider) {
   switch provider {
-  case LLMProviderOpenAI:
+  case runtime.LLMProviderOpenAI:
     Register{{$key}}HandlerOpenAI(s, srv)
-  case LLMProviderStandard:
+  case runtime.LLMProviderStandard:
     fallthrough
   default:
     Register{{$key}}Handler(s, srv)
