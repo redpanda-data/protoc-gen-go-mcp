@@ -1,4 +1,4 @@
-.PHONY: test build update-golden clean install examples lint fmt check-fmt buf-lint ci
+.PHONY: test build update-golden clean install examples lint fmt check-fmt buf-lint ci integrationtest testdata-generate
 
 # Run all tests
 test:

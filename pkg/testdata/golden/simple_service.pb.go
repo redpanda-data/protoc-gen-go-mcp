@@ -18,7 +18,7 @@
 // 	protoc        (unknown)
 // source: simple_service.proto
 
-package testdata
+package golden
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -127,13 +127,14 @@ var File_simple_service_proto protoreflect.FileDescriptor
 
 const file_simple_service_proto_rawDesc = "" +
 	"\n" +
-	"\x14simple_service.proto\x12\tsimple.v1\"'\n" +
+	"\x14simple_service.proto\x12\btestdata\"'\n" +
 	"\vEchoRequest\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"*\n" +
 	"\fEchoResponse\x12\x1a\n" +
-	"\bresponse\x18\x01 \x01(\tR\bresponse2H\n" +
-	"\rSimpleService\x127\n" +
-	"\x04Echo\x12\x16.simple.v1.EchoRequest\x1a\x17.simple.v1.EchoResponseBCZAgithub.com/redpanda-data/protoc-gen-go-mcp/pkg/generator/testdatab\x06proto3"
+	"\bresponse\x18\x01 \x01(\tR\bresponse2F\n" +
+	"\rSimpleService\x125\n" +
+	"\x04Echo\x12\x15.testdata.EchoRequest\x1a\x16.testdata.EchoResponseB\xa2\x01\n" +
+	"\fcom.testdataB\x12SimpleServiceProtoP\x01Z>github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/golden\xa2\x02\x03TXX\xaa\x02\bTestdata\xca\x02\bTestdata\xe2\x02\x14Testdata\\GPBMetadata\xea\x02\bTestdatab\x06proto3"
 
 var (
 	file_simple_service_proto_rawDescOnce sync.Once
@@ -149,12 +150,12 @@ func file_simple_service_proto_rawDescGZIP() []byte {
 
 var file_simple_service_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_simple_service_proto_goTypes = []any{
-	(*EchoRequest)(nil),  // 0: simple.v1.EchoRequest
-	(*EchoResponse)(nil), // 1: simple.v1.EchoResponse
+	(*EchoRequest)(nil),  // 0: testdata.EchoRequest
+	(*EchoResponse)(nil), // 1: testdata.EchoResponse
 }
 var file_simple_service_proto_depIdxs = []int32{
-	0, // 0: simple.v1.SimpleService.Echo:input_type -> simple.v1.EchoRequest
-	1, // 1: simple.v1.SimpleService.Echo:output_type -> simple.v1.EchoResponse
+	0, // 0: testdata.SimpleService.Echo:input_type -> testdata.EchoRequest
+	1, // 1: testdata.SimpleService.Echo:output_type -> testdata.EchoResponse
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name

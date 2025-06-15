@@ -22,10 +22,11 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	examplev1 "github.com/redpanda-data/protoc-gen-go-mcp/examples/openai-compat/gen/go/proto/example/v1"
-	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/generator"
+	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go"
 )
 
 func TestFixOpenAI(t *testing.T) {
+	RegisterTestingT(t)
 	tests := []struct {
 		name                 string
 		descriptor           proto.Message
@@ -447,7 +448,8 @@ func TestFixOpenAI(t *testing.T) {
 				// Simulate unmarshaling a real OpenAI JSON payload
 				jsonPayload := `{"struct_field": "{invalid json}"}`
 				var args map[string]any
-				json.Unmarshal([]byte(jsonPayload), &args)
+				err := json.Unmarshal([]byte(jsonPayload), &args)
+				Expect(err).ToNot(HaveOccurred())
 				return args
 			}(),
 			expected: map[string]any{
@@ -461,7 +463,8 @@ func TestFixOpenAI(t *testing.T) {
 			input: func() map[string]any {
 				jsonPayload := `{"struct_field": "{\"foo\": \"bar\", \"num\": 42}"}`
 				var args map[string]any
-				json.Unmarshal([]byte(jsonPayload), &args)
+				err := json.Unmarshal([]byte(jsonPayload), &args)
+				Expect(err).ToNot(HaveOccurred())
 				return args
 			}(),
 			expected: map[string]any{
@@ -478,7 +481,8 @@ func TestFixOpenAI(t *testing.T) {
 			input: func() map[string]any {
 				jsonPayload := `{"value_field": ""}`
 				var args map[string]any
-				json.Unmarshal([]byte(jsonPayload), &args)
+				err := json.Unmarshal([]byte(jsonPayload), &args)
+				Expect(err).ToNot(HaveOccurred())
 				return args
 			}(),
 			expected: map[string]any{

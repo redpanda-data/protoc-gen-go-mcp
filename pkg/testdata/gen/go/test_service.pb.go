@@ -16,9 +16,9 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        (unknown)
-// source: integrationtest/v1/test.proto
+// source: test_service.proto
 
-package v1
+package _go
 
 import (
 	_ "google.golang.org/genproto/googleapis/api/annotations"
@@ -64,7 +64,7 @@ type CreateItemRequest struct {
 
 func (x *CreateItemRequest) Reset() {
 	*x = CreateItemRequest{}
-	mi := &file_integrationtest_v1_test_proto_msgTypes[0]
+	mi := &file_test_service_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -76,7 +76,7 @@ func (x *CreateItemRequest) String() string {
 func (*CreateItemRequest) ProtoMessage() {}
 
 func (x *CreateItemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_integrationtest_v1_test_proto_msgTypes[0]
+	mi := &file_test_service_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -89,7 +89,7 @@ func (x *CreateItemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateItemRequest.ProtoReflect.Descriptor instead.
 func (*CreateItemRequest) Descriptor() ([]byte, []int) {
-	return file_integrationtest_v1_test_proto_rawDescGZIP(), []int{0}
+	return file_test_service_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *CreateItemRequest) GetName() string {
@@ -178,7 +178,7 @@ type ProductDetails struct {
 
 func (x *ProductDetails) Reset() {
 	*x = ProductDetails{}
-	mi := &file_integrationtest_v1_test_proto_msgTypes[1]
+	mi := &file_test_service_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -190,7 +190,7 @@ func (x *ProductDetails) String() string {
 func (*ProductDetails) ProtoMessage() {}
 
 func (x *ProductDetails) ProtoReflect() protoreflect.Message {
-	mi := &file_integrationtest_v1_test_proto_msgTypes[1]
+	mi := &file_test_service_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -203,7 +203,7 @@ func (x *ProductDetails) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProductDetails.ProtoReflect.Descriptor instead.
 func (*ProductDetails) Descriptor() ([]byte, []int) {
-	return file_integrationtest_v1_test_proto_rawDescGZIP(), []int{1}
+	return file_test_service_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *ProductDetails) GetPrice() float64 {
@@ -230,7 +230,7 @@ type ServiceDetails struct {
 
 func (x *ServiceDetails) Reset() {
 	*x = ServiceDetails{}
-	mi := &file_integrationtest_v1_test_proto_msgTypes[2]
+	mi := &file_test_service_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -242,7 +242,7 @@ func (x *ServiceDetails) String() string {
 func (*ServiceDetails) ProtoMessage() {}
 
 func (x *ServiceDetails) ProtoReflect() protoreflect.Message {
-	mi := &file_integrationtest_v1_test_proto_msgTypes[2]
+	mi := &file_test_service_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -255,7 +255,7 @@ func (x *ServiceDetails) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceDetails.ProtoReflect.Descriptor instead.
 func (*ServiceDetails) Descriptor() ([]byte, []int) {
-	return file_integrationtest_v1_test_proto_rawDescGZIP(), []int{2}
+	return file_test_service_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ServiceDetails) GetDuration() string {
@@ -282,7 +282,7 @@ type CreateItemResponse struct {
 
 func (x *CreateItemResponse) Reset() {
 	*x = CreateItemResponse{}
-	mi := &file_integrationtest_v1_test_proto_msgTypes[3]
+	mi := &file_test_service_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -294,7 +294,7 @@ func (x *CreateItemResponse) String() string {
 func (*CreateItemResponse) ProtoMessage() {}
 
 func (x *CreateItemResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_integrationtest_v1_test_proto_msgTypes[3]
+	mi := &file_test_service_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -307,7 +307,7 @@ func (x *CreateItemResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateItemResponse.ProtoReflect.Descriptor instead.
 func (*CreateItemResponse) Descriptor() ([]byte, []int) {
-	return file_integrationtest_v1_test_proto_rawDescGZIP(), []int{3}
+	return file_test_service_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateItemResponse) GetId() string {
@@ -320,6 +320,178 @@ func (x *CreateItemResponse) GetId() string {
 func (x *CreateItemResponse) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
+	}
+	return nil
+}
+
+type GetItemRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetItemRequest) Reset() {
+	*x = GetItemRequest{}
+	mi := &file_test_service_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetItemRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetItemRequest) ProtoMessage() {}
+
+func (x *GetItemRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_test_service_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetItemRequest.ProtoReflect.Descriptor instead.
+func (*GetItemRequest) Descriptor() ([]byte, []int) {
+	return file_test_service_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetItemRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type GetItemResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Item          *Item                  `protobuf:"bytes,1,opt,name=item,proto3" json:"item,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetItemResponse) Reset() {
+	*x = GetItemResponse{}
+	mi := &file_test_service_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetItemResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetItemResponse) ProtoMessage() {}
+
+func (x *GetItemResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_test_service_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetItemResponse.ProtoReflect.Descriptor instead.
+func (*GetItemResponse) Descriptor() ([]byte, []int) {
+	return file_test_service_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetItemResponse) GetItem() *Item {
+	if x != nil {
+		return x.Item
+	}
+	return nil
+}
+
+type Item struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Labels        map[string]string      `protobuf:"bytes,4,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Item) Reset() {
+	*x = Item{}
+	mi := &file_test_service_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Item) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Item) ProtoMessage() {}
+
+func (x *Item) ProtoReflect() protoreflect.Message {
+	mi := &file_test_service_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Item.ProtoReflect.Descriptor instead.
+func (*Item) Descriptor() ([]byte, []int) {
+	return file_test_service_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *Item) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Item) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Item) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *Item) GetLabels() map[string]string {
+	if x != nil {
+		return x.Labels
+	}
+	return nil
+}
+
+func (x *Item) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *Item) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
 	}
 	return nil
 }
@@ -337,7 +509,7 @@ type ProcessWellKnownTypesRequest struct {
 
 func (x *ProcessWellKnownTypesRequest) Reset() {
 	*x = ProcessWellKnownTypesRequest{}
-	mi := &file_integrationtest_v1_test_proto_msgTypes[4]
+	mi := &file_test_service_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -349,7 +521,7 @@ func (x *ProcessWellKnownTypesRequest) String() string {
 func (*ProcessWellKnownTypesRequest) ProtoMessage() {}
 
 func (x *ProcessWellKnownTypesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_integrationtest_v1_test_proto_msgTypes[4]
+	mi := &file_test_service_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -362,7 +534,7 @@ func (x *ProcessWellKnownTypesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProcessWellKnownTypesRequest.ProtoReflect.Descriptor instead.
 func (*ProcessWellKnownTypesRequest) Descriptor() ([]byte, []int) {
-	return file_integrationtest_v1_test_proto_rawDescGZIP(), []int{4}
+	return file_test_service_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ProcessWellKnownTypesRequest) GetMetadata() *structpb.Struct {
@@ -403,7 +575,7 @@ type ProcessWellKnownTypesResponse struct {
 
 func (x *ProcessWellKnownTypesResponse) Reset() {
 	*x = ProcessWellKnownTypesResponse{}
-	mi := &file_integrationtest_v1_test_proto_msgTypes[5]
+	mi := &file_test_service_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -415,7 +587,7 @@ func (x *ProcessWellKnownTypesResponse) String() string {
 func (*ProcessWellKnownTypesResponse) ProtoMessage() {}
 
 func (x *ProcessWellKnownTypesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_integrationtest_v1_test_proto_msgTypes[5]
+	mi := &file_test_service_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -428,7 +600,7 @@ func (x *ProcessWellKnownTypesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProcessWellKnownTypesResponse.ProtoReflect.Descriptor instead.
 func (*ProcessWellKnownTypesResponse) Descriptor() ([]byte, []int) {
-	return file_integrationtest_v1_test_proto_rawDescGZIP(), []int{5}
+	return file_test_service_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ProcessWellKnownTypesResponse) GetSuccess() bool {
@@ -445,18 +617,18 @@ func (x *ProcessWellKnownTypesResponse) GetMessage() string {
 	return ""
 }
 
-var File_integrationtest_v1_test_proto protoreflect.FileDescriptor
+var File_test_service_proto protoreflect.FileDescriptor
 
-const file_integrationtest_v1_test_proto_rawDesc = "" +
+const file_test_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dintegrationtest/v1/test.proto\x12\x12integrationtest.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x19google/protobuf/any.proto\x1a\x1fgoogle/api/field_behavior.proto\"\xa8\x03\n" +
+	"\x12test_service.proto\x12\btestdata\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x19google/protobuf/any.proto\x1a\x1fgoogle/api/field_behavior.proto\"\x8a\x03\n" +
 	"\x11CreateItemRequest\x12\x17\n" +
 	"\x04name\x18\x01 \x01(\tB\x03\xe0A\x02R\x04name\x12%\n" +
-	"\vdescription\x18\x02 \x01(\tH\x01R\vdescription\x88\x01\x01\x12I\n" +
-	"\x06labels\x18\x03 \x03(\v21.integrationtest.v1.CreateItemRequest.LabelsEntryR\x06labels\x12\x12\n" +
-	"\x04tags\x18\x04 \x03(\tR\x04tags\x12>\n" +
-	"\aproduct\x18\x05 \x01(\v2\".integrationtest.v1.ProductDetailsH\x00R\aproduct\x12>\n" +
-	"\aservice\x18\x06 \x01(\v2\".integrationtest.v1.ServiceDetailsH\x00R\aservice\x12\x1c\n" +
+	"\vdescription\x18\x02 \x01(\tH\x01R\vdescription\x88\x01\x01\x12?\n" +
+	"\x06labels\x18\x03 \x03(\v2'.testdata.CreateItemRequest.LabelsEntryR\x06labels\x12\x12\n" +
+	"\x04tags\x18\x04 \x03(\tR\x04tags\x124\n" +
+	"\aproduct\x18\x05 \x01(\v2\x18.testdata.ProductDetailsH\x00R\aproduct\x124\n" +
+	"\aservice\x18\x06 \x01(\v2\x18.testdata.ServiceDetailsH\x00R\aservice\x12\x1c\n" +
 	"\tthumbnail\x18\a \x01(\fR\tthumbnail\x1a9\n" +
 	"\vLabelsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
@@ -472,7 +644,23 @@ const file_integrationtest_v1_test_proto_rawDesc = "" +
 	"\x12CreateItemResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x129\n" +
 	"\n" +
-	"created_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\xed\x01\n" +
+	"created_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\" \n" +
+	"\x0eGetItemRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"5\n" +
+	"\x0fGetItemResponse\x12\"\n" +
+	"\x04item\x18\x01 \x01(\v2\x0e.testdata.ItemR\x04item\"\xb1\x02\n" +
+	"\x04Item\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x122\n" +
+	"\x06labels\x18\x04 \x03(\v2\x1a.testdata.Item.LabelsEntryR\x06labels\x129\n" +
+	"\n" +
+	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x1a9\n" +
+	"\vLabelsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xed\x01\n" +
 	"\x1cProcessWellKnownTypesRequest\x123\n" +
 	"\bmetadata\x18\x01 \x01(\v2\x17.google.protobuf.StructR\bmetadata\x12.\n" +
 	"\x06config\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x06config\x12.\n" +
@@ -480,64 +668,76 @@ const file_integrationtest_v1_test_proto_rawDesc = "" +
 	"\ttimestamp\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\"S\n" +
 	"\x1dProcessWellKnownTypesResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage2\xe8\x01\n" +
-	"\vTestService\x12[\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage2\x80\x02\n" +
+	"\vTestService\x12G\n" +
 	"\n" +
-	"CreateItem\x12%.integrationtest.v1.CreateItemRequest\x1a&.integrationtest.v1.CreateItemResponse\x12|\n" +
-	"\x15ProcessWellKnownTypes\x120.integrationtest.v1.ProcessWellKnownTypesRequest\x1a1.integrationtest.v1.ProcessWellKnownTypesResponseBSZQgithub.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/integrationtest/v1b\x06proto3"
+	"CreateItem\x12\x1b.testdata.CreateItemRequest\x1a\x1c.testdata.CreateItemResponse\x12>\n" +
+	"\aGetItem\x12\x18.testdata.GetItemRequest\x1a\x19.testdata.GetItemResponse\x12h\n" +
+	"\x15ProcessWellKnownTypes\x12&.testdata.ProcessWellKnownTypesRequest\x1a'.testdata.ProcessWellKnownTypesResponseB\xa0\x01\n" +
+	"\fcom.testdataB\x10TestServiceProtoP\x01Z>github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go\xa2\x02\x03TXX\xaa\x02\bTestdata\xca\x02\bTestdata\xe2\x02\x14Testdata\\GPBMetadata\xea\x02\bTestdatab\x06proto3"
 
 var (
-	file_integrationtest_v1_test_proto_rawDescOnce sync.Once
-	file_integrationtest_v1_test_proto_rawDescData []byte
+	file_test_service_proto_rawDescOnce sync.Once
+	file_test_service_proto_rawDescData []byte
 )
 
-func file_integrationtest_v1_test_proto_rawDescGZIP() []byte {
-	file_integrationtest_v1_test_proto_rawDescOnce.Do(func() {
-		file_integrationtest_v1_test_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_integrationtest_v1_test_proto_rawDesc), len(file_integrationtest_v1_test_proto_rawDesc)))
+func file_test_service_proto_rawDescGZIP() []byte {
+	file_test_service_proto_rawDescOnce.Do(func() {
+		file_test_service_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_test_service_proto_rawDesc), len(file_test_service_proto_rawDesc)))
 	})
-	return file_integrationtest_v1_test_proto_rawDescData
+	return file_test_service_proto_rawDescData
 }
 
-var file_integrationtest_v1_test_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
-var file_integrationtest_v1_test_proto_goTypes = []any{
-	(*CreateItemRequest)(nil),             // 0: integrationtest.v1.CreateItemRequest
-	(*ProductDetails)(nil),                // 1: integrationtest.v1.ProductDetails
-	(*ServiceDetails)(nil),                // 2: integrationtest.v1.ServiceDetails
-	(*CreateItemResponse)(nil),            // 3: integrationtest.v1.CreateItemResponse
-	(*ProcessWellKnownTypesRequest)(nil),  // 4: integrationtest.v1.ProcessWellKnownTypesRequest
-	(*ProcessWellKnownTypesResponse)(nil), // 5: integrationtest.v1.ProcessWellKnownTypesResponse
-	nil,                                   // 6: integrationtest.v1.CreateItemRequest.LabelsEntry
-	(*timestamppb.Timestamp)(nil),         // 7: google.protobuf.Timestamp
-	(*structpb.Struct)(nil),               // 8: google.protobuf.Struct
-	(*structpb.Value)(nil),                // 9: google.protobuf.Value
-	(*anypb.Any)(nil),                     // 10: google.protobuf.Any
+var file_test_service_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_test_service_proto_goTypes = []any{
+	(*CreateItemRequest)(nil),             // 0: testdata.CreateItemRequest
+	(*ProductDetails)(nil),                // 1: testdata.ProductDetails
+	(*ServiceDetails)(nil),                // 2: testdata.ServiceDetails
+	(*CreateItemResponse)(nil),            // 3: testdata.CreateItemResponse
+	(*GetItemRequest)(nil),                // 4: testdata.GetItemRequest
+	(*GetItemResponse)(nil),               // 5: testdata.GetItemResponse
+	(*Item)(nil),                          // 6: testdata.Item
+	(*ProcessWellKnownTypesRequest)(nil),  // 7: testdata.ProcessWellKnownTypesRequest
+	(*ProcessWellKnownTypesResponse)(nil), // 8: testdata.ProcessWellKnownTypesResponse
+	nil,                                   // 9: testdata.CreateItemRequest.LabelsEntry
+	nil,                                   // 10: testdata.Item.LabelsEntry
+	(*timestamppb.Timestamp)(nil),         // 11: google.protobuf.Timestamp
+	(*structpb.Struct)(nil),               // 12: google.protobuf.Struct
+	(*structpb.Value)(nil),                // 13: google.protobuf.Value
+	(*anypb.Any)(nil),                     // 14: google.protobuf.Any
 }
-var file_integrationtest_v1_test_proto_depIdxs = []int32{
-	6,  // 0: integrationtest.v1.CreateItemRequest.labels:type_name -> integrationtest.v1.CreateItemRequest.LabelsEntry
-	1,  // 1: integrationtest.v1.CreateItemRequest.product:type_name -> integrationtest.v1.ProductDetails
-	2,  // 2: integrationtest.v1.CreateItemRequest.service:type_name -> integrationtest.v1.ServiceDetails
-	7,  // 3: integrationtest.v1.CreateItemResponse.created_at:type_name -> google.protobuf.Timestamp
-	8,  // 4: integrationtest.v1.ProcessWellKnownTypesRequest.metadata:type_name -> google.protobuf.Struct
-	9,  // 5: integrationtest.v1.ProcessWellKnownTypesRequest.config:type_name -> google.protobuf.Value
-	10, // 6: integrationtest.v1.ProcessWellKnownTypesRequest.payload:type_name -> google.protobuf.Any
-	7,  // 7: integrationtest.v1.ProcessWellKnownTypesRequest.timestamp:type_name -> google.protobuf.Timestamp
-	0,  // 8: integrationtest.v1.TestService.CreateItem:input_type -> integrationtest.v1.CreateItemRequest
-	4,  // 9: integrationtest.v1.TestService.ProcessWellKnownTypes:input_type -> integrationtest.v1.ProcessWellKnownTypesRequest
-	3,  // 10: integrationtest.v1.TestService.CreateItem:output_type -> integrationtest.v1.CreateItemResponse
-	5,  // 11: integrationtest.v1.TestService.ProcessWellKnownTypes:output_type -> integrationtest.v1.ProcessWellKnownTypesResponse
-	10, // [10:12] is the sub-list for method output_type
-	8,  // [8:10] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+var file_test_service_proto_depIdxs = []int32{
+	9,  // 0: testdata.CreateItemRequest.labels:type_name -> testdata.CreateItemRequest.LabelsEntry
+	1,  // 1: testdata.CreateItemRequest.product:type_name -> testdata.ProductDetails
+	2,  // 2: testdata.CreateItemRequest.service:type_name -> testdata.ServiceDetails
+	11, // 3: testdata.CreateItemResponse.created_at:type_name -> google.protobuf.Timestamp
+	6,  // 4: testdata.GetItemResponse.item:type_name -> testdata.Item
+	10, // 5: testdata.Item.labels:type_name -> testdata.Item.LabelsEntry
+	11, // 6: testdata.Item.created_at:type_name -> google.protobuf.Timestamp
+	11, // 7: testdata.Item.updated_at:type_name -> google.protobuf.Timestamp
+	12, // 8: testdata.ProcessWellKnownTypesRequest.metadata:type_name -> google.protobuf.Struct
+	13, // 9: testdata.ProcessWellKnownTypesRequest.config:type_name -> google.protobuf.Value
+	14, // 10: testdata.ProcessWellKnownTypesRequest.payload:type_name -> google.protobuf.Any
+	11, // 11: testdata.ProcessWellKnownTypesRequest.timestamp:type_name -> google.protobuf.Timestamp
+	0,  // 12: testdata.TestService.CreateItem:input_type -> testdata.CreateItemRequest
+	4,  // 13: testdata.TestService.GetItem:input_type -> testdata.GetItemRequest
+	7,  // 14: testdata.TestService.ProcessWellKnownTypes:input_type -> testdata.ProcessWellKnownTypesRequest
+	3,  // 15: testdata.TestService.CreateItem:output_type -> testdata.CreateItemResponse
+	5,  // 16: testdata.TestService.GetItem:output_type -> testdata.GetItemResponse
+	8,  // 17: testdata.TestService.ProcessWellKnownTypes:output_type -> testdata.ProcessWellKnownTypesResponse
+	15, // [15:18] is the sub-list for method output_type
+	12, // [12:15] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
-func init() { file_integrationtest_v1_test_proto_init() }
-func file_integrationtest_v1_test_proto_init() {
-	if File_integrationtest_v1_test_proto != nil {
+func init() { file_test_service_proto_init() }
+func file_test_service_proto_init() {
+	if File_test_service_proto != nil {
 		return
 	}
-	file_integrationtest_v1_test_proto_msgTypes[0].OneofWrappers = []any{
+	file_test_service_proto_msgTypes[0].OneofWrappers = []any{
 		(*CreateItemRequest_Product)(nil),
 		(*CreateItemRequest_Service)(nil),
 	}
@@ -545,17 +745,17 @@ func file_integrationtest_v1_test_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_integrationtest_v1_test_proto_rawDesc), len(file_integrationtest_v1_test_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_test_service_proto_rawDesc), len(file_test_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_integrationtest_v1_test_proto_goTypes,
-		DependencyIndexes: file_integrationtest_v1_test_proto_depIdxs,
-		MessageInfos:      file_integrationtest_v1_test_proto_msgTypes,
+		GoTypes:           file_test_service_proto_goTypes,
+		DependencyIndexes: file_test_service_proto_depIdxs,
+		MessageInfos:      file_test_service_proto_msgTypes,
 	}.Build()
-	File_integrationtest_v1_test_proto = out.File
-	file_integrationtest_v1_test_proto_goTypes = nil
-	file_integrationtest_v1_test_proto_depIdxs = nil
+	File_test_service_proto = out.File
+	file_test_service_proto_goTypes = nil
+	file_test_service_proto_depIdxs = nil
 }
