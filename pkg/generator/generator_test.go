@@ -307,7 +307,7 @@ func TestFullGeneration(t *testing.T) {
 		t.Fatalf("Failed to generate current files: %v\nOutput: %s", err, output)
 	}
 
-	cmd = exec.Command("task", "fmt")
+	cmd = exec.Command("../../taskw", "fmt")
 	output, err = cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("Failed to generate current files: %v\nOutput: %s", err, output)

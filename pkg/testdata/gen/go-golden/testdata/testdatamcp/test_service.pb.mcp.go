@@ -8,14 +8,14 @@ import (
 )
 
 import (
-	"connectrpc.com/connect"
 	"context"
-	"encoding/json"
 	"github.com/mark3labs/mcp-go/mcp"
 	mcpserver "github.com/mark3labs/mcp-go/server"
-	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
-	grpc "google.golang.org/grpc"
+	"encoding/json"
 	"google.golang.org/protobuf/encoding/protojson"
+	"connectrpc.com/connect"
+	grpc "google.golang.org/grpc"
+	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
 )
 
 var (
