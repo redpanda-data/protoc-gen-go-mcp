@@ -1,5 +1,0 @@
-version: v2
-deps:
-  - buf.build/googleapis/googleapis
-modules:
-  - path: ./
