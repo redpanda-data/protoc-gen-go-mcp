@@ -18,7 +18,7 @@ package mcp.v1;
 
 import "google/protobuf/descriptor.proto";
 
-option go_package = "github.com/redpanda-data/protoc-gen-go-mcp/proto/gen/go/mcp";
+option go_package = "github.com/redpanda-data/protoc-gen-go-mcp/proto/gen/go/mcp/v1";
 
 // mcp_tool_name allows specifying a custom name for the MCP tool generated from a service method.
 // This annotation provides type-safe, compile-time validation of custom tool names.

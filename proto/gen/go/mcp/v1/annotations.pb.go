@@ -57,9 +57,9 @@ var File_mcp_v1_annotations_proto protoreflect.FileDescriptor
 const file_mcp_v1_annotations_proto_rawDesc = "" +
 	"\n" +
 	"\x18mcp/v1/annotations.proto\x12\x06mcp.v1\x1a google/protobuf/descriptor.proto:D\n" +
-	"\rmcp_tool_name\x12\x1e.google.protobuf.MethodOptions\x18ц\x03 \x01(\tR\vmcpToolNameB\x9d\x01\n" +
+	"\rmcp_tool_name\x12\x1e.google.protobuf.MethodOptions\x18ц\x03 \x01(\tR\vmcpToolNameB\xa0\x01\n" +
 	"\n" +
-	"com.mcp.v1B\x10AnnotationsProtoP\x01ZDgithub.com/redpanda-data/protoc-gen-go-mcp/proto/gen/go/mcp/v1;mcpv1\xa2\x02\x03MXX\xaa\x02\x06Mcp.V1\xca\x02\x06Mcp\\V1\xe2\x02\x12Mcp\\V1\\GPBMetadata\xea\x02\aMcp::V1b\x06proto3"
+	"com.mcp.v1B\x10AnnotationsProtoP\x01ZGgithub.com/redpanda-data/protoc-gen-go-mcp/proto/gen/go/v1/mcp/v1;mcpv1\xa2\x02\x03MXX\xaa\x02\x06Mcp.V1\xca\x02\x06Mcp\\V1\xe2\x02\x12Mcp\\V1\\GPBMetadata\xea\x02\aMcp::V1b\x06proto3"
 
 var file_mcp_v1_annotations_proto_goTypes = []any{
 	(*descriptorpb.MethodOptions)(nil), // 0: google.protobuf.MethodOptions

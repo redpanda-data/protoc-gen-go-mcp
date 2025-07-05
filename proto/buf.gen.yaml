@@ -3,7 +3,7 @@ managed:
   enabled: true
   override:
     - file_option: go_package_prefix
-      value: github.com/redpanda-data/protoc-gen-go-mcp/proto/gen/go
+      value: github.com/redpanda-data/protoc-gen-go-mcp/proto/gen/go/v1
 plugins:
   - remote: buf.build/protocolbuffers/go
     out: ./gen/go
