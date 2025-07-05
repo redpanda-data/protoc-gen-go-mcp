@@ -1,0 +1,38 @@
+// Copyright 2025 Redpanda Data, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package mcp;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "github.com/redpanda-data/protoc-gen-go-mcp/proto/gen/go/mcp";
+
+// mcp_tool_name allows specifying a custom name for the MCP tool generated from a service method.
+// This annotation provides type-safe, compile-time validation of custom tool names.
+//
+// Example usage:
+//   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
+//     option (mcp.mcp_tool_name) = "create_user";
+//   }
+//
+// The tool name should follow these conventions:
+// - Use snake_case (lowercase with underscores)
+// - Be descriptive and concise
+// - Avoid spaces or special characters
+// - Be unique within the service
+extend google.protobuf.MethodOptions {
+  string mcp_tool_name = 50001;
+}

@@ -12,6 +12,7 @@ It generates `*.pb.mcp.go` files for each protobuf service, enabling you to dele
 - 📦 Outputs JSON Schema for method inputs  
 - 🔄 Wire up to gRPC or ConnectRPC servers/clients  
 - 🧩 Easy integration with [`buf`](https://buf.build)  
+- 🏷️ **Custom tool naming** via type-safe protobuf annotations  
 
 ## 🔧 Usage
 
@@ -76,6 +77,86 @@ examplev1mcp.ForwardToConnectExampleServiceClient(mcpServer, myConnectClient)
 ```
 
 This directly connects the MCP handler to the connectrpc client, requiring zero boilerplate.
+
+## 🏷️ Custom Tool Naming
+
+By default, MCP tool names are auto-generated from the full protobuf method name (e.g., `example_v1_ExampleService_CreateExample`). You can override this with custom, user-friendly names using **protobuf annotations** (recommended) or comment annotations (backwards compatibility).
+
+### Usage
+
+#### Protobuf Annotations (Recommended)
+
+Use the `mcp.mcp_tool_name` option inside your RPC method definitions. First, import the annotations:
+
+```protobuf
+import "mcp/annotations.proto";
+
+service UserService {
+  // Get user profile information for authentication and personalization
+  rpc GetUserProfile(GetUserProfileRequest) returns (GetUserProfileResponse) {
+    option (mcp.mcp_tool_name) = "get_user_profile";
+  }
+  
+  // Create a new user account with validation and verification  
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
+    option (mcp.mcp_tool_name) = "create_user";
+  }
+}
+```
+
+#### Comment Annotations (Backwards Compatibility)
+
+For backwards compatibility, you can still use comment-based annotations:
+
+```protobuf
+service UserService {
+  // Get user profile information for authentication and personalization
+  // mcp_tool_name:get_user_profile
+  rpc GetUserProfile(GetUserProfileRequest) returns (GetUserProfileResponse);
+  
+  // Create a new user account with validation and verification
+  // mcp_tool_name:create_user
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+}
+```
+
+### Tool Name Validation
+
+Tool names are validated at compile-time with the following rules:
+
+- **snake_case only**: Use lowercase letters, numbers, and underscores
+- **Start with letter**: Cannot begin with numbers or underscores
+- **No consecutive underscores**: `create__user` is invalid
+- **No trailing underscores**: `create_user_` is invalid
+- **Length limit**: Maximum 64 characters
+- **Unique per service**: No duplicate names within the same service
+
+**Valid examples**: `create_user`, `get_profile`, `delete_item2`, `fetch_user_data`
+
+**Invalid examples**: `CreateUser`, `create-user`, `create__user`, `create_user_`, `_create`
+
+### Generated Output
+
+**Without custom naming:**
+```go
+UserService_GetUserProfileTool = mcp.Tool{Name: "example_v1_UserService_GetUserProfile", ...}
+UserService_CreateUserTool = mcp.Tool{Name: "example_v1_UserService_CreateUser", ...}
+```
+
+**With custom naming:**
+```go
+UserService_GetUserProfileTool = mcp.Tool{Name: "get_user_profile", ...}
+UserService_CreateUserTool = mcp.Tool{Name: "create_user", ...}
+```
+
+### Benefits
+
+- **Type-safe**: Protobuf annotations provide compile-time validation
+- **IDE support**: Better autocomplete and tooling integration
+- **User-friendly**: AI assistants see intuitive tool names like `get_user_profile`
+- **Backwards compatible**: Methods without annotations use auto-generated names
+- **Error reporting**: Clear validation errors for invalid names
+- **Discoverable**: Annotations are visible in proto files and documentation
 
 ## Compatibility
 

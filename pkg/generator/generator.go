@@ -22,6 +22,7 @@ import (
 	"math/big"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -522,6 +523,38 @@ outer:
 	return strings.Join(cleanedLines, "\n")
 }
 
+// validateToolName validates that the tool name follows MCP conventions.
+// Returns an error if the name is invalid.
+func validateToolName(name string) error {
+	if name == "" {
+		return fmt.Errorf("tool name cannot be empty")
+	}
+
+	// Check length (reasonable limit for tool names)
+	if len(name) > 64 {
+		return fmt.Errorf("tool name %q is too long (max 64 characters)", name)
+	}
+
+	// Check for valid snake_case pattern
+	// Allow letters, numbers, and underscores, but must start with letter
+	validPattern := regexp.MustCompile(`^[a-z][a-z0-9_]*$`)
+	if !validPattern.MatchString(name) {
+		return fmt.Errorf("tool name %q must be snake_case (lowercase letters, numbers, underscores only, start with letter)", name)
+	}
+
+	// Check for consecutive underscores
+	if strings.Contains(name, "__") {
+		return fmt.Errorf("tool name %q cannot contain consecutive underscores", name)
+	}
+
+	// Check for trailing underscore
+	if strings.HasSuffix(name, "_") {
+		return fmt.Errorf("tool name %q cannot end with underscore", name)
+	}
+
+	return nil
+}
+
 func Base32String(b []byte) string {
 	n := new(big.Int).SetBytes(b)
 	return n.Text(36)
@@ -545,6 +578,76 @@ func MangleHeadIfTooLong(name string, maxLen int) string {
 	// Preserve the end of the name (most specific)
 	tail := name[len(name)-available:]
 	return hashPrefix + "_" + tail
+}
+
+// getMCPToolName extracts and validates the custom MCP tool name using a fallback chain:
+// 1. Protobuf option-based annotation (preferred)
+// 2. Comment-based annotation (backwards compatibility)
+// 3. Auto-generated name (fallback)
+//
+// Option-based syntax:
+//
+//	rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
+//	  option (mcp.mcp_tool_name) = "create_user";
+//	}
+//
+// Comment-based syntax (backwards compatibility):
+//
+//	// mcp_tool_name:create_user
+//	rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {}
+//
+// Returns the custom name if found and valid, otherwise returns empty string to indicate
+// that the default auto-generated name should be used. Validation errors are reported
+// to the generator.
+func (g *FileGenerator) getMCPToolName(meth *protogen.Method) string {
+	var toolName string
+	var source string
+
+	// First priority: Check for protobuf option-based annotation
+	if meth.Desc != nil && proto.HasExtension(meth.Desc.Options(), mcpannotations.E_McpToolName) {
+		if name := proto.GetExtension(meth.Desc.Options(), mcpannotations.E_McpToolName); name != nil {
+			if customName, ok := name.(string); ok && customName != "" {
+				toolName = customName
+				source = "protobuf option"
+			}
+		}
+	}
+
+	// Second priority: Check for comment-based annotation (backwards compatibility)
+	if toolName == "" {
+		comments := string(meth.Comments.Leading)
+		lines := strings.Split(comments, "\n")
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			// Remove optional "//" comment prefix
+			line = strings.TrimPrefix(line, "//")
+			line = strings.TrimSpace(line)
+			if strings.HasPrefix(line, "mcp_tool_name:") {
+				parts := strings.SplitN(line, ":", 2)
+				if len(parts) == 2 {
+					customName := strings.TrimSpace(parts[1])
+					if customName != "" {
+						toolName = customName
+						source = "comment annotation"
+						break
+					}
+				}
+			}
+		}
+	}
+
+	// Validate the custom tool name if found
+	if toolName != "" {
+		if err := validateToolName(toolName); err != nil {
+			g.gen.Error(fmt.Errorf("invalid tool name for method %s (%s): %w",
+				meth.GoName, source, err))
+			return "" // Fall back to auto-generated name
+		}
+		return toolName
+	}
+
+	// Third priority: Return empty string to use auto-generated name
+	return ""
 }
 
 func (g *FileGenerator) Generate(packageSuffix string, openaiCompat bool) {
@@ -592,13 +695,30 @@ func (g *FileGenerator) Generate(packageSuffix string, openaiCompat bool) {
 
 	for _, svc := range g.f.Services {
 		s := map[string]Tool{}
+		seenToolNames := make(map[string]*protogen.Method) // Track tool names for duplicate detection
+
 		for _, meth := range svc.Methods {
 			// Only unary supported at the moment
 			if meth.Desc.IsStreamingClient() || meth.Desc.IsStreamingServer() {
 				continue
 			}
+			// Check for custom MCP tool name in method comments
+			toolName := g.getMCPToolName(meth)
+			if toolName == "" {
+				// Fall back to auto-generated name from protobuf method descriptor
+				toolName = MangleHeadIfTooLong(strings.ReplaceAll(string(meth.Desc.FullName()), ".", "_"), 64)
+			}
+
+			// Check for duplicate tool names within the service
+			if existingMethod, exists := seenToolNames[toolName]; exists {
+				g.gen.Error(fmt.Errorf("duplicate tool name %q in service %s: used by methods %s and %s",
+					toolName, svc.GoName, existingMethod.GoName, meth.GoName))
+				continue
+			}
+			seenToolNames[toolName] = meth
+
 			tool := mcp.Tool{
-				Name:        MangleHeadIfTooLong(strings.ReplaceAll(string(meth.Desc.FullName()), ".", "_"), 64),
+				Name:        toolName,
 				Description: cleanComment(string(meth.Comments.Leading)),
 			}
 

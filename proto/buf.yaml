@@ -1,0 +1,4 @@
+version: v2
+modules:
+  - path: ./
+    name: buf.build/redpanda-data/protoc-gen-go-mcp-annotations

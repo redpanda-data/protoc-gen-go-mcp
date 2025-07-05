@@ -15,6 +15,8 @@
 syntax = "proto3";
 package example.v1;
 
+import "proto/mcp/annotations.proto";
+
 message CreateExampleRequest {
   int32 some_int32 = 1;
   int64 some_int64 = 2;
@@ -53,12 +55,44 @@ message CreateExampleResponse {
   string some_string = 1;
 }
 
+message GetExampleRequest {
+  string example_id = 1;
+}
+
+message GetExampleResponse {
+  string example_id = 1;
+  string some_string = 2;
+}
+
+message DeleteExampleRequest {
+  string example_id = 1;
+}
+
+message DeleteExampleResponse {
+  bool success = 1;
+}
+
 service ExampleService {
 
   // @ignore-comment Ignore these linter rules, because we intentionally return a generic Operation message for all long-running operations.
   // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
   // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
-  // CreateCluster create a Redpanda cluster. The input contains the spec, that describes the cluster.
-  // A Operation is returned. This task allows the caller to find out when the long-running operation of creating a cluster has finished.
-  rpc CreateExample(CreateExampleRequest) returns (CreateExampleResponse);
+  // CreateExample creates a new example resource with the provided configuration.
+  // This demonstrates option-based custom tool naming - the protobuf option below
+  // overrides the default auto-generated name.
+  rpc CreateExample(CreateExampleRequest) returns (CreateExampleResponse) {
+    option (mcp.mcp_tool_name) = "create_example";
+  };
+  
+  // GetExample retrieves an existing example resource by ID.
+  // This method uses option-based custom tool naming (preferred approach).
+  rpc GetExample(GetExampleRequest) returns (GetExampleResponse) {
+    option (mcp.mcp_tool_name) = "get_example";
+  };
+  
+  // DeleteExample removes an example resource permanently.
+  // This method demonstrates that you can mix custom-named and auto-named methods.
+  // Since there's no mcp_tool_name annotation, this will use the default:
+  // "example_v1_ExampleService_DeleteExample"
+  rpc DeleteExample(DeleteExampleRequest) returns (DeleteExampleResponse);
 }

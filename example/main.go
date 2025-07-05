@@ -64,3 +64,16 @@ func (t *exampleServer) CreateExample(ctx context.Context, in *examplev1.CreateE
 		SomeString: "HAHA " + in.GetNested().GetNested2().GetNested3().GetOptionalString(),
 	}, nil
 }
+
+func (t *exampleServer) GetExample(ctx context.Context, in *examplev1.GetExampleRequest) (*examplev1.GetExampleResponse, error) {
+	return &examplev1.GetExampleResponse{
+		ExampleId:  in.GetExampleId(),
+		SomeString: "Retrieved example: " + in.GetExampleId(),
+	}, nil
+}
+
+func (t *exampleServer) DeleteExample(ctx context.Context, in *examplev1.DeleteExampleRequest) (*examplev1.DeleteExampleResponse, error) {
+	return &examplev1.DeleteExampleResponse{
+		Success: true,
+	}, nil
+}
