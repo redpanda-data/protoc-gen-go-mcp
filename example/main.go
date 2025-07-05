@@ -19,9 +19,9 @@ import (
 	"fmt"
 
 	"github.com/mark3labs/mcp-go/server"
-	examplev1 "github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/proto/example/v1"
-	"github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/proto/example/v1/examplev1connect"
-	"github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/proto/example/v1/examplev1mcp"
+	examplev1 "github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/example/v1"
+	"github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/example/v1/examplev1connect"
+	"github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/example/v1/examplev1mcp"
 )
 
 // Ensure our interface and the official gRPC interface are grpcClient
@@ -62,5 +62,18 @@ type exampleServer struct {
 func (t *exampleServer) CreateExample(ctx context.Context, in *examplev1.CreateExampleRequest) (*examplev1.CreateExampleResponse, error) {
 	return &examplev1.CreateExampleResponse{
 		SomeString: "HAHA " + in.GetNested().GetNested2().GetNested3().GetOptionalString(),
+	}, nil
+}
+
+func (t *exampleServer) GetExample(ctx context.Context, in *examplev1.GetExampleRequest) (*examplev1.GetExampleResponse, error) {
+	return &examplev1.GetExampleResponse{
+		ExampleId:  in.GetExampleId(),
+		SomeString: "Retrieved example: " + in.GetExampleId(),
+	}, nil
+}
+
+func (t *exampleServer) DeleteExample(ctx context.Context, in *examplev1.DeleteExampleRequest) (*examplev1.DeleteExampleResponse, error) {
+	return &examplev1.DeleteExampleResponse{
+		Success: true,
 	}, nil
 }

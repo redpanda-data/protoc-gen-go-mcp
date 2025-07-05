@@ -16,11 +16,12 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        (unknown)
-// source: proto/example/v1/example.proto
+// source: example/v1/example.proto
 
 package examplev1
 
 import (
+	_ "github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/mcp/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -68,11 +69,11 @@ func (x CreateExampleRequest_SomeEnum) String() string {
 }
 
 func (CreateExampleRequest_SomeEnum) Descriptor() protoreflect.EnumDescriptor {
-	return file_proto_example_v1_example_proto_enumTypes[0].Descriptor()
+	return file_example_v1_example_proto_enumTypes[0].Descriptor()
 }
 
 func (CreateExampleRequest_SomeEnum) Type() protoreflect.EnumType {
-	return &file_proto_example_v1_example_proto_enumTypes[0]
+	return &file_example_v1_example_proto_enumTypes[0]
 }
 
 func (x CreateExampleRequest_SomeEnum) Number() protoreflect.EnumNumber {
@@ -81,7 +82,7 @@ func (x CreateExampleRequest_SomeEnum) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use CreateExampleRequest_SomeEnum.Descriptor instead.
 func (CreateExampleRequest_SomeEnum) EnumDescriptor() ([]byte, []int) {
-	return file_proto_example_v1_example_proto_rawDescGZIP(), []int{0, 0}
+	return file_example_v1_example_proto_rawDescGZIP(), []int{0, 0}
 }
 
 type CreateExampleRequest struct {
@@ -106,7 +107,7 @@ type CreateExampleRequest struct {
 
 func (x *CreateExampleRequest) Reset() {
 	*x = CreateExampleRequest{}
-	mi := &file_proto_example_v1_example_proto_msgTypes[0]
+	mi := &file_example_v1_example_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -118,7 +119,7 @@ func (x *CreateExampleRequest) String() string {
 func (*CreateExampleRequest) ProtoMessage() {}
 
 func (x *CreateExampleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_example_v1_example_proto_msgTypes[0]
+	mi := &file_example_v1_example_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -131,7 +132,7 @@ func (x *CreateExampleRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateExampleRequest.ProtoReflect.Descriptor instead.
 func (*CreateExampleRequest) Descriptor() ([]byte, []int) {
-	return file_proto_example_v1_example_proto_rawDescGZIP(), []int{0}
+	return file_example_v1_example_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *CreateExampleRequest) GetSomeInt32() int32 {
@@ -247,7 +248,7 @@ type CreateExampleResponse struct {
 
 func (x *CreateExampleResponse) Reset() {
 	*x = CreateExampleResponse{}
-	mi := &file_proto_example_v1_example_proto_msgTypes[1]
+	mi := &file_example_v1_example_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -259,7 +260,7 @@ func (x *CreateExampleResponse) String() string {
 func (*CreateExampleResponse) ProtoMessage() {}
 
 func (x *CreateExampleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_example_v1_example_proto_msgTypes[1]
+	mi := &file_example_v1_example_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -272,7 +273,7 @@ func (x *CreateExampleResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateExampleResponse.ProtoReflect.Descriptor instead.
 func (*CreateExampleResponse) Descriptor() ([]byte, []int) {
-	return file_proto_example_v1_example_proto_rawDescGZIP(), []int{1}
+	return file_example_v1_example_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *CreateExampleResponse) GetSomeString() string {
@@ -280,6 +281,190 @@ func (x *CreateExampleResponse) GetSomeString() string {
 		return x.SomeString
 	}
 	return ""
+}
+
+type GetExampleRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExampleId     string                 `protobuf:"bytes,1,opt,name=example_id,json=exampleId,proto3" json:"example_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetExampleRequest) Reset() {
+	*x = GetExampleRequest{}
+	mi := &file_example_v1_example_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetExampleRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetExampleRequest) ProtoMessage() {}
+
+func (x *GetExampleRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_example_v1_example_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetExampleRequest.ProtoReflect.Descriptor instead.
+func (*GetExampleRequest) Descriptor() ([]byte, []int) {
+	return file_example_v1_example_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *GetExampleRequest) GetExampleId() string {
+	if x != nil {
+		return x.ExampleId
+	}
+	return ""
+}
+
+type GetExampleResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExampleId     string                 `protobuf:"bytes,1,opt,name=example_id,json=exampleId,proto3" json:"example_id,omitempty"`
+	SomeString    string                 `protobuf:"bytes,2,opt,name=some_string,json=someString,proto3" json:"some_string,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetExampleResponse) Reset() {
+	*x = GetExampleResponse{}
+	mi := &file_example_v1_example_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetExampleResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetExampleResponse) ProtoMessage() {}
+
+func (x *GetExampleResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_example_v1_example_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetExampleResponse.ProtoReflect.Descriptor instead.
+func (*GetExampleResponse) Descriptor() ([]byte, []int) {
+	return file_example_v1_example_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GetExampleResponse) GetExampleId() string {
+	if x != nil {
+		return x.ExampleId
+	}
+	return ""
+}
+
+func (x *GetExampleResponse) GetSomeString() string {
+	if x != nil {
+		return x.SomeString
+	}
+	return ""
+}
+
+type DeleteExampleRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExampleId     string                 `protobuf:"bytes,1,opt,name=example_id,json=exampleId,proto3" json:"example_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteExampleRequest) Reset() {
+	*x = DeleteExampleRequest{}
+	mi := &file_example_v1_example_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteExampleRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteExampleRequest) ProtoMessage() {}
+
+func (x *DeleteExampleRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_example_v1_example_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteExampleRequest.ProtoReflect.Descriptor instead.
+func (*DeleteExampleRequest) Descriptor() ([]byte, []int) {
+	return file_example_v1_example_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *DeleteExampleRequest) GetExampleId() string {
+	if x != nil {
+		return x.ExampleId
+	}
+	return ""
+}
+
+type DeleteExampleResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteExampleResponse) Reset() {
+	*x = DeleteExampleResponse{}
+	mi := &file_example_v1_example_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteExampleResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteExampleResponse) ProtoMessage() {}
+
+func (x *DeleteExampleResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_example_v1_example_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteExampleResponse.ProtoReflect.Descriptor instead.
+func (*DeleteExampleResponse) Descriptor() ([]byte, []int) {
+	return file_example_v1_example_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *DeleteExampleResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
 }
 
 type CreateExampleRequest_Nested struct {
@@ -292,7 +477,7 @@ type CreateExampleRequest_Nested struct {
 
 func (x *CreateExampleRequest_Nested) Reset() {
 	*x = CreateExampleRequest_Nested{}
-	mi := &file_proto_example_v1_example_proto_msgTypes[2]
+	mi := &file_example_v1_example_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -304,7 +489,7 @@ func (x *CreateExampleRequest_Nested) String() string {
 func (*CreateExampleRequest_Nested) ProtoMessage() {}
 
 func (x *CreateExampleRequest_Nested) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_example_v1_example_proto_msgTypes[2]
+	mi := &file_example_v1_example_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -317,7 +502,7 @@ func (x *CreateExampleRequest_Nested) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateExampleRequest_Nested.ProtoReflect.Descriptor instead.
 func (*CreateExampleRequest_Nested) Descriptor() ([]byte, []int) {
-	return file_proto_example_v1_example_proto_rawDescGZIP(), []int{0, 0}
+	return file_example_v1_example_proto_rawDescGZIP(), []int{0, 0}
 }
 
 func (x *CreateExampleRequest_Nested) GetSomeField() string {
@@ -344,7 +529,7 @@ type CreateExampleRequest_Nested_Nested2 struct {
 
 func (x *CreateExampleRequest_Nested_Nested2) Reset() {
 	*x = CreateExampleRequest_Nested_Nested2{}
-	mi := &file_proto_example_v1_example_proto_msgTypes[5]
+	mi := &file_example_v1_example_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -356,7 +541,7 @@ func (x *CreateExampleRequest_Nested_Nested2) String() string {
 func (*CreateExampleRequest_Nested_Nested2) ProtoMessage() {}
 
 func (x *CreateExampleRequest_Nested_Nested2) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_example_v1_example_proto_msgTypes[5]
+	mi := &file_example_v1_example_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -369,7 +554,7 @@ func (x *CreateExampleRequest_Nested_Nested2) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use CreateExampleRequest_Nested_Nested2.ProtoReflect.Descriptor instead.
 func (*CreateExampleRequest_Nested_Nested2) Descriptor() ([]byte, []int) {
-	return file_proto_example_v1_example_proto_rawDescGZIP(), []int{0, 0, 0}
+	return file_example_v1_example_proto_rawDescGZIP(), []int{0, 0, 0}
 }
 
 func (x *CreateExampleRequest_Nested_Nested2) GetSomeNestedField() string {
@@ -396,7 +581,7 @@ type CreateExampleRequest_Nested_Nested2_Nested3 struct {
 
 func (x *CreateExampleRequest_Nested_Nested2_Nested3) Reset() {
 	*x = CreateExampleRequest_Nested_Nested2_Nested3{}
-	mi := &file_proto_example_v1_example_proto_msgTypes[6]
+	mi := &file_example_v1_example_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -408,7 +593,7 @@ func (x *CreateExampleRequest_Nested_Nested2_Nested3) String() string {
 func (*CreateExampleRequest_Nested_Nested2_Nested3) ProtoMessage() {}
 
 func (x *CreateExampleRequest_Nested_Nested2_Nested3) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_example_v1_example_proto_msgTypes[6]
+	mi := &file_example_v1_example_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -421,7 +606,7 @@ func (x *CreateExampleRequest_Nested_Nested2_Nested3) ProtoReflect() protoreflec
 
 // Deprecated: Use CreateExampleRequest_Nested_Nested2_Nested3.ProtoReflect.Descriptor instead.
 func (*CreateExampleRequest_Nested_Nested2_Nested3) Descriptor() ([]byte, []int) {
-	return file_proto_example_v1_example_proto_rawDescGZIP(), []int{0, 0, 0, 0}
+	return file_example_v1_example_proto_rawDescGZIP(), []int{0, 0, 0, 0}
 }
 
 func (x *CreateExampleRequest_Nested_Nested2_Nested3) GetSomeNestedInNestedField() string {
@@ -438,12 +623,12 @@ func (x *CreateExampleRequest_Nested_Nested2_Nested3) GetOptionalString() string
 	return ""
 }
 
-var File_proto_example_v1_example_proto protoreflect.FileDescriptor
+var File_example_v1_example_proto protoreflect.FileDescriptor
 
-const file_proto_example_v1_example_proto_rawDesc = "" +
+const file_example_v1_example_proto_rawDesc = "" +
 	"\n" +
-	"\x1eproto/example/v1/example.proto\x12\n" +
-	"example.v1\"\xf3\n" +
+	"\x18example/v1/example.proto\x12\n" +
+	"example.v1\x1a\x18mcp/v1/annotations.proto\"\xf3\n" +
 	"\n" +
 	"\x14CreateExampleRequest\x12\x1d\n" +
 	"\n" +
@@ -489,81 +674,105 @@ const file_proto_example_v1_example_proto_rawDesc = "" +
 	"\x10_optional_string\"8\n" +
 	"\x15CreateExampleResponse\x12\x1f\n" +
 	"\vsome_string\x18\x01 \x01(\tR\n" +
-	"someString2f\n" +
-	"\x0eExampleService\x12T\n" +
-	"\rCreateExample\x12 .example.v1.CreateExampleRequest\x1a!.example.v1.CreateExampleResponseB\xbd\x01\n" +
-	"\x0ecom.example.v1B\fExampleProtoP\x01ZTgithub.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/proto/example/v1;examplev1\xa2\x02\x03EXX\xaa\x02\n" +
+	"someString\"2\n" +
+	"\x11GetExampleRequest\x12\x1d\n" +
+	"\n" +
+	"example_id\x18\x01 \x01(\tR\texampleId\"T\n" +
+	"\x12GetExampleResponse\x12\x1d\n" +
+	"\n" +
+	"example_id\x18\x01 \x01(\tR\texampleId\x12\x1f\n" +
+	"\vsome_string\x18\x02 \x01(\tR\n" +
+	"someString\"5\n" +
+	"\x14DeleteExampleRequest\x12\x1d\n" +
+	"\n" +
+	"example_id\x18\x01 \x01(\tR\texampleId\"1\n" +
+	"\x15DeleteExampleResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess2\xae\x02\n" +
+	"\x0eExampleService\x12h\n" +
+	"\rCreateExample\x12 .example.v1.CreateExampleRequest\x1a!.example.v1.CreateExampleResponse\"\x12\x8a\xb5\x18\x0ecreate_example\x12\\\n" +
+	"\n" +
+	"GetExample\x12\x1d.example.v1.GetExampleRequest\x1a\x1e.example.v1.GetExampleResponse\"\x0f\x8a\xb5\x18\vget_example\x12T\n" +
+	"\rDeleteExample\x12 .example.v1.DeleteExampleRequest\x1a!.example.v1.DeleteExampleResponseB\xb7\x01\n" +
+	"\x0ecom.example.v1B\fExampleProtoP\x01ZNgithub.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/example/v1;examplev1\xa2\x02\x03EXX\xaa\x02\n" +
 	"Example.V1\xca\x02\n" +
 	"Example\\V1\xe2\x02\x16Example\\V1\\GPBMetadata\xea\x02\vExample::V1b\x06proto3"
 
 var (
-	file_proto_example_v1_example_proto_rawDescOnce sync.Once
-	file_proto_example_v1_example_proto_rawDescData []byte
+	file_example_v1_example_proto_rawDescOnce sync.Once
+	file_example_v1_example_proto_rawDescData []byte
 )
 
-func file_proto_example_v1_example_proto_rawDescGZIP() []byte {
-	file_proto_example_v1_example_proto_rawDescOnce.Do(func() {
-		file_proto_example_v1_example_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_example_v1_example_proto_rawDesc), len(file_proto_example_v1_example_proto_rawDesc)))
+func file_example_v1_example_proto_rawDescGZIP() []byte {
+	file_example_v1_example_proto_rawDescOnce.Do(func() {
+		file_example_v1_example_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_example_v1_example_proto_rawDesc), len(file_example_v1_example_proto_rawDesc)))
 	})
-	return file_proto_example_v1_example_proto_rawDescData
+	return file_example_v1_example_proto_rawDescData
 }
 
-var file_proto_example_v1_example_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_proto_example_v1_example_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
-var file_proto_example_v1_example_proto_goTypes = []any{
-	(CreateExampleRequest_SomeEnum)(0),  // 0: example.v1.CreateExampleRequest.SomeEnum
-	(*CreateExampleRequest)(nil),        // 1: example.v1.CreateExampleRequest
-	(*CreateExampleResponse)(nil),       // 2: example.v1.CreateExampleResponse
-	(*CreateExampleRequest_Nested)(nil), // 3: example.v1.CreateExampleRequest.Nested
-	nil,                                 // 4: example.v1.CreateExampleRequest.MapWithNestedValEntry
-	nil,                                 // 5: example.v1.CreateExampleRequest.MapWithNestedValNoStringKeyEntry
-	(*CreateExampleRequest_Nested_Nested2)(nil),         // 6: example.v1.CreateExampleRequest.Nested.Nested2
-	(*CreateExampleRequest_Nested_Nested2_Nested3)(nil), // 7: example.v1.CreateExampleRequest.Nested.Nested2.Nested3
+var file_example_v1_example_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_example_v1_example_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_example_v1_example_proto_goTypes = []any{
+	(CreateExampleRequest_SomeEnum)(0),          // 0: example.v1.CreateExampleRequest.SomeEnum
+	(*CreateExampleRequest)(nil),                // 1: example.v1.CreateExampleRequest
+	(*CreateExampleResponse)(nil),               // 2: example.v1.CreateExampleResponse
+	(*GetExampleRequest)(nil),                   // 3: example.v1.GetExampleRequest
+	(*GetExampleResponse)(nil),                  // 4: example.v1.GetExampleResponse
+	(*DeleteExampleRequest)(nil),                // 5: example.v1.DeleteExampleRequest
+	(*DeleteExampleResponse)(nil),               // 6: example.v1.DeleteExampleResponse
+	(*CreateExampleRequest_Nested)(nil),         // 7: example.v1.CreateExampleRequest.Nested
+	nil,                                         // 8: example.v1.CreateExampleRequest.MapWithNestedValEntry
+	nil,                                         // 9: example.v1.CreateExampleRequest.MapWithNestedValNoStringKeyEntry
+	(*CreateExampleRequest_Nested_Nested2)(nil), // 10: example.v1.CreateExampleRequest.Nested.Nested2
+	(*CreateExampleRequest_Nested_Nested2_Nested3)(nil), // 11: example.v1.CreateExampleRequest.Nested.Nested2.Nested3
 }
-var file_proto_example_v1_example_proto_depIdxs = []int32{
-	0, // 0: example.v1.CreateExampleRequest.some_enum:type_name -> example.v1.CreateExampleRequest.SomeEnum
-	3, // 1: example.v1.CreateExampleRequest.nested:type_name -> example.v1.CreateExampleRequest.Nested
-	4, // 2: example.v1.CreateExampleRequest.map_with_nested_val:type_name -> example.v1.CreateExampleRequest.MapWithNestedValEntry
-	5, // 3: example.v1.CreateExampleRequest.map_with_nested_val_no_string_key:type_name -> example.v1.CreateExampleRequest.MapWithNestedValNoStringKeyEntry
-	6, // 4: example.v1.CreateExampleRequest.Nested.nested2:type_name -> example.v1.CreateExampleRequest.Nested.Nested2
-	3, // 5: example.v1.CreateExampleRequest.MapWithNestedValEntry.value:type_name -> example.v1.CreateExampleRequest.Nested
-	3, // 6: example.v1.CreateExampleRequest.MapWithNestedValNoStringKeyEntry.value:type_name -> example.v1.CreateExampleRequest.Nested
-	7, // 7: example.v1.CreateExampleRequest.Nested.Nested2.nested3:type_name -> example.v1.CreateExampleRequest.Nested.Nested2.Nested3
-	1, // 8: example.v1.ExampleService.CreateExample:input_type -> example.v1.CreateExampleRequest
-	2, // 9: example.v1.ExampleService.CreateExample:output_type -> example.v1.CreateExampleResponse
-	9, // [9:10] is the sub-list for method output_type
-	8, // [8:9] is the sub-list for method input_type
-	8, // [8:8] is the sub-list for extension type_name
-	8, // [8:8] is the sub-list for extension extendee
-	0, // [0:8] is the sub-list for field type_name
+var file_example_v1_example_proto_depIdxs = []int32{
+	0,  // 0: example.v1.CreateExampleRequest.some_enum:type_name -> example.v1.CreateExampleRequest.SomeEnum
+	7,  // 1: example.v1.CreateExampleRequest.nested:type_name -> example.v1.CreateExampleRequest.Nested
+	8,  // 2: example.v1.CreateExampleRequest.map_with_nested_val:type_name -> example.v1.CreateExampleRequest.MapWithNestedValEntry
+	9,  // 3: example.v1.CreateExampleRequest.map_with_nested_val_no_string_key:type_name -> example.v1.CreateExampleRequest.MapWithNestedValNoStringKeyEntry
+	10, // 4: example.v1.CreateExampleRequest.Nested.nested2:type_name -> example.v1.CreateExampleRequest.Nested.Nested2
+	7,  // 5: example.v1.CreateExampleRequest.MapWithNestedValEntry.value:type_name -> example.v1.CreateExampleRequest.Nested
+	7,  // 6: example.v1.CreateExampleRequest.MapWithNestedValNoStringKeyEntry.value:type_name -> example.v1.CreateExampleRequest.Nested
+	11, // 7: example.v1.CreateExampleRequest.Nested.Nested2.nested3:type_name -> example.v1.CreateExampleRequest.Nested.Nested2.Nested3
+	1,  // 8: example.v1.ExampleService.CreateExample:input_type -> example.v1.CreateExampleRequest
+	3,  // 9: example.v1.ExampleService.GetExample:input_type -> example.v1.GetExampleRequest
+	5,  // 10: example.v1.ExampleService.DeleteExample:input_type -> example.v1.DeleteExampleRequest
+	2,  // 11: example.v1.ExampleService.CreateExample:output_type -> example.v1.CreateExampleResponse
+	4,  // 12: example.v1.ExampleService.GetExample:output_type -> example.v1.GetExampleResponse
+	6,  // 13: example.v1.ExampleService.DeleteExample:output_type -> example.v1.DeleteExampleResponse
+	11, // [11:14] is the sub-list for method output_type
+	8,  // [8:11] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
-func init() { file_proto_example_v1_example_proto_init() }
-func file_proto_example_v1_example_proto_init() {
-	if File_proto_example_v1_example_proto != nil {
+func init() { file_example_v1_example_proto_init() }
+func file_example_v1_example_proto_init() {
+	if File_example_v1_example_proto != nil {
 		return
 	}
-	file_proto_example_v1_example_proto_msgTypes[0].OneofWrappers = []any{
+	file_example_v1_example_proto_msgTypes[0].OneofWrappers = []any{
 		(*CreateExampleRequest_FirstItem)(nil),
 		(*CreateExampleRequest_SecondItem)(nil),
 	}
-	file_proto_example_v1_example_proto_msgTypes[6].OneofWrappers = []any{}
+	file_example_v1_example_proto_msgTypes[10].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_example_v1_example_proto_rawDesc), len(file_proto_example_v1_example_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_example_v1_example_proto_rawDesc), len(file_example_v1_example_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   7,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_proto_example_v1_example_proto_goTypes,
-		DependencyIndexes: file_proto_example_v1_example_proto_depIdxs,
-		EnumInfos:         file_proto_example_v1_example_proto_enumTypes,
-		MessageInfos:      file_proto_example_v1_example_proto_msgTypes,
+		GoTypes:           file_example_v1_example_proto_goTypes,
+		DependencyIndexes: file_example_v1_example_proto_depIdxs,
+		EnumInfos:         file_example_v1_example_proto_enumTypes,
+		MessageInfos:      file_example_v1_example_proto_msgTypes,
 	}.Build()
-	File_proto_example_v1_example_proto = out.File
-	file_proto_example_v1_example_proto_goTypes = nil
-	file_proto_example_v1_example_proto_depIdxs = nil
+	File_example_v1_example_proto = out.File
+	file_example_v1_example_proto_goTypes = nil
+	file_example_v1_example_proto_depIdxs = nil
 }
