@@ -86,7 +86,7 @@ By default, MCP tool names are auto-generated from the full protobuf method name
 
 #### Protobuf Annotations (Recommended)
 
-Use the `mcp.mcp_tool_name` option inside your RPC method definitions. First, import the annotations:
+Use the `mcp.v1.mcp_tool_name` option inside your RPC method definitions. First, import the annotations:
 
 ```protobuf
 import "mcp/v1/annotations.proto";

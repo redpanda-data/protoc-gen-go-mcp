@@ -25,7 +25,7 @@ option go_package = "github.com/redpanda-data/protoc-gen-go-mcp/proto/gen/go/mcp
 //
 // Example usage:
 //   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
-//     option (mcp.mcp_tool_name) = "create_user";
+//     option (mcp.v1.mcp_tool_name) = "create_user";
 //   }
 //
 // The tool name should follow these conventions:

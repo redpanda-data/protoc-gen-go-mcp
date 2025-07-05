@@ -543,7 +543,7 @@ func validateToolNameStrict(name string, strictSnakeCase bool) error {
 
 	var validPattern *regexp.Regexp
 	var errorMsg string
-	
+
 	if strictSnakeCase {
 		// For custom annotations: strict snake_case only
 		validPattern = regexp.MustCompile(`^[a-z][a-z0-9_]*$`)
@@ -553,7 +553,7 @@ func validateToolNameStrict(name string, strictSnakeCase bool) error {
 		validPattern = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`)
 		errorMsg = "must contain only letters, numbers, underscores and start with letter"
 	}
-	
+
 	if !validPattern.MatchString(name) {
 		return fmt.Errorf("tool name %q %s", name, errorMsg)
 	}
@@ -604,7 +604,7 @@ func MangleHeadIfTooLong(name string, maxLen int) string {
 // Option-based syntax:
 //
 //	rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
-//	  option (mcp.mcp_tool_name) = "create_user";
+//	  option (mcp.v1.mcp_tool_name) = "create_user";
 //	}
 //
 // Comment-based syntax (backwards compatibility):
@@ -619,7 +619,7 @@ func (g *FileGenerator) getMCPToolName(meth *protogen.Method) string {
 	if meth == nil {
 		return ""
 	}
-	
+
 	var toolName string
 	var source string
 
