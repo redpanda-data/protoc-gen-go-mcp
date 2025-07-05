@@ -27,6 +27,7 @@ import (
 	"text/template"
 
 	"github.com/mark3labs/mcp-go/mcp"
+	mcpv1 "github.com/redpanda-data/protoc-gen-go-mcp/proto/gen/go/mcp/v1"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
@@ -604,8 +605,8 @@ func (g *FileGenerator) getMCPToolName(meth *protogen.Method) string {
 	var source string
 
 	// First priority: Check for protobuf option-based annotation
-	if meth.Desc != nil && proto.HasExtension(meth.Desc.Options(), mcpannotations.E_McpToolName) {
-		if name := proto.GetExtension(meth.Desc.Options(), mcpannotations.E_McpToolName); name != nil {
+	if meth.Desc != nil && proto.HasExtension(meth.Desc.Options(), mcpv1.E_McpToolName) {
+		if name := proto.GetExtension(meth.Desc.Options(), mcpv1.E_McpToolName); name != nil {
 			if customName, ok := name.(string); ok && customName != "" {
 				toolName = customName
 				source = "protobuf option"

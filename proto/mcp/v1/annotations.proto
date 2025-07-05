@@ -14,7 +14,7 @@
 
 syntax = "proto3";
 
-package mcp;
+package mcp.v1;
 
 import "google/protobuf/descriptor.proto";
 

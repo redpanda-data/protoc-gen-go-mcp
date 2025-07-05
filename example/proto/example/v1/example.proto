@@ -15,7 +15,7 @@
 syntax = "proto3";
 package example.v1;
 
-import "proto/mcp/annotations.proto";
+import "proto/mcp/v1/annotations.proto";
 
 message CreateExampleRequest {
   int32 some_int32 = 1;
@@ -81,13 +81,13 @@ service ExampleService {
   // This demonstrates option-based custom tool naming - the protobuf option below
   // overrides the default auto-generated name.
   rpc CreateExample(CreateExampleRequest) returns (CreateExampleResponse) {
-    option (mcp.mcp_tool_name) = "create_example";
+    option (mcp.v1.mcp_tool_name) = "create_example";
   };
   
   // GetExample retrieves an existing example resource by ID.
   // This method uses option-based custom tool naming (preferred approach).
   rpc GetExample(GetExampleRequest) returns (GetExampleResponse) {
-    option (mcp.mcp_tool_name) = "get_example";
+    option (mcp.v1.mcp_tool_name) = "get_example";
   };
   
   // DeleteExample removes an example resource permanently.
