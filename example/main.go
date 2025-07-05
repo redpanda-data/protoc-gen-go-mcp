@@ -19,9 +19,9 @@ import (
 	"fmt"
 
 	"github.com/mark3labs/mcp-go/server"
-	examplev1 "github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/proto/example/v1"
-	"github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/proto/example/v1/examplev1connect"
-	"github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/proto/example/v1/examplev1mcp"
+	examplev1 "github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/example/v1"
+	"github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/example/v1/examplev1connect"
+	"github.com/redpanda-data/protoc-gen-go-mcp/example/gen/go/example/v1/examplev1mcp"
 )
 
 // Ensure our interface and the official gRPC interface are grpcClient

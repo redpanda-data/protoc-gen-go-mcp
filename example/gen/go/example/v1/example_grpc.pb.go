@@ -16,7 +16,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             (unknown)
-// source: proto/example/v1/example.proto
+// source: example/v1/example.proto
 
 package examplev1
 
@@ -34,6 +34,8 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	ExampleService_CreateExample_FullMethodName = "/example.v1.ExampleService/CreateExample"
+	ExampleService_GetExample_FullMethodName    = "/example.v1.ExampleService/GetExample"
+	ExampleService_DeleteExample_FullMethodName = "/example.v1.ExampleService/DeleteExample"
 )
 
 // ExampleServiceClient is the client API for ExampleService service.
@@ -43,9 +45,18 @@ type ExampleServiceClient interface {
 	// @ignore-comment Ignore these linter rules, because we intentionally return a generic Operation message for all long-running operations.
 	// buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
 	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
-	// CreateCluster create a Redpanda cluster. The input contains the spec, that describes the cluster.
-	// A Operation is returned. This task allows the caller to find out when the long-running operation of creating a cluster has finished.
+	// CreateExample creates a new example resource with the provided configuration.
+	// This demonstrates option-based custom tool naming - the protobuf option below
+	// overrides the default auto-generated name.
 	CreateExample(ctx context.Context, in *CreateExampleRequest, opts ...grpc.CallOption) (*CreateExampleResponse, error)
+	// GetExample retrieves an existing example resource by ID.
+	// This method uses option-based custom tool naming (preferred approach).
+	GetExample(ctx context.Context, in *GetExampleRequest, opts ...grpc.CallOption) (*GetExampleResponse, error)
+	// DeleteExample removes an example resource permanently.
+	// This method demonstrates that you can mix custom-named and auto-named methods.
+	// Since there's no mcp_tool_name annotation, this will use the default:
+	// "example_v1_ExampleService_DeleteExample"
+	DeleteExample(ctx context.Context, in *DeleteExampleRequest, opts ...grpc.CallOption) (*DeleteExampleResponse, error)
 }
 
 type exampleServiceClient struct {
@@ -66,6 +77,26 @@ func (c *exampleServiceClient) CreateExample(ctx context.Context, in *CreateExam
 	return out, nil
 }
 
+func (c *exampleServiceClient) GetExample(ctx context.Context, in *GetExampleRequest, opts ...grpc.CallOption) (*GetExampleResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetExampleResponse)
+	err := c.cc.Invoke(ctx, ExampleService_GetExample_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *exampleServiceClient) DeleteExample(ctx context.Context, in *DeleteExampleRequest, opts ...grpc.CallOption) (*DeleteExampleResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteExampleResponse)
+	err := c.cc.Invoke(ctx, ExampleService_DeleteExample_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExampleServiceServer is the server API for ExampleService service.
 // All implementations must embed UnimplementedExampleServiceServer
 // for forward compatibility.
@@ -73,9 +104,18 @@ type ExampleServiceServer interface {
 	// @ignore-comment Ignore these linter rules, because we intentionally return a generic Operation message for all long-running operations.
 	// buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
 	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
-	// CreateCluster create a Redpanda cluster. The input contains the spec, that describes the cluster.
-	// A Operation is returned. This task allows the caller to find out when the long-running operation of creating a cluster has finished.
+	// CreateExample creates a new example resource with the provided configuration.
+	// This demonstrates option-based custom tool naming - the protobuf option below
+	// overrides the default auto-generated name.
 	CreateExample(context.Context, *CreateExampleRequest) (*CreateExampleResponse, error)
+	// GetExample retrieves an existing example resource by ID.
+	// This method uses option-based custom tool naming (preferred approach).
+	GetExample(context.Context, *GetExampleRequest) (*GetExampleResponse, error)
+	// DeleteExample removes an example resource permanently.
+	// This method demonstrates that you can mix custom-named and auto-named methods.
+	// Since there's no mcp_tool_name annotation, this will use the default:
+	// "example_v1_ExampleService_DeleteExample"
+	DeleteExample(context.Context, *DeleteExampleRequest) (*DeleteExampleResponse, error)
 	mustEmbedUnimplementedExampleServiceServer()
 }
 
@@ -88,6 +128,12 @@ type UnimplementedExampleServiceServer struct{}
 
 func (UnimplementedExampleServiceServer) CreateExample(context.Context, *CreateExampleRequest) (*CreateExampleResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateExample not implemented")
+}
+func (UnimplementedExampleServiceServer) GetExample(context.Context, *GetExampleRequest) (*GetExampleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetExample not implemented")
+}
+func (UnimplementedExampleServiceServer) DeleteExample(context.Context, *DeleteExampleRequest) (*DeleteExampleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteExample not implemented")
 }
 func (UnimplementedExampleServiceServer) mustEmbedUnimplementedExampleServiceServer() {}
 func (UnimplementedExampleServiceServer) testEmbeddedByValue()                        {}
@@ -128,6 +174,42 @@ func _ExampleService_CreateExample_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExampleService_GetExample_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetExampleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExampleServiceServer).GetExample(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExampleService_GetExample_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExampleServiceServer).GetExample(ctx, req.(*GetExampleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExampleService_DeleteExample_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteExampleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExampleServiceServer).DeleteExample(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExampleService_DeleteExample_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExampleServiceServer).DeleteExample(ctx, req.(*DeleteExampleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ExampleService_ServiceDesc is the grpc.ServiceDesc for ExampleService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -139,7 +221,15 @@ var ExampleService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "CreateExample",
 			Handler:    _ExampleService_CreateExample_Handler,
 		},
+		{
+			MethodName: "GetExample",
+			Handler:    _ExampleService_GetExample_Handler,
+		},
+		{
+			MethodName: "DeleteExample",
+			Handler:    _ExampleService_DeleteExample_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/example/v1/example.proto",
+	Metadata: "example/v1/example.proto",
 }

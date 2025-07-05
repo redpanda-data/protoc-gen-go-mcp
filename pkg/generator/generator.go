@@ -527,6 +527,11 @@ outer:
 // validateToolName validates that the tool name follows MCP conventions.
 // Returns an error if the name is invalid.
 func validateToolName(name string) error {
+	return validateToolNameStrict(name, true)
+}
+
+// validateToolNameStrict validates tool names with optional strict mode for custom annotations
+func validateToolNameStrict(name string, strictSnakeCase bool) error {
 	if name == "" {
 		return fmt.Errorf("tool name cannot be empty")
 	}
@@ -536,11 +541,21 @@ func validateToolName(name string) error {
 		return fmt.Errorf("tool name %q is too long (max 64 characters)", name)
 	}
 
-	// Check for valid snake_case pattern
-	// Allow letters, numbers, and underscores, but must start with letter
-	validPattern := regexp.MustCompile(`^[a-z][a-z0-9_]*$`)
+	var validPattern *regexp.Regexp
+	var errorMsg string
+	
+	if strictSnakeCase {
+		// For custom annotations: strict snake_case only
+		validPattern = regexp.MustCompile(`^[a-z][a-z0-9_]*$`)
+		errorMsg = "must be snake_case (lowercase letters, numbers, underscores only, start with letter)"
+	} else {
+		// For auto-generated names: allow mixed case (package/service names)
+		validPattern = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`)
+		errorMsg = "must contain only letters, numbers, underscores and start with letter"
+	}
+	
 	if !validPattern.MatchString(name) {
-		return fmt.Errorf("tool name %q must be snake_case (lowercase letters, numbers, underscores only, start with letter)", name)
+		return fmt.Errorf("tool name %q %s", name, errorMsg)
 	}
 
 	// Check for consecutive underscores
@@ -601,6 +616,10 @@ func MangleHeadIfTooLong(name string, maxLen int) string {
 // that the default auto-generated name should be used. Validation errors are reported
 // to the generator.
 func (g *FileGenerator) getMCPToolName(meth *protogen.Method) string {
+	if meth == nil {
+		return ""
+	}
+	
 	var toolName string
 	var source string
 

@@ -3,4 +3,3 @@ deps:
   - buf.build/googleapis/googleapis
 modules:
   - path: ./
-  - path: ../../proto

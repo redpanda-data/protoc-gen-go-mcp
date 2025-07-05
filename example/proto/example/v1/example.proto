@@ -15,7 +15,7 @@
 syntax = "proto3";
 package example.v1;
 
-import "proto/mcp/v1/annotations.proto";
+import "mcp/v1/annotations.proto";
 
 message CreateExampleRequest {
   int32 some_int32 = 1;
