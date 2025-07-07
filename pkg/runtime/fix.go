@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//  http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,9 +15,17 @@ package runtime
 
 import (
 	"encoding/json"
+
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
+// LLMProvider represents different LLM providers for runtime selection
+type LLMProvider string
+
+const (
+	LLMProviderStandard LLMProvider = "standard"
+	LLMProviderOpenAI   LLMProvider = "openai"
+)
 
 // FixOpenAI applies all OpenAI compatibility transformations to convert OpenAI-formatted JSON
 // back to standard protobuf-compatible JSON. This includes:
@@ -49,26 +57,26 @@ func FixOpenAI(descriptor protoreflect.MessageDescriptor, args map[string]any) {
 				}
 			} else if field.Kind() == protoreflect.MessageKind {
 				fullName := string(field.Message().FullName())
-				
+
 				// Handle OpenAI string representations of special protobuf types
 				switch fullName {
 				case "google.protobuf.Value":
 					if str, ok := obj[name].(string); ok {
-						var value interface{}
+						var value any
 						if err := json.Unmarshal([]byte(str), &value); err == nil {
 							obj[name] = value
 						}
 					}
 				case "google.protobuf.ListValue":
 					if str, ok := obj[name].(string); ok {
-						var listValue []interface{}
+						var listValue []any
 						if err := json.Unmarshal([]byte(str), &listValue); err == nil {
 							obj[name] = listValue
 						}
 					}
 				case "google.protobuf.Struct":
 					if str, ok := obj[name].(string); ok {
-						var structValue map[string]interface{}
+						var structValue map[string]any
 						if err := json.Unmarshal([]byte(str), &structValue); err == nil {
 							obj[name] = structValue
 						}

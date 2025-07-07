@@ -1,0 +1,58 @@
+version: '3'
+
+vars:
+  BINARY_NAME: protoc-gen-go-mcp
+
+tasks:
+  test:
+    desc: Run all tests
+    cmds:
+      - go test ./...
+
+  build:
+    desc: Build the binary
+    cmds:
+      - go build -o {{.BINARY_NAME}} ./cmd/protoc-gen-go-mcp
+
+  install:
+    desc: Install the binary to GOPATH/bin
+    cmds:
+      - go install ./cmd/protoc-gen-go-mcp
+
+  generate-golden:
+    desc: Update golden test files
+    cmds:
+      - echo "Updating golden test files..."
+      - go test ./pkg/generator -update-golden -v
+      - task: fmt
+      - echo "Golden files updated successfully!"
+
+
+  generate:
+    desc: Generate testdata (including integration test protos)
+    dir: pkg/testdata
+    cmds:
+      - buf generate buf.build/googleapis/googleapis
+      - buf generate --include-imports
+      - gofumpt -l -w .
+
+  integrationtest:
+    desc: Run integration tests (requires OPENAI_API_KEY)
+    deps: [generate]
+    cmds:
+      - |
+        if [ -f .env ]; then
+          export $(cat .env | xargs) && go test -tags=integration ./integrationtest -v
+        else
+          go test -tags=integration ./integrationtest -v
+        fi
+
+  lint:
+    desc: Lint code
+    cmds:
+      - golangci-lint run
+
+  fmt:
+    desc: Format code (excludes generated protobuf files)
+    cmds:
+      - find . -name '*.go' -not -path './pkg/testdata/gen/*' | xargs go run mvdan.cc/gofumpt@latest -l -w

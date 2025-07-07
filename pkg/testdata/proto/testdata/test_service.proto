@@ -1,0 +1,102 @@
+// Copyright 2025 Redpanda Data, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package testdata;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/any.proto";
+import "google/api/field_behavior.proto";
+
+// TestService provides test operations
+service TestService {
+  // CreateItem creates a new item
+  rpc CreateItem(CreateItemRequest) returns (CreateItemResponse);
+  
+  // GetItem retrieves an item by ID
+  rpc GetItem(GetItemRequest) returns (GetItemResponse);
+  
+  // Test well-known types handling
+  rpc ProcessWellKnownTypes(ProcessWellKnownTypesRequest) returns (ProcessWellKnownTypesResponse);
+}
+
+message CreateItemRequest {
+  // Required field
+  string name = 1 [(google.api.field_behavior) = REQUIRED];
+  
+  // Optional field
+  optional string description = 2;
+  
+  // Map field (becomes array in OpenAI mode)
+  map<string, string> labels = 3;
+  
+  // Repeated field
+  repeated string tags = 4;
+  
+  // Oneof field
+  oneof item_type {
+    ProductDetails product = 5;
+    ServiceDetails service = 6;
+  }
+  
+  // Bytes field (has format: byte that should be removed in OpenAI)
+  bytes thumbnail = 7;
+}
+
+message ProductDetails {
+  double price = 1;
+  int32 quantity = 2;
+}
+
+message ServiceDetails {
+  string duration = 1;
+  bool recurring = 2;
+}
+
+message CreateItemResponse {
+  string id = 1;
+  google.protobuf.Timestamp created_at = 2;
+}
+
+message GetItemRequest {
+  string id = 1;
+}
+
+message GetItemResponse {
+  Item item = 1;
+}
+
+message Item {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  map<string, string> labels = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message ProcessWellKnownTypesRequest {
+  // Well-known types that need special handling in OpenAI mode
+  google.protobuf.Struct metadata = 1;
+  google.protobuf.Value config = 2;
+  google.protobuf.Any payload = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+message ProcessWellKnownTypesResponse {
+  bool success = 1;
+  string message = 2;
+}
