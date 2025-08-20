@@ -22,7 +22,7 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go-golden/testdata"
+	testdata "github.com/mrproliu/protoc-gen-go-mcp/pkg/testdata/gen/go-golden/testdata"
 	http "net/http"
 	strings "strings"
 )

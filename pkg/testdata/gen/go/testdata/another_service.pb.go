@@ -134,7 +134,7 @@ const file_testdata_another_service_proto_rawDesc = "" +
 	"\x06output\x18\x01 \x01(\tR\x06output2\\\n" +
 	"\x0eAnotherService\x12J\n" +
 	"\vDoSomething\x12\x1c.testdata.DoSomethingRequest\x1a\x1d.testdata.DoSomethingResponseB\xac\x01\n" +
-	"\fcom.testdataB\x13AnotherServiceProtoP\x01ZGgithub.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata\xa2\x02\x03TXX\xaa\x02\bTestdata\xca\x02\bTestdata\xe2\x02\x14Testdata\\GPBMetadata\xea\x02\bTestdatab\x06proto3"
+	"\fcom.testdataB\x13AnotherServiceProtoP\x01ZGgithub.com/mrproliu/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata\xa2\x02\x03TXX\xaa\x02\bTestdata\xca\x02\bTestdata\xe2\x02\x14Testdata\\GPBMetadata\xea\x02\bTestdatab\x06proto3"
 
 var (
 	file_testdata_another_service_proto_rawDescOnce sync.Once

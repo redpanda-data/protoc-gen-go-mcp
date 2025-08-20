@@ -16,7 +16,7 @@ package main
 import (
 	"flag"
 
-	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/generator"
+	"github.com/mrproliu/protoc-gen-go-mcp/pkg/generator"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 

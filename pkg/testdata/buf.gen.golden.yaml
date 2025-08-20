@@ -3,7 +3,7 @@ managed:
   enabled: true
   override:
     - file_option: go_package_prefix
-      value: github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go-golden
+      value: github.com/mrproliu/protoc-gen-go-mcp/pkg/testdata/gen/go-golden
   disable:
     - file_option: go_package
       module: buf.build/googleapis/googleapis

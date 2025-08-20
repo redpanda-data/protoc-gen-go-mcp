@@ -674,7 +674,7 @@ const file_testdata_test_service_proto_rawDesc = "" +
 	"CreateItem\x12\x1b.testdata.CreateItemRequest\x1a\x1c.testdata.CreateItemResponse\x12>\n" +
 	"\aGetItem\x12\x18.testdata.GetItemRequest\x1a\x19.testdata.GetItemResponse\x12h\n" +
 	"\x15ProcessWellKnownTypes\x12&.testdata.ProcessWellKnownTypesRequest\x1a'.testdata.ProcessWellKnownTypesResponseB\xa9\x01\n" +
-	"\fcom.testdataB\x10TestServiceProtoP\x01ZGgithub.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata\xa2\x02\x03TXX\xaa\x02\bTestdata\xca\x02\bTestdata\xe2\x02\x14Testdata\\GPBMetadata\xea\x02\bTestdatab\x06proto3"
+	"\fcom.testdataB\x10TestServiceProtoP\x01ZGgithub.com/mrproliu/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata\xa2\x02\x03TXX\xaa\x02\bTestdata\xca\x02\bTestdata\xe2\x02\x14Testdata\\GPBMetadata\xea\x02\bTestdatab\x06proto3"
 
 var (
 	file_testdata_test_service_proto_rawDescOnce sync.Once

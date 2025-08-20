@@ -343,7 +343,7 @@ const file_testdata_compatibility_test_proto_rawDesc = "" +
 	"\x0eStringMapEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\xb6\x01\n" +
-	"\fcom.testdataB\x16CompatibilityTestProtoP\x01ZNgithub.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go-golden/testdata\xa2\x02\x03TXX\xaa\x02\bTestdata\xca\x02\bTestdata\xe2\x02\x14Testdata\\GPBMetadata\xea\x02\bTestdatab\x06proto3"
+	"\fcom.testdataB\x16CompatibilityTestProtoP\x01ZNgithub.com/mrproliu/protoc-gen-go-mcp/pkg/testdata/gen/go-golden/testdata\xa2\x02\x03TXX\xaa\x02\bTestdata\xca\x02\bTestdata\xe2\x02\x14Testdata\\GPBMetadata\xea\x02\bTestdatab\x06proto3"
 
 var (
 	file_testdata_compatibility_test_proto_rawDescOnce sync.Once

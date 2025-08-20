@@ -19,9 +19,9 @@ import (
 	"fmt"
 
 	"github.com/mark3labs/mcp-go/server"
-	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
-	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdataconnect"
-	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdatamcp"
+	testdata "github.com/mrproliu/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
+	"github.com/mrproliu/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdataconnect"
+	"github.com/mrproliu/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdatamcp"
 )
 
 // Ensure our interface and the official gRPC interface are grpcClient
