@@ -75,6 +75,14 @@ var (
 {{- range $key, $val := .ToolsOpenAI }}
   {{$key}}ToolOpenAI = {{ printf "%#v" $val }}
 {{- end }}
+  AllTools = []mcp.Tool{
+{{- range $key, $val := .Tools }}
+	{{$key}}Tool,
+{{- end }}
+{{- range $key, $val := .ToolsOpenAI }}
+	{{$key}}ToolOpenAI,
+{{- end }}
+  }
 )
 
 {{- range $serviceName, $methods := .Services }}
@@ -103,6 +111,12 @@ func Register{{$key}}Handler(s *mcpserver.MCPServer, srv {{$key}}Server, opts ..
   
   s.AddTool({{$tool_name}}Tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
+	// If BeforeToolCall is configured, call it before executing the tool
+	if config.BeforeToolCall != nil {
+	  if err := config.BeforeToolCall({{$tool_name}}Tool, &request); err != nil {
+		return nil, fmt.Errorf("before tool call error: %w", err)
+	  }
+	}
 
     message := request.GetArguments()
 
@@ -153,6 +167,12 @@ func Register{{$key}}HandlerOpenAI(s *mcpserver.MCPServer, srv {{$key}}Server, o
   
   s.AddTool({{$tool_name}}ToolOpenAI, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
+	// If BeforeToolCall is configured, call it before executing the tool
+	if config.BeforeToolCall != nil {
+	  if err := config.BeforeToolCall({{$tool_name}}ToolOpenAI, &request); err != nil {
+		return nil, fmt.Errorf("before tool call error: %w", err)
+	  }
+	}
 
     message := request.GetArguments()
 

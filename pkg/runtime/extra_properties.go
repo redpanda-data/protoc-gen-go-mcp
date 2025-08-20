@@ -19,12 +19,20 @@ type ExtraProperty struct {
 
 type config struct {
 	ExtraProperties []ExtraProperty
+	BeforeToolCall  func(tool mcp.Tool, request *mcp.CallToolRequest) error
 }
 
 // WithExtraProperties adds extra properties to tool schemas and extracts them from request arguments
 func WithExtraProperties(properties ...ExtraProperty) Option {
 	return func(c *config) {
 		c.ExtraProperties = append(c.ExtraProperties, properties...)
+	}
+}
+
+// WithBeforeToolCall sets a function to be called before executing a tool call
+func WithBeforeToolCall(call func(tool mcp.Tool, request *mcp.CallToolRequest) error) Option {
+	return func(c *config) {
+		c.BeforeToolCall = call
 	}
 }
 
