@@ -27,6 +27,11 @@ func main() {
 		"mcp",
 		"Generate files into a sub-package of the package containing the base .pb.go files using the given suffix. An empty suffix denotes to generate into the same package as the base pb.go files.",
 	)
+	trimToolPrefixes := flagSet.Bool(
+		"trim_tool_prefixes",
+		false,
+		"Remove the most common leading substring from every tool name prior to mangling",
+	)
 
 	protogen.Options{
 		ParamFunc: flagSet.Set,
@@ -35,7 +40,7 @@ func main() {
 			if !f.Generate {
 				continue
 			}
-			generator.NewFileGenerator(f, gen).Generate(*packageSuffix)
+			generator.NewFileGenerator(f, gen).Generate(*packageSuffix, *trimToolPrefixes)
 		}
 		return nil
 	})

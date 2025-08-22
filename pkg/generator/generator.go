@@ -670,7 +670,45 @@ func MangleHeadIfTooLong(name string, maxLen int) string {
 	return hashPrefix + "_" + tail
 }
 
-func (g *FileGenerator) Generate(packageSuffix string) {
+func findCommonPrefix(names []string) string {
+	if len(names) == 0 {
+		return ""
+	}
+	if len(names) == 1 {
+		return ""
+	}
+
+	prefix := names[0]
+	for _, name := range names[1:] {
+		for len(prefix) > 0 && !strings.HasPrefix(name, prefix) {
+			prefix = prefix[:len(prefix)-1]
+		}
+		if len(prefix) == 0 {
+			break
+		}
+	}
+
+	if len(prefix) <= 1 {
+		return ""
+	}
+
+	lastUnderscore := strings.LastIndex(prefix, "_")
+	if lastUnderscore > 0 {
+		result := prefix[:lastUnderscore+1]
+		if len(result) <= 2 {
+			return ""
+		}
+		return result
+	}
+
+	if len(prefix) <= 2 {
+		return ""
+	}
+
+	return prefix
+}
+
+func (g *FileGenerator) Generate(packageSuffix string, trimToolPrefixes bool) {
 	file := g.f
 	if len(g.f.Services) == 0 {
 		return
@@ -713,6 +751,25 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 	tools := map[string]mcp.Tool{}
 	toolsOpenAI := map[string]mcp.Tool{}
 
+	// Collect all tool names to find common prefix if trimming is enabled
+	var allToolNames []string
+	if trimToolPrefixes {
+		for _, svc := range g.f.Services {
+			for _, meth := range svc.Methods {
+				if meth.Desc.IsStreamingClient() || meth.Desc.IsStreamingServer() {
+					continue
+				}
+				toolName := strings.ReplaceAll(string(meth.Desc.FullName()), ".", "_")
+				allToolNames = append(allToolNames, toolName)
+			}
+		}
+	}
+
+	commonPrefix := ""
+	if trimToolPrefixes {
+		commonPrefix = findCommonPrefix(allToolNames)
+	}
+
 	for _, svc := range g.f.Services {
 		s := map[string]Tool{}
 		for _, meth := range svc.Methods {
@@ -721,9 +778,17 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 				continue
 			}
 
+			// Generate base tool name
+			baseToolName := strings.ReplaceAll(string(meth.Desc.FullName()), ".", "_")
+
+			// Trim common prefix if enabled
+			if trimToolPrefixes && commonPrefix != "" && strings.HasPrefix(baseToolName, commonPrefix) {
+				baseToolName = strings.TrimPrefix(baseToolName, commonPrefix)
+			}
+
 			// Generate standard tool
 			toolStandard := mcp.Tool{
-				Name:        MangleHeadIfTooLong(strings.ReplaceAll(string(meth.Desc.FullName()), ".", "_"), 64),
+				Name:        MangleHeadIfTooLong(baseToolName, 64),
 				Description: cleanComment(string(meth.Comments.Leading)),
 			}
 
@@ -738,7 +803,7 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 
 			// Generate OpenAI tool
 			toolOpenAI := mcp.Tool{
-				Name:        MangleHeadIfTooLong(strings.ReplaceAll(string(meth.Desc.FullName()), ".", "_"), 64),
+				Name:        MangleHeadIfTooLong(baseToolName, 64),
 				Description: cleanComment(string(meth.Comments.Leading)),
 			}
 
