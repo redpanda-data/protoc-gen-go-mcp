@@ -25,6 +25,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	"github.com/mark3labs/mcp-go/mcp"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
@@ -645,6 +646,24 @@ outer:
 	return strings.Join(cleanedLines, "\n")
 }
 
+func getRPCDescription(meth *protogen.Method) string {
+	// First choice is comments
+	commentDescription := cleanComment(string(meth.Comments.Leading))
+	if strings.TrimSpace(commentDescription) != "" {
+		return commentDescription
+	}
+
+	// Second choice is OpenAPIv2 description
+	if proto.HasExtension(meth.Desc.Options(), options.E_Openapiv2Operation) {
+		opExt := proto.GetExtension(meth.Desc.Options(), options.E_Openapiv2Operation).(*options.Operation)
+		if opExt != nil && strings.TrimSpace(opExt.Description) != "" {
+			return opExt.Description
+		}
+	}
+
+	return commentDescription
+}
+
 func Base32String(b []byte) string {
 	n := new(big.Int).SetBytes(b)
 	return n.Text(36)
@@ -724,7 +743,7 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 			// Generate standard tool
 			toolStandard := mcp.Tool{
 				Name:        MangleHeadIfTooLong(strings.ReplaceAll(string(meth.Desc.FullName()), ".", "_"), 64),
-				Description: cleanComment(string(meth.Comments.Leading)),
+				Description: getRPCDescription(meth),
 			}
 
 			// Generate standard schema
@@ -739,7 +758,7 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 			// Generate OpenAI tool
 			toolOpenAI := mcp.Tool{
 				Name:        MangleHeadIfTooLong(strings.ReplaceAll(string(meth.Desc.FullName()), ".", "_"), 64),
-				Description: cleanComment(string(meth.Comments.Leading)),
+				Description: getRPCDescription(meth),
 			}
 
 			// Generate OpenAI schema
