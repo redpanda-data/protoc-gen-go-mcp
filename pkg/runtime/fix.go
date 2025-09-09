@@ -15,6 +15,8 @@ package runtime
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
 
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
@@ -32,6 +34,29 @@ const (
 // - Converting map arrays back to objects
 // - Converting string representations back to proper JSON for google.protobuf.Value/ListValue/Struct
 func FixOpenAI(descriptor protoreflect.MessageDescriptor, args map[string]any) {
+	// DEBUG: Log to file for debugging context issues
+	if debugFile, err := os.OpenFile("/tmp/fixopenai_debug.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644); err == nil {
+		defer debugFile.Close()
+		fmt.Fprintf(debugFile, "=== FixOpenAI START ===\n")
+		fmt.Fprintf(debugFile, "Descriptor: %s\n", descriptor.FullName())
+		fmt.Fprintf(debugFile, "Input args keys: %v\n", getMapKeys(args))
+		if dataplaneURL, ok := args["dataplane_api_url"]; ok {
+			fmt.Fprintf(debugFile, "dataplane_api_url IN: %q (type: %T)\n", dataplaneURL, dataplaneURL)
+		} else {
+			fmt.Fprintf(debugFile, "NO dataplane_api_url in input args\n")
+		}
+
+		// Call the original function
+		defer func() {
+			if dataplaneURL, ok := args["dataplane_api_url"]; ok {
+				fmt.Fprintf(debugFile, "dataplane_api_url OUT: %q (type: %T)\n", dataplaneURL, dataplaneURL)
+			} else {
+				fmt.Fprintf(debugFile, "NO dataplane_api_url in output args\n")
+			}
+			fmt.Fprintf(debugFile, "Output args keys: %v\n", getMapKeys(args))
+			fmt.Fprintf(debugFile, "=== FixOpenAI END ===\n\n")
+		}()
+	}
 	var rewrite func(msg protoreflect.MessageDescriptor, path []string, obj map[string]any)
 
 	rewrite = func(msg protoreflect.MessageDescriptor, path []string, obj map[string]any) {
@@ -92,4 +117,13 @@ func FixOpenAI(descriptor protoreflect.MessageDescriptor, args map[string]any) {
 	}
 
 	rewrite(descriptor, nil, args)
+}
+
+// getMapKeys returns the keys of a map for debug logging
+func getMapKeys(m map[string]any) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
 }

@@ -588,16 +588,19 @@ func (g *FileGenerator) getType(fd protoreflect.FieldDescriptor) map[string]any 
 		}
 
 		if g.openAICompat {
+			// Get the full schema for the map value type
+			valueSchema := g.getType(fd.MapValue())
+
+			// For OpenAI compatibility, map values should use the complete schema definition
+			// The valueSchema already has proper OpenAI nullability handling
 			return map[string]any{
 				"type":        "array",
 				"description": "List of key value pairs",
 				"items": map[string]any{
 					"type": "object",
 					"properties": map[string]any{
-						"key": map[string]any{"type": "string"},
-						"value": map[string]any{
-							"type": g.getType(fd.MapValue())["type"],
-						},
+						"key":   map[string]any{"type": "string"},
+						"value": valueSchema,
 					},
 					"required":             []string{"key", "value"},
 					"additionalProperties": false,
