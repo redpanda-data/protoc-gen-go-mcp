@@ -512,12 +512,10 @@ func (g *FileGenerator) messageSchema(md protoreflect.MessageDescriptor) map[str
 				// OpenAI compatibility mode. Oneof, Anyof are not supported, therefore just use ordinary fields, BUT add extra comments.
 				schema := g.getType(nestedFd)
 
-				// Replace type with a union of the actual type and null.
-				// This is the suggested way to work around OpenAI's requirement to make all fields
-				// required, but still allowing the LLM to not put a value (kind of).
-				// See https://platform.openai.com/docs/guides/structured-outputs/supported-schemas#all-fields-must-be-required
-				if v, ok := schema["type"].(string); ok {
-					schema["type"] = []string{v, "null"}
+				// Use nullable property instead of type unions for better JSON Schema parser compatibility
+				// OpenAI still supports this but standard parsers (like Claude Code) won't break
+				if _, ok := schema["type"].(string); ok {
+					schema["nullable"] = true
 				}
 				normalFields[name] = schema
 				schema["description"] = fmt.Sprintf("Note: This field is part of the '%s' oneof group. Only one field in this group can be set at a time. Setting multiple fields in the group WILL result in an error. Protobuf oneOf semantics apply.", oneof.Name())
@@ -560,12 +558,10 @@ func (g *FileGenerator) messageSchema(md protoreflect.MessageDescriptor) map[str
 	// OpenAI requires "additionalProperties: false", always.
 	if g.openAICompat {
 		result["additionalProperties"] = false
-		// Replace type with a union of the actual type and null.
-		// This is the suggested way to work around OpenAI's requirement to make all fields
-		// required, but still allowing the LLM to not put a value (kind of).
-		// See https://platform.openai.com/docs/guides/structured-outputs/supported-schemas#all-fields-must-be-required
-		if v, ok := result["type"].(string); ok {
-			result["type"] = []string{v, "null"}
+		// Use nullable property instead of type unions for better JSON Schema parser compatibility
+		// OpenAI still supports this but standard parsers (like Claude Code) won't break
+		if _, ok := result["type"].(string); ok {
+			result["nullable"] = true
 		}
 
 	}
@@ -622,9 +618,9 @@ func (g *FileGenerator) getType(fd protoreflect.FieldDescriptor) map[string]any 
 		fullName := string(fd.Message().FullName())
 		switch fullName {
 		case "google.protobuf.Timestamp":
-			schema = map[string]any{"type": []string{"string", "null"}, "format": "date-time"}
+			schema = map[string]any{"type": "string", "format": "date-time", "nullable": true}
 		case "google.protobuf.Duration":
-			schema = map[string]any{"type": []string{"string", "null"}, "pattern": `^-?[0-9]+(\.[0-9]+)?s$`}
+			schema = map[string]any{"type": "string", "pattern": `^-?[0-9]+(\.[0-9]+)?s$`, "nullable": true}
 		case "google.protobuf.Struct":
 			if g.openAICompat {
 				schema = map[string]any{
@@ -663,7 +659,7 @@ func (g *FileGenerator) getType(fd protoreflect.FieldDescriptor) map[string]any 
 			}
 		case "google.protobuf.FieldMask":
 			if g.openAICompat {
-				schema = map[string]any{"type": []string{"string", "null"}}
+				schema = map[string]any{"type": "string", "nullable": true}
 			} else {
 				schema = map[string]any{"type": "string"}
 			}
