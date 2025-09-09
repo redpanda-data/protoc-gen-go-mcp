@@ -1,0 +1,161 @@
+// Copyright 2025 Redpanda Data, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package testdata;
+
+import "google/api/field_behavior.proto";
+
+// MCPServerService mimics the real dataplane MCPServer service
+// This reproduces the exact schema pattern that causes the URL corruption bug
+service MCPServerService {
+  // Works: No path parameters, only extra properties
+  rpc ListMCPServers(ListMCPServersRequest) returns (ListMCPServersResponse);
+  
+  // Works: No path parameters, only extra properties  
+  rpc CreateMCPServer(CreateMCPServerRequest) returns (CreateMCPServerResponse);
+  
+  // FAILS: Has path parameter (id) + extra properties
+  rpc GetMCPServer(GetMCPServerRequest) returns (GetMCPServerResponse);
+  
+  // FAILS: Has path parameter (id) + extra properties
+  rpc UpdateMCPServer(UpdateMCPServerRequest) returns (UpdateMCPServerResponse);
+  
+  // FAILS: Has path parameter (id) + extra properties
+  rpc DeleteMCPServer(DeleteMCPServerRequest) returns (DeleteMCPServerResponse);
+}
+
+// Reproduces the exact ListMCPServersRequest structure (no path params)
+message ListMCPServersRequest {
+  // NOTE: dataplane_api_url will be added as extra property
+  // This operation works because it has no path parameters
+  
+  message Filter {
+    string display_name_contains = 1;
+    repeated Tag tags = 2;
+    string secret_id = 3;
+  }
+  
+  Filter filter = 1;
+  int32 page_size = 2;
+  string page_token = 3;
+}
+
+// Reproduces the exact CreateMCPServerRequest structure (no path params)
+message CreateMCPServerRequest {
+  // NOTE: dataplane_api_url will be added as extra property
+  // This operation works because it has no path parameters
+  
+  MCPServer mcp_server = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+// Reproduces the exact GetMCPServerRequest structure (HAS path param)
+message GetMCPServerRequest {
+  // NOTE: dataplane_api_url will be added as extra property
+  // This operation FAILS because it has both path parameter AND extra properties
+  
+  // This is the path parameter that causes the bug
+  string id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+// Reproduces the exact UpdateMCPServerRequest structure (HAS path param)
+message UpdateMCPServerRequest {
+  // NOTE: dataplane_api_url will be added as extra property
+  // This operation FAILS because it has both path parameter AND extra properties
+  
+  // This is the path parameter that causes the bug
+  string id = 1 [(google.api.field_behavior) = REQUIRED];
+  
+  MCPServerUpdate mcp_server = 2 [(google.api.field_behavior) = REQUIRED];
+  
+  // This field might also contribute to the issue
+  string update_mask = 3;
+}
+
+// Reproduces the exact DeleteMCPServerRequest structure (HAS path param)
+message DeleteMCPServerRequest {
+  // NOTE: dataplane_api_url will be added as extra property
+  // This operation FAILS because it has both path parameter AND extra properties
+  
+  // This is the path parameter that causes the bug
+  string id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+// MCPServer message that mimics the complex nested structure
+message MCPServer {
+  string id = 1;
+  string display_name = 2;
+  string description = 3;
+  
+  // This map field gets converted to array-of-key-value-pairs in OpenAI mode
+  // and contains complex nested YAML configs
+  map<string, Tool> tools = 4;
+  
+  Resources resources = 5;
+  
+  // Another map field
+  repeated Tag tags = 6;
+  
+  string url = 7;
+  string state = 8;
+  
+  message Tool {
+    string component_type = 1;
+    // This field contains YAML with URLs that get corrupted
+    string config_yaml = 2 [(google.api.field_behavior) = REQUIRED];
+  }
+  
+  message Resources {
+    string memory_shares = 1;
+    string cpu_shares = 2;
+  }
+}
+
+// MCPServerUpdate message for updates
+message MCPServerUpdate {
+  string display_name = 1;
+  string description = 2;
+  map<string, MCPServer.Tool> tools = 3;
+  MCPServer.Resources resources = 4;
+  repeated Tag tags = 5;
+}
+
+// Tag message
+message Tag {
+  string key = 1;
+  string value = 2;
+}
+
+// Response messages
+message ListMCPServersResponse {
+  repeated MCPServer mcp_servers = 1;
+  string next_page_token = 2;
+}
+
+message CreateMCPServerResponse {
+  MCPServer mcp_server = 1;
+}
+
+message GetMCPServerResponse {
+  MCPServer mcp_server = 1;
+}
+
+message UpdateMCPServerResponse {
+  MCPServer mcp_server = 1;
+}
+
+message DeleteMCPServerResponse {
+  // Empty response
+}

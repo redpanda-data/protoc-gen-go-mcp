@@ -25,6 +25,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	"github.com/mark3labs/mcp-go/mcp"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
@@ -323,6 +324,112 @@ func ForwardTo{{$key}}Client(s *mcpserver.MCPServer, client {{$key}}Client, opts
 }
 {{- end }}
 
+{{- range $key, $val := .Services }}
+// ForwardToConnect{{$key}}ClientOpenAI registers a connectrpc client with OpenAI-compatible tools, to forward MCP calls to it.
+func ForwardToConnect{{$key}}ClientOpenAI(s *mcpserver.MCPServer, client Connect{{$key}}Client, opts ...runtime.Option) {
+  config := runtime.NewConfig()
+  for _, opt := range opts {
+    opt(config)
+  }
+
+  {{- range $tool_name, $tool_val := $val }}
+  {{$tool_name}}ToolOpenAI := {{$key}}_{{$tool_name}}ToolOpenAI
+  // Add extra properties to schema if configured
+  if len(config.ExtraProperties) > 0 {
+    {{$tool_name}}ToolOpenAI = runtime.AddExtraPropertiesToTool({{$tool_name}}ToolOpenAI, config.ExtraProperties)
+  }
+  
+  s.AddTool({{$tool_name}}ToolOpenAI, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+    var req {{$tool_val.RequestType}}
+
+    message := request.GetArguments()
+
+    // Extract extra properties if configured
+    for _, prop := range config.ExtraProperties {
+      if propVal, ok := message[prop.Name]; ok {
+        ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+      }
+    }
+
+    runtime.FixOpenAI(req.ProtoReflect().Descriptor(), message)
+
+    marshaled, err := json.Marshal(message)
+    if err != nil {
+      return nil, err
+    }
+
+    if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+      return nil, err
+    }
+
+    resp, err := client.{{$tool_name}}(ctx, connect.NewRequest(&req))
+    if err != nil {
+      return runtime.HandleError(err)
+    }
+
+    marshaled, err = (protojson.MarshalOptions{UseProtoNames: true, EmitDefaultValues: true}).Marshal(resp.Msg)
+    if err != nil {
+      return nil, err
+    }
+    return mcp.NewToolResultText(string(marshaled)), nil
+  })
+  {{- end }}
+}
+{{- end }}
+
+{{- range $key, $val := .Services }}
+// ForwardTo{{$key}}ClientOpenAI registers a gRPC client with OpenAI-compatible tools, to forward MCP calls to it.
+func ForwardTo{{$key}}ClientOpenAI(s *mcpserver.MCPServer, client {{$key}}Client, opts ...runtime.Option) {
+  config := runtime.NewConfig()
+  for _, opt := range opts {
+    opt(config)
+  }
+
+  {{- range $tool_name, $tool_val := $val }}
+  {{$tool_name}}ToolOpenAI := {{$key}}_{{$tool_name}}ToolOpenAI
+  // Add extra properties to schema if configured
+  if len(config.ExtraProperties) > 0 {
+    {{$tool_name}}ToolOpenAI = runtime.AddExtraPropertiesToTool({{$tool_name}}ToolOpenAI, config.ExtraProperties)
+  }
+  
+  s.AddTool({{$tool_name}}ToolOpenAI, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+    var req {{$tool_val.RequestType}}
+
+    message := request.GetArguments()
+
+    // Extract extra properties if configured
+    for _, prop := range config.ExtraProperties {
+      if propVal, ok := message[prop.Name]; ok {
+        ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+      }
+    }
+
+    runtime.FixOpenAI(req.ProtoReflect().Descriptor(), message)
+
+    marshaled, err := json.Marshal(message)
+    if err != nil {
+      return nil, err
+    }
+
+    if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+      return nil, err
+    }
+
+    resp, err := client.{{$tool_name}}(ctx, &req)
+    if err != nil {
+      return runtime.HandleError(err)
+    }
+
+    marshaled, err = (protojson.MarshalOptions{UseProtoNames: true, EmitDefaultValues: true}).Marshal(resp)
+    if err != nil {
+      return nil, err
+    }
+    return mcp.NewToolResultText(string(marshaled)), nil
+  })
+  {{- end }}
+}
+{{- end }}
+
 
 `
 
@@ -405,12 +512,10 @@ func (g *FileGenerator) messageSchema(md protoreflect.MessageDescriptor) map[str
 				// OpenAI compatibility mode. Oneof, Anyof are not supported, therefore just use ordinary fields, BUT add extra comments.
 				schema := g.getType(nestedFd)
 
-				// Replace type with a union of the actual type and null.
-				// This is the suggested way to work around OpenAI's requirement to make all fields
-				// required, but still allowing the LLM to not put a value (kind of).
-				// See https://platform.openai.com/docs/guides/structured-outputs/supported-schemas#all-fields-must-be-required
-				if v, ok := schema["type"].(string); ok {
-					schema["type"] = []string{v, "null"}
+				// Use nullable property instead of type unions for better JSON Schema parser compatibility
+				// OpenAI still supports this but standard parsers (like Claude Code) won't break
+				if _, ok := schema["type"].(string); ok {
+					schema["nullable"] = true
 				}
 				normalFields[name] = schema
 				schema["description"] = fmt.Sprintf("Note: This field is part of the '%s' oneof group. Only one field in this group can be set at a time. Setting multiple fields in the group WILL result in an error. Protobuf oneOf semantics apply.", oneof.Name())
@@ -453,12 +558,10 @@ func (g *FileGenerator) messageSchema(md protoreflect.MessageDescriptor) map[str
 	// OpenAI requires "additionalProperties: false", always.
 	if g.openAICompat {
 		result["additionalProperties"] = false
-		// Replace type with a union of the actual type and null.
-		// This is the suggested way to work around OpenAI's requirement to make all fields
-		// required, but still allowing the LLM to not put a value (kind of).
-		// See https://platform.openai.com/docs/guides/structured-outputs/supported-schemas#all-fields-must-be-required
-		if v, ok := result["type"].(string); ok {
-			result["type"] = []string{v, "null"}
+		// Use nullable property instead of type unions for better JSON Schema parser compatibility
+		// OpenAI still supports this but standard parsers (like Claude Code) won't break
+		if _, ok := result["type"].(string); ok {
+			result["nullable"] = true
 		}
 
 	}
@@ -481,16 +584,19 @@ func (g *FileGenerator) getType(fd protoreflect.FieldDescriptor) map[string]any 
 		}
 
 		if g.openAICompat {
+			// Get the full schema for the map value type
+			valueSchema := g.getType(fd.MapValue())
+
+			// For OpenAI compatibility, map values should use the complete schema definition
+			// The valueSchema already has proper OpenAI nullability handling
 			return map[string]any{
 				"type":        "array",
 				"description": "List of key value pairs",
 				"items": map[string]any{
 					"type": "object",
 					"properties": map[string]any{
-						"key": map[string]any{"type": "string"},
-						"value": map[string]any{
-							"type": g.getType(fd.MapValue())["type"],
-						},
+						"key":   map[string]any{"type": "string"},
+						"value": valueSchema,
 					},
 					"required":             []string{"key", "value"},
 					"additionalProperties": false,
@@ -512,9 +618,9 @@ func (g *FileGenerator) getType(fd protoreflect.FieldDescriptor) map[string]any 
 		fullName := string(fd.Message().FullName())
 		switch fullName {
 		case "google.protobuf.Timestamp":
-			schema = map[string]any{"type": []string{"string", "null"}, "format": "date-time"}
+			schema = map[string]any{"type": "string", "format": "date-time", "nullable": true}
 		case "google.protobuf.Duration":
-			schema = map[string]any{"type": []string{"string", "null"}, "pattern": `^-?[0-9]+(\.[0-9]+)?s$`}
+			schema = map[string]any{"type": "string", "pattern": `^-?[0-9]+(\.[0-9]+)?s$`, "nullable": true}
 		case "google.protobuf.Struct":
 			if g.openAICompat {
 				schema = map[string]any{
@@ -553,7 +659,7 @@ func (g *FileGenerator) getType(fd protoreflect.FieldDescriptor) map[string]any 
 			}
 		case "google.protobuf.FieldMask":
 			if g.openAICompat {
-				schema = map[string]any{"type": []string{"string", "null"}}
+				schema = map[string]any{"type": "string", "nullable": true}
 			} else {
 				schema = map[string]any{"type": "string"}
 			}
@@ -645,6 +751,24 @@ outer:
 	return strings.Join(cleanedLines, "\n")
 }
 
+func getRPCDescription(meth *protogen.Method) string {
+	// First choice is comments
+	commentDescription := cleanComment(string(meth.Comments.Leading))
+	if strings.TrimSpace(commentDescription) != "" {
+		return commentDescription
+	}
+
+	// Second choice is OpenAPIv2 description
+	if proto.HasExtension(meth.Desc.Options(), options.E_Openapiv2Operation) {
+		opExt := proto.GetExtension(meth.Desc.Options(), options.E_Openapiv2Operation).(*options.Operation)
+		if opExt != nil && strings.TrimSpace(opExt.Description) != "" {
+			return opExt.Description
+		}
+	}
+
+	return commentDescription
+}
+
 func Base32String(b []byte) string {
 	n := new(big.Int).SetBytes(b)
 	return n.Text(36)
@@ -724,7 +848,7 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 			// Generate standard tool
 			toolStandard := mcp.Tool{
 				Name:        MangleHeadIfTooLong(strings.ReplaceAll(string(meth.Desc.FullName()), ".", "_"), 64),
-				Description: cleanComment(string(meth.Comments.Leading)),
+				Description: getRPCDescription(meth),
 			}
 
 			// Generate standard schema
@@ -739,7 +863,7 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 			// Generate OpenAI tool
 			toolOpenAI := mcp.Tool{
 				Name:        MangleHeadIfTooLong(strings.ReplaceAll(string(meth.Desc.FullName()), ".", "_"), 64),
-				Description: cleanComment(string(meth.Comments.Leading)),
+				Description: getRPCDescription(meth),
 			}
 
 			// Generate OpenAI schema
