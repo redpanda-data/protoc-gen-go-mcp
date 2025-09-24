@@ -7,6 +7,10 @@ managed:
   disable:
     - file_option: go_package
       module: buf.build/googleapis/googleapis
+    - file_option: go_package
+      module: buf.build/bufbuild/protovalidate
+inputs:
+  - directory: proto
 plugins:
   - remote: buf.build/protocolbuffers/go
     out: ./gen/go

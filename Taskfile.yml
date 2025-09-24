@@ -34,7 +34,8 @@ tasks:
     dir: pkg/testdata
     cmds:
       - buf generate buf.build/googleapis/googleapis
-      - buf generate --include-imports
+      - buf generate --include-imports --exclude-path buf/validate
+      - rm -rf gen/go/buf/  # Remove duplicate protovalidate files
       - go run mvdan.cc/gofumpt@latest -l -w .
 
   integrationtest:
