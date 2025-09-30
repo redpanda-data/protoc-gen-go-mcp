@@ -25,6 +25,7 @@ import (
 	"strings"
 	"text/template"
 
+	"buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	"github.com/mark3labs/mcp-go/mcp"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
@@ -377,6 +378,74 @@ func isFieldRequired(fd protoreflect.FieldDescriptor) bool {
 	return false
 }
 
+func extractValidateConstraints(fd protoreflect.FieldDescriptor) map[string]any {
+	constraints := make(map[string]any)
+
+	if !proto.HasExtension(fd.Options(), validate.E_Field) {
+		return constraints
+	}
+
+	fieldConstraints := proto.GetExtension(fd.Options(), validate.E_Field).(*validate.FieldRules)
+	if fieldConstraints == nil {
+		return constraints
+	}
+
+	// Handle string constraints
+	if stringRules := fieldConstraints.GetString(); stringRules != nil {
+		// UUID constraint
+		if stringRules.GetUuid() {
+			constraints["format"] = "uuid"
+		}
+
+		// Email constraint
+		if stringRules.GetEmail() {
+			constraints["format"] = "email"
+		}
+
+		// Pattern constraint
+		if pattern := stringRules.GetPattern(); pattern != "" {
+			constraints["pattern"] = pattern
+		}
+
+		// Length constraints
+		if stringRules.HasMinLen() {
+			constraints["minLength"] = int(stringRules.GetMinLen())
+		}
+		if stringRules.HasMaxLen() {
+			constraints["maxLength"] = int(stringRules.GetMaxLen())
+		}
+	}
+
+	// Handle numeric constraints (for completeness)
+	if int32Rules := fieldConstraints.GetInt32(); int32Rules != nil {
+		if int32Rules.HasGt() {
+			constraints["minimum"] = int(int32Rules.GetGt()) + 1
+		} else if int32Rules.HasGte() {
+			constraints["minimum"] = int(int32Rules.GetGte())
+		}
+		if int32Rules.HasLt() {
+			constraints["maximum"] = int(int32Rules.GetLt()) - 1
+		} else if int32Rules.HasLte() {
+			constraints["maximum"] = int(int32Rules.GetLte())
+		}
+	}
+
+	if int64Rules := fieldConstraints.GetInt64(); int64Rules != nil {
+		if int64Rules.HasGt() {
+			constraints["minimum"] = int(int64Rules.GetGt()) + 1
+		} else if int64Rules.HasGte() {
+			constraints["minimum"] = int(int64Rules.GetGte())
+		}
+		if int64Rules.HasLt() {
+			constraints["maximum"] = int(int64Rules.GetLt()) - 1
+		} else if int64Rules.HasLte() {
+			constraints["maximum"] = int(int64Rules.GetLte())
+		}
+	}
+
+	return constraints
+}
+
 func (g *FileGenerator) messageSchema(md protoreflect.MessageDescriptor) map[string]any {
 	required := []string{}
 	// Fields that are not oneOf
@@ -616,6 +685,12 @@ func (g *FileGenerator) getType(fd protoreflect.FieldDescriptor) map[string]any 
 				schema["format"] = "byte"
 			}
 		}
+	}
+
+	// Apply protovalidate constraints to the schema
+	validateConstraints := extractValidateConstraints(fd)
+	for key, value := range validateConstraints {
+		schema[key] = value
 	}
 
 	// Handle repeated fields here, wrapping the actual schema in an array.

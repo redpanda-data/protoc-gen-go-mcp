@@ -102,3 +102,10 @@ func (t *testServer) ProcessWellKnownTypes(ctx context.Context, in *testdata.Pro
 		Message: "Processed well-known types",
 	}, nil
 }
+
+func (t *testServer) TestValidation(ctx context.Context, in *testdata.TestValidationRequest) (*testdata.TestValidationResponse, error) {
+	return &testdata.TestValidationResponse{
+		Success: true,
+		Message: "Validation test completed",
+	}, nil
+}

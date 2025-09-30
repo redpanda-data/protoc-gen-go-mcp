@@ -54,6 +54,9 @@ const (
 	// TestServiceProcessWellKnownTypesProcedure is the fully-qualified name of the TestService's
 	// ProcessWellKnownTypes RPC.
 	TestServiceProcessWellKnownTypesProcedure = "/testdata.TestService/ProcessWellKnownTypes"
+	// TestServiceTestValidationProcedure is the fully-qualified name of the TestService's
+	// TestValidation RPC.
+	TestServiceTestValidationProcedure = "/testdata.TestService/TestValidation"
 )
 
 // TestServiceClient is a client for the testdata.TestService service.
@@ -64,6 +67,8 @@ type TestServiceClient interface {
 	GetItem(context.Context, *connect.Request[testdata.GetItemRequest]) (*connect.Response[testdata.GetItemResponse], error)
 	// Test well-known types handling
 	ProcessWellKnownTypes(context.Context, *connect.Request[testdata.ProcessWellKnownTypesRequest]) (*connect.Response[testdata.ProcessWellKnownTypesResponse], error)
+	// Test protovalidate constraints
+	TestValidation(context.Context, *connect.Request[testdata.TestValidationRequest]) (*connect.Response[testdata.TestValidationResponse], error)
 }
 
 // NewTestServiceClient constructs a client for the testdata.TestService service. By default, it
@@ -95,6 +100,12 @@ func NewTestServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(testServiceMethods.ByName("ProcessWellKnownTypes")),
 			connect.WithClientOptions(opts...),
 		),
+		testValidation: connect.NewClient[testdata.TestValidationRequest, testdata.TestValidationResponse](
+			httpClient,
+			baseURL+TestServiceTestValidationProcedure,
+			connect.WithSchema(testServiceMethods.ByName("TestValidation")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -103,6 +114,7 @@ type testServiceClient struct {
 	createItem            *connect.Client[testdata.CreateItemRequest, testdata.CreateItemResponse]
 	getItem               *connect.Client[testdata.GetItemRequest, testdata.GetItemResponse]
 	processWellKnownTypes *connect.Client[testdata.ProcessWellKnownTypesRequest, testdata.ProcessWellKnownTypesResponse]
+	testValidation        *connect.Client[testdata.TestValidationRequest, testdata.TestValidationResponse]
 }
 
 // CreateItem calls testdata.TestService.CreateItem.
@@ -120,6 +132,11 @@ func (c *testServiceClient) ProcessWellKnownTypes(ctx context.Context, req *conn
 	return c.processWellKnownTypes.CallUnary(ctx, req)
 }
 
+// TestValidation calls testdata.TestService.TestValidation.
+func (c *testServiceClient) TestValidation(ctx context.Context, req *connect.Request[testdata.TestValidationRequest]) (*connect.Response[testdata.TestValidationResponse], error) {
+	return c.testValidation.CallUnary(ctx, req)
+}
+
 // TestServiceHandler is an implementation of the testdata.TestService service.
 type TestServiceHandler interface {
 	// CreateItem creates a new item
@@ -128,6 +145,8 @@ type TestServiceHandler interface {
 	GetItem(context.Context, *connect.Request[testdata.GetItemRequest]) (*connect.Response[testdata.GetItemResponse], error)
 	// Test well-known types handling
 	ProcessWellKnownTypes(context.Context, *connect.Request[testdata.ProcessWellKnownTypesRequest]) (*connect.Response[testdata.ProcessWellKnownTypesResponse], error)
+	// Test protovalidate constraints
+	TestValidation(context.Context, *connect.Request[testdata.TestValidationRequest]) (*connect.Response[testdata.TestValidationResponse], error)
 }
 
 // NewTestServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -155,6 +174,12 @@ func NewTestServiceHandler(svc TestServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(testServiceMethods.ByName("ProcessWellKnownTypes")),
 		connect.WithHandlerOptions(opts...),
 	)
+	testServiceTestValidationHandler := connect.NewUnaryHandler(
+		TestServiceTestValidationProcedure,
+		svc.TestValidation,
+		connect.WithSchema(testServiceMethods.ByName("TestValidation")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/testdata.TestService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case TestServiceCreateItemProcedure:
@@ -163,6 +188,8 @@ func NewTestServiceHandler(svc TestServiceHandler, opts ...connect.HandlerOption
 			testServiceGetItemHandler.ServeHTTP(w, r)
 		case TestServiceProcessWellKnownTypesProcedure:
 			testServiceProcessWellKnownTypesHandler.ServeHTTP(w, r)
+		case TestServiceTestValidationProcedure:
+			testServiceTestValidationHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -182,4 +209,8 @@ func (UnimplementedTestServiceHandler) GetItem(context.Context, *connect.Request
 
 func (UnimplementedTestServiceHandler) ProcessWellKnownTypes(context.Context, *connect.Request[testdata.ProcessWellKnownTypesRequest]) (*connect.Response[testdata.ProcessWellKnownTypesResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("testdata.TestService.ProcessWellKnownTypes is not implemented"))
+}
+
+func (UnimplementedTestServiceHandler) TestValidation(context.Context, *connect.Request[testdata.TestValidationRequest]) (*connect.Response[testdata.TestValidationResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("testdata.TestService.TestValidation is not implemented"))
 }
