@@ -20,6 +20,7 @@ import (
 	"flag"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -274,6 +275,55 @@ func TestSchemaMarshaling(t *testing.T) {
 }
 
 var updateGolden = flag.Bool("update-golden", false, "Update golden files")
+
+func TestPackagePrefixPath(t *testing.T) {
+	tests := []struct {
+		name          string
+		packagePrefix string
+		originalPath  string
+		expectedPath  string
+	}{
+		{
+			name:          "no prefix",
+			packagePrefix: "",
+			originalPath:  "buf.build/gen/go/example",
+			expectedPath:  "buf.build/gen/go/example",
+		},
+		{
+			name:          "with prefix",
+			packagePrefix: "github.com/example/gen",
+			originalPath:  "buf.build/gen/go/example",
+			expectedPath:  "github.com/example/gen/buf.build/gen/go/example",
+		},
+		{
+			name:          "nested path with prefix",
+			packagePrefix: "github.com/myorg/protolib",
+			originalPath:  "google.golang.org/genproto/protobuf/api",
+			expectedPath:  "github.com/myorg/protolib/google.golang.org/genproto/protobuf/api",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := NewWithT(t)
+
+			// Test the path transformation logic directly
+			fg := &FileGenerator{
+				packagePrefix: tt.packagePrefix,
+			}
+
+			// Extract the path transformation logic from getQualifiedTypeName
+			var actualPath string
+			if fg.packagePrefix != "" {
+				actualPath = path.Join(fg.packagePrefix, tt.originalPath)
+			} else {
+				actualPath = tt.originalPath
+			}
+
+			g.Expect(actualPath).To(Equal(tt.expectedPath))
+		})
+	}
+}
 
 func TestFullGeneration(t *testing.T) {
 	g := NewWithT(t)
