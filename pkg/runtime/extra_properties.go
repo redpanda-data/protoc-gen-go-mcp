@@ -19,6 +19,7 @@ type ExtraProperty struct {
 
 type config struct {
 	ExtraProperties []ExtraProperty
+	Annotations     *ToolAnnotationConfig
 }
 
 // WithExtraProperties adds extra properties to tool schemas and extracts them from request arguments
