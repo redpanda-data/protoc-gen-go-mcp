@@ -23,6 +23,7 @@ go_library(
 
 go_test(
     name = "gen_test",
+    size = "small",
     srcs = [
         "register_test.go",
         "schema_fuzz_test.go",

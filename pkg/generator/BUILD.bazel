@@ -16,6 +16,7 @@ go_library(
 
 go_test(
     name = "generator_test",
+    size = "small",
     srcs = [
         "compatibility_test.go",
         "edge_cases_test.go",

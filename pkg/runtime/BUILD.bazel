@@ -23,6 +23,7 @@ go_library(
 
 go_test(
     name = "runtime_test",
+    size = "small",
     srcs = [
         "error_test.go",
         "extra_properties_test.go",

@@ -5,12 +5,20 @@ Protoc plugin + runtime library for generating MCP (Model Context Protocol) serv
 ## Build & Test
 
 ```bash
+# Go (primary)
 ./taskw test              # Run unit tests with race detector
 ./taskw test-cover        # Run tests with coverage report
 ./taskw build             # Build binary
+./taskw generate          # Regenerate proto code + descriptor set
 ./taskw lint              # Run golangci-lint
-./taskw conformancetest   # Run conformance tests against LLM providers (needs GOOGLE_API_KEY)
+./taskw conformancetest   # Run conformance tests against LLM providers (needs API keys)
 ./taskw integrationtest   # Run all integration tests (needs API keys)
+
+# Bazel
+just test                 # bazelisk test //...
+just build                # bazelisk build //...
+just gazelle              # Sync BUILD files from go.mod
+just generate             # Same as taskw generate but from justfile
 ```
 
 ## Architecture
@@ -60,13 +68,13 @@ standard, openAI := gen.ToolForMethod(methodDescriptor, "description")
 - Well-known types (Struct, Value, ListValue) become JSON strings in OpenAI mode
 - Tool names > 64 chars get hash-mangled (Claude desktop limit)
 - `pkg/gen` is fully independent of protoc - works with any protoreflect descriptor
-- Golden file tests catch generated code drift
+- Golden test re-runs generator in-process from compiled descriptors, no shell/buf at test time
 
 ## Testing
 
 - Unit tests: `go test ./pkg/...` (with -race, always)
-- Conformance tests: `go test -tags=integration ./conformancetest/` (needs GOOGLE_API_KEY)
-- Golden file tests: in-process generator re-run vs checked-in `gen/go/*.pb.mcp.go`
+- Conformance tests: `go test -tags=integration ./conformancetest/` (needs API keys)
+- Golden test: in-process generator re-run vs checked-in `gen/go/*.pb.mcp.go`
 - Edge case protos: `pkg/testdata/proto/testdata/edge_cases.proto`
 - Fuzz tests: `pkg/runtime/fix_fuzz_test.go`, `pkg/gen/schema_fuzz_test.go`
 
