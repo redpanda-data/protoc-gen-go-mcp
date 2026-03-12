@@ -15,6 +15,10 @@ jobs:
 
     - name: Setup Bazel
       uses: useblacksmith/setup-bazel@v1
+      with:
+        bazelisk-cache: true
+        disk-cache: ${{ github.ref }}
+        repository-cache: true
 
     - name: Build and test
       run: bazelisk test //...
