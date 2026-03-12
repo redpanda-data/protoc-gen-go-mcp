@@ -1,0 +1,23 @@
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "dynamic_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/redpanda-data/protoc-gen-go-mcp/examples/dynamic",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//pkg/gen",
+        "//pkg/runtime",
+        "//pkg/testdata/gen/go/testdata",
+        "@com_github_mark3labs_mcp_go//server",
+        "@org_golang_google_protobuf//encoding/protojson",
+        "@org_golang_google_protobuf//proto",
+        "@org_golang_google_protobuf//reflect/protoreflect",
+    ],
+)
+
+go_binary(
+    name = "dynamic",
+    embed = [":dynamic_lib"],
+    visibility = ["//visibility:public"],
+)

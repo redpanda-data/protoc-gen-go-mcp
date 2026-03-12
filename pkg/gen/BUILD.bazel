@@ -1,0 +1,48 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "gen",
+    srcs = [
+        "register.go",
+        "schema.go",
+    ],
+    importpath = "github.com/redpanda-data/protoc-gen-go-mcp/pkg/gen",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/runtime",
+        "@build_buf_gen_go_bufbuild_protovalidate_protocolbuffers_go//buf/validate",
+        "@com_github_mark3labs_mcp_go//mcp",
+        "@com_github_mark3labs_mcp_go//server",
+        "@org_golang_google_genproto_googleapis_api//annotations",
+        "@org_golang_google_protobuf//encoding/protojson",
+        "@org_golang_google_protobuf//proto",
+        "@org_golang_google_protobuf//reflect/protoreflect",
+        "@org_golang_google_protobuf//types/dynamicpb",
+    ],
+)
+
+go_test(
+    name = "gen_test",
+    srcs = [
+        "register_test.go",
+        "schema_fuzz_test.go",
+        "schema_test.go",
+    ],
+    data = glob(["testdata/**"]),
+    embed = [":gen"],
+    deps = [
+        "//pkg/runtime",
+        "//pkg/testdata/gen/go/testdata",
+        "@com_github_mark3labs_mcp_go//server",
+        "@com_github_onsi_gomega//:gomega",
+        "@com_github_santhosh_tekuri_jsonschema_v5//:jsonschema",
+        "@org_golang_google_protobuf//encoding/protojson",
+        "@org_golang_google_protobuf//proto",
+        "@org_golang_google_protobuf//reflect/protoreflect",
+        "@org_golang_google_protobuf//types/dynamicpb",
+        "@org_golang_google_protobuf//types/known/anypb",
+        "@org_golang_google_protobuf//types/known/structpb",
+        "@org_golang_google_protobuf//types/known/timestamppb",
+        "@org_golang_google_protobuf//types/known/wrapperspb",
+    ],
+)

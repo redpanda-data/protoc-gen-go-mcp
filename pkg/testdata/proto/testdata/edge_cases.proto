@@ -1,0 +1,220 @@
+// Copyright 2025 Redpanda Data, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package testdata;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/wrappers.proto";
+import "google/api/field_behavior.proto";
+import "buf/validate/validate.proto";
+
+// EdgeCaseService exercises every tricky code path in the generator
+service EdgeCaseService {
+  // DeepNesting tests deeply nested messages with maps and WKTs
+  rpc DeepNesting(DeepNestingRequest) returns (DeepNestingResponse);
+
+  // AllScalarTypes tests all protobuf scalar types
+  rpc AllScalarTypes(AllScalarTypesRequest) returns (AllScalarTypesResponse);
+
+  // RepeatedMessages tests repeated message fields with inner maps/WKTs
+  rpc RepeatedMessages(RepeatedMessagesRequest) returns (RepeatedMessagesResponse);
+
+  // MapVariants tests all map key/value type combinations
+  rpc MapVariants(MapVariantsRequest) returns (MapVariantsResponse);
+
+  // EnumFields tests enum handling
+  rpc EnumFields(EnumFieldsRequest) returns (EnumFieldsResponse);
+
+  // MultipleOneofs tests multiple oneof groups in a single message
+  rpc MultipleOneofs(MultipleOneofsRequest) returns (MultipleOneofsResponse);
+
+  // NumericValidation tests all numeric validation constraint types
+  rpc NumericValidation(NumericValidationRequest) returns (NumericValidationResponse);
+}
+
+// Deeply nested message: Inner has a map and a WKT
+message InnerMessage {
+  string id = 1;
+  map<string, string> tags = 2;
+  google.protobuf.Struct metadata = 3;
+  google.protobuf.Value dynamic_config = 4;
+}
+
+message MiddleMessage {
+  InnerMessage inner = 1;
+  repeated InnerMessage items = 2;
+  map<string, InnerMessage> named_items = 3;
+}
+
+message DeepNestingRequest {
+  MiddleMessage middle = 1;
+  repeated MiddleMessage middles = 2;
+}
+
+message DeepNestingResponse {
+  bool success = 1;
+}
+
+// All scalar types
+message AllScalarTypesRequest {
+  double double_field = 1;
+  float float_field = 2;
+  int32 int32_field = 3;
+  int64 int64_field = 4;
+  uint32 uint32_field = 5;
+  uint64 uint64_field = 6;
+  sint32 sint32_field = 7;
+  sint64 sint64_field = 8;
+  fixed32 fixed32_field = 9;
+  fixed64 fixed64_field = 10;
+  sfixed32 sfixed32_field = 11;
+  sfixed64 sfixed64_field = 12;
+  bool bool_field = 13;
+  string string_field = 14;
+  bytes bytes_field = 15;
+}
+
+message AllScalarTypesResponse {
+  bool success = 1;
+}
+
+// Repeated messages with inner maps and WKTs
+message ItemWithMap {
+  string name = 1;
+  map<string, string> labels = 2;
+  google.protobuf.Value config = 3;
+  google.protobuf.Struct extra = 4;
+}
+
+message RepeatedMessagesRequest {
+  repeated ItemWithMap items = 1;
+  repeated google.protobuf.Timestamp timestamps = 2;
+}
+
+message RepeatedMessagesResponse {
+  bool success = 1;
+}
+
+// Map with various key and value types
+message MapVariantsRequest {
+  map<string, string> string_to_string = 1;
+  map<int32, string> int_to_string = 2;
+  map<bool, string> bool_to_string = 3;
+  map<uint64, string> uint64_to_string = 4;
+  map<string, InnerMessage> string_to_message = 5;
+  map<string, double> string_to_double = 6;
+  map<string, bool> string_to_bool = 7;
+}
+
+message MapVariantsResponse {
+  bool success = 1;
+}
+
+// Enum types
+enum Priority {
+  PRIORITY_UNSPECIFIED = 0;
+  PRIORITY_LOW = 1;
+  PRIORITY_MEDIUM = 2;
+  PRIORITY_HIGH = 3;
+  PRIORITY_CRITICAL = 4;
+}
+
+message EnumFieldsRequest {
+  Priority priority = 1;
+  repeated Priority priorities = 2;
+}
+
+message EnumFieldsResponse {
+  bool success = 1;
+}
+
+// Multiple oneof groups
+message MultipleOneofsRequest {
+  string name = 1 [(google.api.field_behavior) = REQUIRED];
+
+  oneof source {
+    string url = 2;
+    bytes raw_data = 3;
+    string file_path = 4;
+  }
+
+  oneof output_format {
+    bool as_json = 5;
+    bool as_xml = 6;
+    bool as_csv = 7;
+  }
+}
+
+message MultipleOneofsResponse {
+  bool success = 1;
+}
+
+// Numeric validation for all types
+message NumericValidationRequest {
+  // int32 with gte/lte
+  int32 age = 1 [
+    (buf.validate.field).int32.gte = 0,
+    (buf.validate.field).int32.lte = 150
+  ];
+
+  // int32 with gt/lt
+  int32 score = 2 [
+    (buf.validate.field).int32.gt = 0,
+    (buf.validate.field).int32.lt = 100
+  ];
+
+  // uint32 with gte/lte
+  uint32 count = 3 [
+    (buf.validate.field).uint32.gte = 1,
+    (buf.validate.field).uint32.lte = 1000
+  ];
+
+  // uint64 with gt
+  uint64 big_count = 4 [
+    (buf.validate.field).uint64.gt = 0
+  ];
+
+  // float with gte/lte
+  float percentage = 5 [
+    (buf.validate.field).float.gte = 0.0,
+    (buf.validate.field).float.lte = 100.0
+  ];
+
+  // double with gt/lt
+  double temperature = 6 [
+    (buf.validate.field).double.gt = -273.15,
+    (buf.validate.field).double.lt = 1000000.0
+  ];
+
+  // int64 with gte
+  int64 timestamp_nanos = 7 [
+    (buf.validate.field).int64.gte = 0
+  ];
+
+  // string with multiple constraints
+  string code = 8 [
+    (buf.validate.field).string.min_len = 2,
+    (buf.validate.field).string.max_len = 10,
+    (buf.validate.field).string.pattern = "^[A-Z0-9]+$"
+  ];
+}
+
+message NumericValidationResponse {
+  bool success = 1;
+}
