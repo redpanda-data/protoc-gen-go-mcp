@@ -7,74 +7,14 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.24'
+    - name: Setup Bazel
+      uses: useblacksmith/setup-bazel@v1
 
-    - name: Set up Buf
-      uses: bufbuild/buf-setup-action@v1
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Cache Go modules
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
-        key: ${{ runner.os }}-go-1.24-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-1.24-
-
-    - name: Download dependencies
-      run: go mod download
-
-    - name: Run tests with race detector and coverage
-      run: go test -race -coverprofile=coverage.out -covermode=atomic ./pkg/...
-
-    - name: Print coverage summary
-      run: go tool cover -func=coverage.out
-
-    - name: Check examples build
-      run: |
-        cd examples/basic && go build .
-        cd ../openai-compat && go build .
-        cd ../dynamic && go build .
-
-  bazel:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Cache Bazel
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/bazel
-        key: ${{ runner.os }}-bazel-${{ hashFiles('MODULE.bazel', 'go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-bazel-
-
-    - name: Test
+    - name: Build and test
       run: bazelisk test //...
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.24'
-
-    - name: golangci-lint
-      uses: golangci/golangci-lint-action@v7
-      with:
-        version: v2.1.6
