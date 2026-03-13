@@ -22,3 +22,13 @@ jobs:
 
     - name: Build and test
       run: bazelisk test //...
+
+    - name: Conformance tests
+      if: github.event_name == 'push' || !github.event.pull_request.head.repo.fork
+      env:
+        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      run: |
+        bazelisk test //conformancetest:conformancetest_test //integrationtest:integrationtest_test \
+          --test_env=GOOGLE_API_KEY --test_env=OPENAI_API_KEY --test_env=ANTHROPIC_API_KEY
