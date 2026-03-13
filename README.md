@@ -169,90 +169,42 @@ plugins:
 testdatamcp.RegisterTestServiceHandlerWithProvider(server, srv, testdatamcp.LLMProviderOpenAI)
 ```
 
-## 🧪 Development & Testing
+## Development & Testing
 
-### Quick Commands
+### Commands
+
+All commands use [just](https://github.com/casey/just):
 
 ```bash
-# Run all tests
-task test
-
-# Build the binary
-task build
-
-# Install to GOPATH/bin
-task install
-
-# Update golden test files
-task generate-golden
-
+just build                # Build everything (Bazel)
+just test-unit            # Unit + golden tests (no API keys needed)
+just test                 # All tests including conformance/integration (needs API keys)
+just test-cover           # Tests with coverage report
+just generate             # Regenerate proto code + descriptor set
+just lint                 # Run golangci-lint
+just fmt                  # Format code
+just install              # Install binary to GOPATH/bin
+just gazelle              # Sync BUILD files from go.mod
 
 # View all available commands
-task --list
-```
-
-### Manual Commands
-
-```bash
-# Run tests
-go test ./...
-
-# Update golden files
-./tools/update-golden.sh
-# Or manually for specific packages
-go test ./pkg/generator -update-golden
-
-# Build from source
-go build -o protoc-gen-go-mcp ./cmd/protoc-gen-go-mcp
-
-# Run integration tests (requires OPENAI_API_KEY)
-# Either export OPENAI_API_KEY or add to .env file
-export OPENAI_API_KEY="your-api-key"
-task integrationtest
+just --list
 ```
 
 ### Development Workflow
 
 ```bash
-# Format code
-task fmt
-
-# Run linting
-task lint
-
-# Generate protobuf files for testdata
-task generate
+# 1. Edit proto or generator code
+# 2. Regenerate
+just generate
+# 3. Run tests
+just test-unit
 ```
 
 ### Golden File Testing
 
-The generator uses golden file testing to ensure output consistency. The test structure in `pkg/generator/testdata/` is organized as:
+The generator uses golden file testing to ensure output consistency. Tests re-run the generator in-process from compiled descriptors and compare against checked-in `*.pb.mcp.go` files.
 
-```
-testdata/
-├── *.proto          # Input proto files (just drop new ones here!)
-├── buf.gen.yaml     # Generates into actual/
-├── buf.gen.golden.yaml # Generates into golden/
-├── actual/          # Current generated output (committed to track changes)
-└── golden/          # Expected output (committed as test baseline)
-```
-
-**To add new tests:** Simply drop a `.proto` file in `pkg/testdata/proto/testdata/` and run the tests. The framework automatically:
-1. Discovers all `.proto` files
-2. Generates code using `task generate`
-3. Compares with expected output
-4. Creates missing golden files on first run
-
-**To update golden files after generator changes:**
-```bash
-# Update all golden files
-task generate-golden
-
-# Or update specific package
-go test ./pkg/generator -update-golden
-```
-
-The `actual/` directory is committed to git so you can track how generator changes affect output over time.
+**To add new tests:** Drop a `.proto` file in `pkg/testdata/proto/testdata/` and run `just generate`. The golden test automatically discovers all generated files and compares them.
 
 ## ⚠️ Limitations
 

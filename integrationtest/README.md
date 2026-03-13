@@ -24,14 +24,14 @@ This directory contains integration tests that validate the end-to-end functiona
 
 2. Generate the test code:
    ```bash
-   task generate
+   just generate
    ```
 
 ### Run Tests
 
 ```bash
 # Run integration tests
-task integrationtest
+just integrationtest
 
 # Or run directly with go test
 go test -tags=integration ./integrationtest -v
@@ -55,7 +55,7 @@ go test -tags=integration ./integrationtest -run TestSchemaValidation -v
 ## Adding New Test Cases
 
 1. Add new message types or fields to `test.proto`
-2. Run `task generate` to regenerate code
+2. Run `just generate` to regenerate code
 3. Add test cases in `openai_integration_test.go`
 
 ## Debugging

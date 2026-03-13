@@ -135,6 +135,111 @@ func TestFixOpenAI(t *testing.T) {
 	}
 }
 
+func TestFixOpenAIRepeatedMessages(t *testing.T) {
+	tests := []struct {
+		name       string
+		descriptor proto.Message
+		input      map[string]any
+		expected   map[string]any
+	}{
+		{
+			name:       "repeated messages with nested maps and WKTs",
+			descriptor: new(testdata.RepeatedMessagesRequest),
+			input: map[string]any{
+				"items": []any{
+					map[string]any{
+						"name": "item1",
+						"labels": []any{
+							map[string]any{"key": "env", "value": "prod"},
+						},
+						"config": `{"enabled": true}`,
+						"extra":  `{"x": 1}`,
+					},
+					map[string]any{
+						"name": "item2",
+						"labels": []any{
+							map[string]any{"key": "region", "value": "us-east"},
+						},
+						"config": `42`,
+						"extra":  `{"y": 2}`,
+					},
+				},
+			},
+			expected: map[string]any{
+				"items": []any{
+					map[string]any{
+						"name":   "item1",
+						"labels": map[string]any{"env": "prod"},
+						"config": map[string]any{"enabled": true},
+						"extra":  map[string]any{"x": float64(1)},
+					},
+					map[string]any{
+						"name":   "item2",
+						"labels": map[string]any{"region": "us-east"},
+						"config": float64(42),
+						"extra":  map[string]any{"y": float64(2)},
+					},
+				},
+			},
+		},
+		{
+			name:       "deeply nested repeated messages with maps",
+			descriptor: new(testdata.DeepNestingRequest),
+			input: map[string]any{
+				"middle": map[string]any{
+					"items": []any{
+						map[string]any{
+							"id": "a",
+							"tags": []any{
+								map[string]any{"key": "k", "value": "v"},
+							},
+							"metadata":       `{"nested": true}`,
+							"dynamic_config": `[1,2,3]`,
+						},
+					},
+				},
+			},
+			expected: map[string]any{
+				"middle": map[string]any{
+					"items": []any{
+						map[string]any{
+							"id":             "a",
+							"tags":           map[string]any{"k": "v"},
+							"metadata":       map[string]any{"nested": true},
+							"dynamic_config": []any{float64(1), float64(2), float64(3)},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := NewWithT(t)
+
+			fixed := deepCopyMap(tt.input)
+			FixOpenAI(tt.descriptor.ProtoReflect().Descriptor(), fixed)
+
+			g.Expect(fixed).To(Equal(tt.expected))
+
+			fixedJSON, err := json.Marshal(fixed)
+			g.Expect(err).ToNot(HaveOccurred())
+
+			msg := tt.descriptor.ProtoReflect().New().Interface()
+			err = protojson.Unmarshal(fixedJSON, msg)
+			g.Expect(err).ToNot(HaveOccurred(), "protojson.Unmarshal should succeed after FixOpenAI")
+		})
+	}
+}
+
+func deepCopyMap(m map[string]any) map[string]any {
+	b, _ := json.Marshal(m)
+	var out map[string]any
+	_ = json.Unmarshal(b, &out)
+	return out
+}
+
 func TestFixOpenAINonMapField(t *testing.T) {
 	RegisterTestingT(t)
 	g := NewWithT(t)

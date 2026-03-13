@@ -5,20 +5,15 @@ Protoc plugin + runtime library for generating MCP (Model Context Protocol) serv
 ## Build & Test
 
 ```bash
-# Go (primary)
-./taskw test              # Run unit tests with race detector
-./taskw test-cover        # Run tests with coverage report
-./taskw build             # Build binary
-./taskw generate          # Regenerate proto code + descriptor set
-./taskw lint              # Run golangci-lint
-./taskw conformancetest   # Run conformance tests against LLM providers (needs API keys)
-./taskw integrationtest   # Run all integration tests (needs API keys)
-
-# Bazel
-just test                 # bazelisk test //...
 just build                # bazelisk build //...
+just test-unit            # bazelisk test //... (no API keys needed)
+just test                 # All tests including conformance/integration (needs API keys)
+just test-cover           # Tests with coverage report
+just generate             # Regenerate proto code + descriptor set
+just lint                 # Run golangci-lint
+just conformancetest      # Run conformance tests against LLM providers (needs API keys)
+just integrationtest      # Run all integration tests (needs API keys)
 just gazelle              # Sync BUILD files from go.mod
-just generate             # Same as taskw generate but from justfile
 ```
 
 ## Architecture
@@ -81,10 +76,10 @@ standard, openAI := gen.ToolForMethod(methodDescriptor, "description")
 ## Proto Generation
 
 Uses `buf`. Test protos in `pkg/testdata/proto/`.
-After changing protos: `./taskw generate`.
+After changing protos: `just generate`.
 
 ## Development workflow
 
 1. Edit proto or generator code
-2. `./taskw generate` (regenerates test proto Go code + descriptor set)
-3. `./taskw test` (runs unit tests, including golden comparison)
+2. `just generate` (regenerates test proto Go code + descriptor set)
+3. `just test-unit` (runs unit tests, including golden comparison)

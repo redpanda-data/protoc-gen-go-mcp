@@ -117,7 +117,7 @@ func TestGoldenGeneration(t *testing.T) {
 		expected, err := os.ReadFile(goldenPath)
 		g.Expect(err).ToNot(HaveOccurred(), "reading golden file for %s", rf.GetName())
 		g.Expect(rf.GetContent()).To(Equal(string(expected)),
-			"generated output differs from checked-in %s\nRun: ./taskw generate", rf.GetName())
+			"generated output differs from checked-in %s\nRun: just generate", rf.GetName())
 	}
 }
 
