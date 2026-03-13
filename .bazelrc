@@ -3,6 +3,7 @@ build --incompatible_strict_action_env
 
 # Only print test output on failure
 test --test_output=errors
+test --test_summary=short
 
 # Some tests need $HOME (e.g. for config files)
 test --test_env=HOME

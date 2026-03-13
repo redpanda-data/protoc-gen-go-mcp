@@ -21,4 +21,21 @@ jobs:
         repository-cache: true
 
     - name: Build and test
-      run: bazelisk test //...
+      run: bazelisk test //... --test_summary=detailed
+
+    - name: Conformance tests
+      if: >-
+        github.event_name == 'push' ||
+        (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork)
+      env:
+        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      run: |
+        if [ -z "$OPENAI_API_KEY" ]; then
+          echo "::warning::API key secrets not available, skipping conformance tests"
+          exit 0
+        fi
+        bazelisk test //conformancetest:conformancetest_test //integrationtest:integrationtest_test \
+          --test_env=GOOGLE_API_KEY --test_env=OPENAI_API_KEY --test_env=ANTHROPIC_API_KEY \
+          --test_output=all --test_summary=detailed

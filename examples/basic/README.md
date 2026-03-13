@@ -11,7 +11,7 @@ go run .
 LLM_PROVIDER=openai go run .
 ```
 
-This example uses the generated MCP handlers from `pkg/testdata/gen/go/testdata/testdatamcp` which are created by running `task generate` in the project root.
+This example uses the generated MCP handlers from `pkg/testdata/gen/go/testdata/testdatamcp` which are created by running `just generate` in the project root.
 
 ## Test / list tools
 

@@ -79,12 +79,36 @@ func FixOpenAI(descriptor protoreflect.MessageDescriptor, args map[string]any) {
 				fullName := string(field.Message().FullName())
 
 				if field.IsList() {
-					// Handle repeated message fields
+					// Handle repeated message fields, including well-known types
 					if arr, ok := obj[name].([]any); ok {
 						for i, elem := range arr {
-							if nested, ok := elem.(map[string]any); ok {
-								rewrite(field.Message(), nested)
-								arr[i] = nested
+							switch fullName {
+							case "google.protobuf.Value":
+								if str, ok := elem.(string); ok {
+									var value any
+									if err := json.Unmarshal([]byte(str), &value); err == nil {
+										arr[i] = value
+									}
+								}
+							case "google.protobuf.ListValue":
+								if str, ok := elem.(string); ok {
+									var listValue []any
+									if err := json.Unmarshal([]byte(str), &listValue); err == nil {
+										arr[i] = listValue
+									}
+								}
+							case "google.protobuf.Struct":
+								if str, ok := elem.(string); ok {
+									var structValue map[string]any
+									if err := json.Unmarshal([]byte(str), &structValue); err == nil {
+										arr[i] = structValue
+									}
+								}
+							default:
+								if nested, ok := elem.(map[string]any); ok {
+									rewrite(field.Message(), nested)
+									arr[i] = nested
+								}
 							}
 						}
 					}

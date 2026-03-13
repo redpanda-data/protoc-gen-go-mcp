@@ -1,4 +1,4 @@
-# Bazel-native build commands. Proto codegen stays with buf (see Taskfile.yml).
+# Bazel-native build commands. Proto codegen stays with buf.
 
 default:
     @just --list
@@ -16,6 +16,20 @@ test:
 test-unit:
     bazelisk test //...
 
+# Run tests with coverage report
+test-cover:
+    go test -race -coverprofile=coverage.out -covermode=atomic ./pkg/...
+    go tool cover -func=coverage.out
+    go tool cover -html=coverage.out -o coverage.html
+
+# Run conformance tests against all cloud providers (requires API keys)
+conformancetest:
+    go test -tags=integration ./conformancetest -v -timeout=300s
+
+# Run integration tests (requires API keys)
+integrationtest:
+    go test -tags=integration ./integrationtest ./conformancetest -v -timeout=120s
+
 # Run gazelle to sync BUILD files from go.mod
 gazelle:
     bazelisk run //:gazelle
@@ -30,3 +44,15 @@ generate:
     rm -rf pkg/testdata/gen/go/buf/
     cd pkg/testdata && buf build -o gen/descriptors.binpb --exclude-path buf/validate
     go run mvdan.cc/gofumpt@latest -l -w pkg/testdata/
+
+# Install binary to GOPATH/bin
+install:
+    go install ./cmd/protoc-gen-go-mcp
+
+# Lint code
+lint:
+    golangci-lint run
+
+# Format code (excludes generated protobuf files)
+fmt:
+    find . -name '*.go' -not -path './pkg/testdata/gen/*' | xargs go run mvdan.cc/gofumpt@latest -l -w
