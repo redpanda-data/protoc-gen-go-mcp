@@ -240,6 +240,70 @@ func deepCopyMap(m map[string]any) map[string]any {
 	return out
 }
 
+// TestFixOpenAI_Issue34 reproduces the exact scenario from
+// https://github.com/redpanda-data/protoc-gen-go-mcp/issues/34:
+// a repeated message field containing a map that wasn't being fixed
+// because FixOpenAI didn't recurse into list elements.
+//
+// The issue's JSON (adapted to our test protos):
+//
+//	{
+//	  "items": [
+//	    {
+//	      "name": "cell-1",
+//	      "labels": [
+//	        { "key": "agent/summary", "value": "A simple hello world program." }
+//	      ]
+//	    }
+//	  ]
+//	}
+//
+// Without the fix, "labels" stays as an array instead of being
+// converted to a map.
+func TestFixOpenAI_Issue34(t *testing.T) {
+	g := NewWithT(t)
+
+	// This is the issue reporter's payload mapped to RepeatedMessagesRequest.
+	// RepeatedMessagesRequest has repeated ItemWithMap items, where
+	// ItemWithMap has map<string,string> labels -- same shape as the
+	// reported "cells" containing "metadata".
+	input := map[string]any{
+		"items": []any{
+			map[string]any{
+				"name": "cell-1",
+				"labels": []any{
+					map[string]any{
+						"key":   "agent/summary",
+						"value": "A simple hello world program.",
+					},
+				},
+			},
+		},
+	}
+
+	fixed := deepCopyMap(input)
+	desc := new(testdata.RepeatedMessagesRequest)
+	FixOpenAI(desc.ProtoReflect().Descriptor(), fixed)
+
+	// The map inside the repeated message must be converted.
+	g.Expect(fixed).To(Equal(map[string]any{
+		"items": []any{
+			map[string]any{
+				"name": "cell-1",
+				"labels": map[string]any{
+					"agent/summary": "A simple hello world program.",
+				},
+			},
+		},
+	}))
+
+	// Must round-trip through protojson without error.
+	fixedJSON, err := json.Marshal(fixed)
+	g.Expect(err).ToNot(HaveOccurred())
+	err = protojson.Unmarshal(fixedJSON, desc)
+	g.Expect(err).ToNot(HaveOccurred())
+}
+
 func TestFixOpenAINonMapField(t *testing.T) {
 	RegisterTestingT(t)
 	g := NewWithT(t)
