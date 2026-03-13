@@ -42,6 +42,12 @@ func HandleError(err error) (*mcp.CallToolResult, error) {
 	} else if connectErr := new(connect.Error); errors.As(err, &connectErr) {
 		// Handle Connect RPC errors using ConnectErrorToGoogleStatus
 		statusProto = apierrors.ConnectErrorToGoogleStatus(connectErr)
+		// Preserve wrapper context: if the error was wrapped (e.g., fmt.Errorf),
+		// the outer message is lost by ConnectErrorToGoogleStatus which only sees
+		// the inner connect.Error. Use the full error chain message instead.
+		if fullMsg := err.Error(); fullMsg != connectErr.Error() {
+			statusProto.Message = fullMsg
+		}
 	} else {
 		// Create a basic status for generic errors
 		statusProto = &spb.Status{

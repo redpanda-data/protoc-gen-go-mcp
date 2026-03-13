@@ -15,6 +15,9 @@ package runtime
 
 import (
 	"encoding/json"
+	"fmt"
+	"math"
+	"strconv"
 
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
@@ -55,11 +58,34 @@ func FixOpenAI(descriptor protoreflect.MessageDescriptor, args map[string]any) {
 					m := make(map[string]any)
 					for _, e := range arr {
 						if pair, ok := e.(map[string]any); ok {
-							k, kOk := pair["key"].(string)
-							v, vOk := pair["value"]
-							if kOk && vOk {
-								m[k] = v
+							rawKey, hasKey := pair["key"]
+							v, hasVal := pair["value"]
+							if !hasKey || !hasVal {
+								continue
 							}
+							// Coerce non-string keys (LLMs may send int/bool map keys as native JSON types)
+							var k string
+							switch kt := rawKey.(type) {
+							case string:
+								k = kt
+							case float64:
+								// JSON numbers are float64. Format as integer if possible
+								// to match protojson's expected map key format.
+								if kt == math.Trunc(kt) {
+									k = strconv.FormatInt(int64(kt), 10)
+								} else {
+									k = strconv.FormatFloat(kt, 'f', -1, 64)
+								}
+							case bool:
+								k = strconv.FormatBool(kt)
+							default:
+								k = fmt.Sprintf("%v", kt)
+							}
+							// Skip null values -- protojson rejects null for map values
+							if v == nil {
+								continue
+							}
+							m[k] = v
 						}
 					}
 					obj[name] = m
@@ -138,11 +164,59 @@ func FixOpenAI(descriptor protoreflect.MessageDescriptor, args map[string]any) {
 							obj[name] = structValue
 						}
 					}
-				default:
-					// Recursively process nested messages
-					if nested, ok := obj[name].(map[string]any); ok {
-						rewrite(field.Message(), nested)
+				case "google.protobuf.DoubleValue", "google.protobuf.FloatValue",
+					"google.protobuf.Int32Value", "google.protobuf.UInt32Value",
+					"google.protobuf.Int64Value", "google.protobuf.UInt64Value",
+					"google.protobuf.StringValue", "google.protobuf.BoolValue",
+					"google.protobuf.BytesValue":
+					// Unwrap {"value": X} -> X for wrapper types.
+					// LLMs sometimes send the protobuf message form instead of
+					// the plain scalar that protojson expects.
+					if wrapped, ok := obj[name].(map[string]any); ok {
+						if val, hasVal := wrapped["value"]; hasVal {
+							obj[name] = val
+						}
 					}
+				default:
+					// Recursively process nested messages.
+					// The value may be a JSON object (normal case) or a JSON string
+					// (from depth-limited recursive schema expansion in OpenAI mode,
+					// where deep recursion levels are encoded as string placeholders).
+					switch v := obj[name].(type) {
+					case map[string]any:
+						rewrite(field.Message(), v)
+					case string:
+						var parsed map[string]any
+						if err := json.Unmarshal([]byte(v), &parsed); err == nil {
+							rewrite(field.Message(), parsed)
+							obj[name] = parsed
+						}
+					}
+				}
+			}
+		}
+
+		// Strip null oneof alternatives. In OpenAI strict mode, all fields are
+		// required so LLMs send all oneof members. protojson rejects messages
+		// with multiple oneof fields set. Keep only the first non-null alternative.
+		for i := 0; i < msg.Oneofs().Len(); i++ {
+			oo := msg.Oneofs().Get(i)
+			if oo.IsSynthetic() {
+				continue
+			}
+			foundNonNull := false
+			for j := 0; j < oo.Fields().Len(); j++ {
+				fd := oo.Fields().Get(j)
+				name := resolveFieldName(fd, obj)
+				if name == "" {
+					continue
+				}
+				if obj[name] == nil {
+					delete(obj, name)
+				} else if foundNonNull {
+					delete(obj, name)
+				} else {
+					foundNonNull = true
 				}
 			}
 		}

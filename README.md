@@ -206,16 +206,87 @@ The generator uses golden file testing to ensure output consistency. Tests re-ru
 
 **To add new tests:** Drop a `.proto` file in `pkg/testdata/proto/testdata/` and run `just generate`. The golden test automatically discovers all generated files and compares them.
 
-## ⚠️ Limitations
+## Proto-to-JSON Schema mapping
+
+The plugin maps protobuf types to JSON Schema. Understanding these mappings matters because LLMs see the schema, not your proto definitions.
+
+### Scalar types
+
+| Proto type | JSON Schema type | Notes |
+|---|---|---|
+| `double`, `float` | `number` | |
+| `int32`, `uint32`, `sint32`, `fixed32`, `sfixed32` | `integer` | |
+| `int64`, `uint64`, `sint64`, `fixed64`, `sfixed64` | `string` | JSON cannot represent 64-bit integers precisely |
+| `bool` | `boolean` | |
+| `string` | `string` | |
+| `bytes` | `string` | `contentEncoding: base64` |
+| `enum` | `string` | `enum` array with all value names |
+
+### Messages and maps
+
+Nested messages become nested `object` schemas. Maps depend on the mode:
+
+**Standard mode:** `map<K, V>` becomes a JSON object with `propertyNames` constraints (e.g., `pattern` for int keys, `enum` for bool keys).
+
+**OpenAI mode:** `map<K, V>` becomes an array of `{key, value}` objects. Key constraints (patterns, enums) are preserved on the `key` field. At runtime, `FixOpenAI` converts these arrays back to objects before proto unmarshaling.
+
+### Well-known types
+
+| Proto type | Standard schema | OpenAI schema |
+|---|---|---|
+| `google.protobuf.Timestamp` | `string` with `format: date-time` | Same |
+| `google.protobuf.Duration` | `string` with duration pattern | Same |
+| `google.protobuf.Struct` | `object` with `additionalProperties: true` | `string` (JSON-encoded) |
+| `google.protobuf.Value` | any (no type constraint) | `string` (JSON-encoded) |
+| `google.protobuf.ListValue` | `array` | `string` (JSON-encoded) |
+| `google.protobuf.FieldMask` | `string` | Same |
+| `google.protobuf.Any` | `object` with `@type` + `value` | Same, with `additionalProperties: false` |
+| Wrapper types (`StringValue`, etc.) | nullable scalar (e.g., `["string", "null"]`) | Same |
+
+In OpenAI mode, `FixOpenAI` handles the reverse transformation at runtime: JSON-encoded strings are parsed back, wrapper objects `{"value": X}` are unwrapped to `X`, and map arrays are converted to objects.
+
+### Oneof fields
+
+**Standard mode:** Uses JSON Schema `anyOf` with one entry per oneof group. Each entry specifies one allowed alternative.
+
+**OpenAI mode:** Oneof fields are flattened into nullable fields (e.g., `type: ["string", "null"]`) with a description noting the oneof constraint. At runtime, `FixOpenAI` strips null oneof alternatives and keeps only the first non-null field per group.
+
+### Validation constraints
+
+[buf.validate](https://buf.build/bufbuild/protovalidate) annotations are mapped to JSON Schema keywords:
+
+| Validation | JSON Schema |
+|---|---|
+| `string.uuid` | `format: uuid` |
+| `string.email` | `format: email` |
+| `string.pattern` | `pattern` |
+| `string.min_len/max_len` | `minLength/maxLength` |
+| `int32.gte/lte` | `minimum/maximum` |
+| `int32.gt/lt` | `minimum+1 / maximum-1` |
+| `float.gt/lt` | `exclusiveMinimum/exclusiveMaximum` |
+| `double.gte/lte` | `minimum/maximum` |
+
+### Recursive messages
+
+Self-referencing and mutually recursive messages (e.g., tree nodes, linked lists) are supported. The schema expands up to 3 levels deep with full field detail. Beyond that, recursive fields become `{"type": "string", "description": "JSON-encoded TreeNode. Provide a JSON object as a string."}` -- the same pattern used for `Struct`/`Value`/`ListValue` in OpenAI mode.
+
+At runtime, `FixOpenAI` parses these string-encoded fields back into JSON objects before proto unmarshaling. The actual data can nest arbitrarily deep -- the depth limit only applies to the schema the LLM sees, not to what it can send.
+
+### Tool name mangling
+
+If the fully qualified RPC name (dots replaced with underscores) exceeds 64 characters, the name is truncated: the head is replaced with a 10-character SHA-256 hash prefix, preserving the tail (the most specific part, typically `ServiceName_MethodName`). The 64-char limit exists because Claude desktop enforces it.
+
+## Limitations
 
 - No interceptor support (yet). Registering with a gRPC server bypasses interceptors.
-- Tool name mangling for long RPC names: If the full RPC name exceeds 64 characters (Claude desktop limit), the head of the tool name is mangled to fit.
+- Recursive message schemas lose field-level detail beyond 3 levels of nesting (see above). The LLM must encode deeper levels as JSON strings.
+- Extra properties added via `WithExtraProperties` must not collide with proto field names. If they do, the extra property value will be extracted into context but will also leak into the proto message.
 
-## 🗺️ Roadmap
+## Roadmap
 
 - Reflection/proxy mode
 - Interceptor middleware support in gRPC server mode
-- Support for the official Go MCP SDK (once published)
+- Migrate to [modelcontextprotocol/go-sdk](https://github.com/modelcontextprotocol/go-sdk)
 
 ## 💬 Feedback
 

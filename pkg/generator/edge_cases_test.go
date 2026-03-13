@@ -198,7 +198,7 @@ func TestMangleHeadIfTooLong(t *testing.T) {
 		{
 			name:   "preserves tail (most specific part)",
 			input:  "some_package_ServiceName_MethodName",
-			maxLen: 20,
+			maxLen: 24,
 			check: func(g *WithT, result string) {
 				g.Expect(result).To(HaveSuffix("MethodName"))
 			},

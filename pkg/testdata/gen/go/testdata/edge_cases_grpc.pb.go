@@ -40,6 +40,7 @@ const (
 	EdgeCaseService_EnumFields_FullMethodName        = "/testdata.EdgeCaseService/EnumFields"
 	EdgeCaseService_MultipleOneofs_FullMethodName    = "/testdata.EdgeCaseService/MultipleOneofs"
 	EdgeCaseService_NumericValidation_FullMethodName = "/testdata.EdgeCaseService/NumericValidation"
+	EdgeCaseService_RecursiveTree_FullMethodName     = "/testdata.EdgeCaseService/RecursiveTree"
 )
 
 // EdgeCaseServiceClient is the client API for EdgeCaseService service.
@@ -62,6 +63,8 @@ type EdgeCaseServiceClient interface {
 	MultipleOneofs(ctx context.Context, in *MultipleOneofsRequest, opts ...grpc.CallOption) (*MultipleOneofsResponse, error)
 	// NumericValidation tests all numeric validation constraint types
 	NumericValidation(ctx context.Context, in *NumericValidationRequest, opts ...grpc.CallOption) (*NumericValidationResponse, error)
+	// RecursiveTree tests self-referencing message schemas
+	RecursiveTree(ctx context.Context, in *RecursiveTreeRequest, opts ...grpc.CallOption) (*RecursiveTreeResponse, error)
 }
 
 type edgeCaseServiceClient struct {
@@ -142,6 +145,16 @@ func (c *edgeCaseServiceClient) NumericValidation(ctx context.Context, in *Numer
 	return out, nil
 }
 
+func (c *edgeCaseServiceClient) RecursiveTree(ctx context.Context, in *RecursiveTreeRequest, opts ...grpc.CallOption) (*RecursiveTreeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RecursiveTreeResponse)
+	err := c.cc.Invoke(ctx, EdgeCaseService_RecursiveTree_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EdgeCaseServiceServer is the server API for EdgeCaseService service.
 // All implementations must embed UnimplementedEdgeCaseServiceServer
 // for forward compatibility.
@@ -162,6 +175,8 @@ type EdgeCaseServiceServer interface {
 	MultipleOneofs(context.Context, *MultipleOneofsRequest) (*MultipleOneofsResponse, error)
 	// NumericValidation tests all numeric validation constraint types
 	NumericValidation(context.Context, *NumericValidationRequest) (*NumericValidationResponse, error)
+	// RecursiveTree tests self-referencing message schemas
+	RecursiveTree(context.Context, *RecursiveTreeRequest) (*RecursiveTreeResponse, error)
 	mustEmbedUnimplementedEdgeCaseServiceServer()
 }
 
@@ -192,6 +207,9 @@ func (UnimplementedEdgeCaseServiceServer) MultipleOneofs(context.Context, *Multi
 }
 func (UnimplementedEdgeCaseServiceServer) NumericValidation(context.Context, *NumericValidationRequest) (*NumericValidationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NumericValidation not implemented")
+}
+func (UnimplementedEdgeCaseServiceServer) RecursiveTree(context.Context, *RecursiveTreeRequest) (*RecursiveTreeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RecursiveTree not implemented")
 }
 func (UnimplementedEdgeCaseServiceServer) mustEmbedUnimplementedEdgeCaseServiceServer() {}
 func (UnimplementedEdgeCaseServiceServer) testEmbeddedByValue()                         {}
@@ -340,6 +358,24 @@ func _EdgeCaseService_NumericValidation_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EdgeCaseService_RecursiveTree_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RecursiveTreeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EdgeCaseServiceServer).RecursiveTree(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EdgeCaseService_RecursiveTree_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EdgeCaseServiceServer).RecursiveTree(ctx, req.(*RecursiveTreeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EdgeCaseService_ServiceDesc is the grpc.ServiceDesc for EdgeCaseService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -374,6 +410,10 @@ var EdgeCaseService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "NumericValidation",
 			Handler:    _EdgeCaseService_NumericValidation_Handler,
+		},
+		{
+			MethodName: "RecursiveTree",
+			Handler:    _EdgeCaseService_RecursiveTree_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

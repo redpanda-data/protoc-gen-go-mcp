@@ -1244,6 +1244,147 @@ func (x *NumericValidationRequest) GetCode() string {
 	return ""
 }
 
+// Recursive tree node (self-referencing message)
+type TreeNode struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Value         string                 `protobuf:"bytes,1,opt,name=value,proto3" json:"value,omitempty"`
+	Children      []*TreeNode            `protobuf:"bytes,2,rep,name=children,proto3" json:"children,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TreeNode) Reset() {
+	*x = TreeNode{}
+	mi := &file_testdata_edge_cases_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TreeNode) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TreeNode) ProtoMessage() {}
+
+func (x *TreeNode) ProtoReflect() protoreflect.Message {
+	mi := &file_testdata_edge_cases_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TreeNode.ProtoReflect.Descriptor instead.
+func (*TreeNode) Descriptor() ([]byte, []int) {
+	return file_testdata_edge_cases_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *TreeNode) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
+func (x *TreeNode) GetChildren() []*TreeNode {
+	if x != nil {
+		return x.Children
+	}
+	return nil
+}
+
+type RecursiveTreeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Root          *TreeNode              `protobuf:"bytes,1,opt,name=root,proto3" json:"root,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RecursiveTreeRequest) Reset() {
+	*x = RecursiveTreeRequest{}
+	mi := &file_testdata_edge_cases_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecursiveTreeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecursiveTreeRequest) ProtoMessage() {}
+
+func (x *RecursiveTreeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_testdata_edge_cases_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RecursiveTreeRequest.ProtoReflect.Descriptor instead.
+func (*RecursiveTreeRequest) Descriptor() ([]byte, []int) {
+	return file_testdata_edge_cases_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *RecursiveTreeRequest) GetRoot() *TreeNode {
+	if x != nil {
+		return x.Root
+	}
+	return nil
+}
+
+type RecursiveTreeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RecursiveTreeResponse) Reset() {
+	*x = RecursiveTreeResponse{}
+	mi := &file_testdata_edge_cases_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecursiveTreeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecursiveTreeResponse) ProtoMessage() {}
+
+func (x *RecursiveTreeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_testdata_edge_cases_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RecursiveTreeResponse.ProtoReflect.Descriptor instead.
+func (*RecursiveTreeResponse) Descriptor() ([]byte, []int) {
+	return file_testdata_edge_cases_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *RecursiveTreeResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
 type NumericValidationResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
@@ -1253,7 +1394,7 @@ type NumericValidationResponse struct {
 
 func (x *NumericValidationResponse) Reset() {
 	*x = NumericValidationResponse{}
-	mi := &file_testdata_edge_cases_proto_msgTypes[16]
+	mi := &file_testdata_edge_cases_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1265,7 +1406,7 @@ func (x *NumericValidationResponse) String() string {
 func (*NumericValidationResponse) ProtoMessage() {}
 
 func (x *NumericValidationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_testdata_edge_cases_proto_msgTypes[16]
+	mi := &file_testdata_edge_cases_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1278,7 +1419,7 @@ func (x *NumericValidationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NumericValidationResponse.ProtoReflect.Descriptor instead.
 func (*NumericValidationResponse) Descriptor() ([]byte, []int) {
-	return file_testdata_edge_cases_proto_rawDescGZIP(), []int{16}
+	return file_testdata_edge_cases_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *NumericValidationResponse) GetSuccess() bool {
@@ -1418,7 +1559,14 @@ const file_testdata_edge_cases_proto_rawDesc = "" +
 	"\vtemperature\x18\x06 \x01(\x01B\x17\xbaH\x14\x12\x12\x11\x00\x00\x00\x00\x80\x84.A!fffff\x12q\xc0R\vtemperature\x120\n" +
 	"\x0ftimestamp_nanos\x18\a \x01(\x03B\a\xbaH\x04\"\x02(\x00R\x0etimestampNanos\x12*\n" +
 	"\x04code\x18\b \x01(\tB\x16\xbaH\x13r\x11\x10\x02\x18\n" +
-	"2\v^[A-Z0-9]+$R\x04code\"5\n" +
+	"2\v^[A-Z0-9]+$R\x04code\"P\n" +
+	"\bTreeNode\x12\x14\n" +
+	"\x05value\x18\x01 \x01(\tR\x05value\x12.\n" +
+	"\bchildren\x18\x02 \x03(\v2\x12.testdata.TreeNodeR\bchildren\">\n" +
+	"\x14RecursiveTreeRequest\x12&\n" +
+	"\x04root\x18\x01 \x01(\v2\x12.testdata.TreeNodeR\x04root\"1\n" +
+	"\x15RecursiveTreeResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"5\n" +
 	"\x19NumericValidationResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess*u\n" +
 	"\bPriority\x12\x18\n" +
@@ -1426,7 +1574,7 @@ const file_testdata_edge_cases_proto_rawDesc = "" +
 	"\fPRIORITY_LOW\x10\x01\x12\x13\n" +
 	"\x0fPRIORITY_MEDIUM\x10\x02\x12\x11\n" +
 	"\rPRIORITY_HIGH\x10\x03\x12\x15\n" +
-	"\x11PRIORITY_CRITICAL\x10\x042\xd5\x04\n" +
+	"\x11PRIORITY_CRITICAL\x10\x042\xa7\x05\n" +
 	"\x0fEdgeCaseService\x12J\n" +
 	"\vDeepNesting\x12\x1c.testdata.DeepNestingRequest\x1a\x1d.testdata.DeepNestingResponse\x12S\n" +
 	"\x0eAllScalarTypes\x12\x1f.testdata.AllScalarTypesRequest\x1a .testdata.AllScalarTypesResponse\x12Y\n" +
@@ -1435,7 +1583,8 @@ const file_testdata_edge_cases_proto_rawDesc = "" +
 	"\n" +
 	"EnumFields\x12\x1b.testdata.EnumFieldsRequest\x1a\x1c.testdata.EnumFieldsResponse\x12S\n" +
 	"\x0eMultipleOneofs\x12\x1f.testdata.MultipleOneofsRequest\x1a .testdata.MultipleOneofsResponse\x12\\\n" +
-	"\x11NumericValidation\x12\".testdata.NumericValidationRequest\x1a#.testdata.NumericValidationResponseB\xa7\x01\n" +
+	"\x11NumericValidation\x12\".testdata.NumericValidationRequest\x1a#.testdata.NumericValidationResponse\x12P\n" +
+	"\rRecursiveTree\x12\x1e.testdata.RecursiveTreeRequest\x1a\x1f.testdata.RecursiveTreeResponseB\xa7\x01\n" +
 	"\fcom.testdataB\x0eEdgeCasesProtoP\x01ZGgithub.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata\xa2\x02\x03TXX\xaa\x02\bTestdata\xca\x02\bTestdata\xe2\x02\x14Testdata\\GPBMetadata\xea\x02\bTestdatab\x06proto3"
 
 var (
@@ -1451,7 +1600,7 @@ func file_testdata_edge_cases_proto_rawDescGZIP() []byte {
 }
 
 var file_testdata_edge_cases_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_testdata_edge_cases_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
+var file_testdata_edge_cases_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
 var file_testdata_edge_cases_proto_goTypes = []any{
 	(Priority)(0),                     // 0: testdata.Priority
 	(*InnerMessage)(nil),              // 1: testdata.InnerMessage
@@ -1470,65 +1619,72 @@ var file_testdata_edge_cases_proto_goTypes = []any{
 	(*MultipleOneofsRequest)(nil),     // 14: testdata.MultipleOneofsRequest
 	(*MultipleOneofsResponse)(nil),    // 15: testdata.MultipleOneofsResponse
 	(*NumericValidationRequest)(nil),  // 16: testdata.NumericValidationRequest
-	(*NumericValidationResponse)(nil), // 17: testdata.NumericValidationResponse
-	nil,                               // 18: testdata.InnerMessage.TagsEntry
-	nil,                               // 19: testdata.MiddleMessage.NamedItemsEntry
-	nil,                               // 20: testdata.ItemWithMap.LabelsEntry
-	nil,                               // 21: testdata.MapVariantsRequest.StringToStringEntry
-	nil,                               // 22: testdata.MapVariantsRequest.IntToStringEntry
-	nil,                               // 23: testdata.MapVariantsRequest.BoolToStringEntry
-	nil,                               // 24: testdata.MapVariantsRequest.Uint64ToStringEntry
-	nil,                               // 25: testdata.MapVariantsRequest.StringToMessageEntry
-	nil,                               // 26: testdata.MapVariantsRequest.StringToDoubleEntry
-	nil,                               // 27: testdata.MapVariantsRequest.StringToBoolEntry
-	(*structpb.Struct)(nil),           // 28: google.protobuf.Struct
-	(*structpb.Value)(nil),            // 29: google.protobuf.Value
-	(*timestamppb.Timestamp)(nil),     // 30: google.protobuf.Timestamp
+	(*TreeNode)(nil),                  // 17: testdata.TreeNode
+	(*RecursiveTreeRequest)(nil),      // 18: testdata.RecursiveTreeRequest
+	(*RecursiveTreeResponse)(nil),     // 19: testdata.RecursiveTreeResponse
+	(*NumericValidationResponse)(nil), // 20: testdata.NumericValidationResponse
+	nil,                               // 21: testdata.InnerMessage.TagsEntry
+	nil,                               // 22: testdata.MiddleMessage.NamedItemsEntry
+	nil,                               // 23: testdata.ItemWithMap.LabelsEntry
+	nil,                               // 24: testdata.MapVariantsRequest.StringToStringEntry
+	nil,                               // 25: testdata.MapVariantsRequest.IntToStringEntry
+	nil,                               // 26: testdata.MapVariantsRequest.BoolToStringEntry
+	nil,                               // 27: testdata.MapVariantsRequest.Uint64ToStringEntry
+	nil,                               // 28: testdata.MapVariantsRequest.StringToMessageEntry
+	nil,                               // 29: testdata.MapVariantsRequest.StringToDoubleEntry
+	nil,                               // 30: testdata.MapVariantsRequest.StringToBoolEntry
+	(*structpb.Struct)(nil),           // 31: google.protobuf.Struct
+	(*structpb.Value)(nil),            // 32: google.protobuf.Value
+	(*timestamppb.Timestamp)(nil),     // 33: google.protobuf.Timestamp
 }
 var file_testdata_edge_cases_proto_depIdxs = []int32{
-	18, // 0: testdata.InnerMessage.tags:type_name -> testdata.InnerMessage.TagsEntry
-	28, // 1: testdata.InnerMessage.metadata:type_name -> google.protobuf.Struct
-	29, // 2: testdata.InnerMessage.dynamic_config:type_name -> google.protobuf.Value
+	21, // 0: testdata.InnerMessage.tags:type_name -> testdata.InnerMessage.TagsEntry
+	31, // 1: testdata.InnerMessage.metadata:type_name -> google.protobuf.Struct
+	32, // 2: testdata.InnerMessage.dynamic_config:type_name -> google.protobuf.Value
 	1,  // 3: testdata.MiddleMessage.inner:type_name -> testdata.InnerMessage
 	1,  // 4: testdata.MiddleMessage.items:type_name -> testdata.InnerMessage
-	19, // 5: testdata.MiddleMessage.named_items:type_name -> testdata.MiddleMessage.NamedItemsEntry
+	22, // 5: testdata.MiddleMessage.named_items:type_name -> testdata.MiddleMessage.NamedItemsEntry
 	2,  // 6: testdata.DeepNestingRequest.middle:type_name -> testdata.MiddleMessage
 	2,  // 7: testdata.DeepNestingRequest.middles:type_name -> testdata.MiddleMessage
-	20, // 8: testdata.ItemWithMap.labels:type_name -> testdata.ItemWithMap.LabelsEntry
-	29, // 9: testdata.ItemWithMap.config:type_name -> google.protobuf.Value
-	28, // 10: testdata.ItemWithMap.extra:type_name -> google.protobuf.Struct
+	23, // 8: testdata.ItemWithMap.labels:type_name -> testdata.ItemWithMap.LabelsEntry
+	32, // 9: testdata.ItemWithMap.config:type_name -> google.protobuf.Value
+	31, // 10: testdata.ItemWithMap.extra:type_name -> google.protobuf.Struct
 	7,  // 11: testdata.RepeatedMessagesRequest.items:type_name -> testdata.ItemWithMap
-	30, // 12: testdata.RepeatedMessagesRequest.timestamps:type_name -> google.protobuf.Timestamp
-	21, // 13: testdata.MapVariantsRequest.string_to_string:type_name -> testdata.MapVariantsRequest.StringToStringEntry
-	22, // 14: testdata.MapVariantsRequest.int_to_string:type_name -> testdata.MapVariantsRequest.IntToStringEntry
-	23, // 15: testdata.MapVariantsRequest.bool_to_string:type_name -> testdata.MapVariantsRequest.BoolToStringEntry
-	24, // 16: testdata.MapVariantsRequest.uint64_to_string:type_name -> testdata.MapVariantsRequest.Uint64ToStringEntry
-	25, // 17: testdata.MapVariantsRequest.string_to_message:type_name -> testdata.MapVariantsRequest.StringToMessageEntry
-	26, // 18: testdata.MapVariantsRequest.string_to_double:type_name -> testdata.MapVariantsRequest.StringToDoubleEntry
-	27, // 19: testdata.MapVariantsRequest.string_to_bool:type_name -> testdata.MapVariantsRequest.StringToBoolEntry
+	33, // 12: testdata.RepeatedMessagesRequest.timestamps:type_name -> google.protobuf.Timestamp
+	24, // 13: testdata.MapVariantsRequest.string_to_string:type_name -> testdata.MapVariantsRequest.StringToStringEntry
+	25, // 14: testdata.MapVariantsRequest.int_to_string:type_name -> testdata.MapVariantsRequest.IntToStringEntry
+	26, // 15: testdata.MapVariantsRequest.bool_to_string:type_name -> testdata.MapVariantsRequest.BoolToStringEntry
+	27, // 16: testdata.MapVariantsRequest.uint64_to_string:type_name -> testdata.MapVariantsRequest.Uint64ToStringEntry
+	28, // 17: testdata.MapVariantsRequest.string_to_message:type_name -> testdata.MapVariantsRequest.StringToMessageEntry
+	29, // 18: testdata.MapVariantsRequest.string_to_double:type_name -> testdata.MapVariantsRequest.StringToDoubleEntry
+	30, // 19: testdata.MapVariantsRequest.string_to_bool:type_name -> testdata.MapVariantsRequest.StringToBoolEntry
 	0,  // 20: testdata.EnumFieldsRequest.priority:type_name -> testdata.Priority
 	0,  // 21: testdata.EnumFieldsRequest.priorities:type_name -> testdata.Priority
-	1,  // 22: testdata.MiddleMessage.NamedItemsEntry.value:type_name -> testdata.InnerMessage
-	1,  // 23: testdata.MapVariantsRequest.StringToMessageEntry.value:type_name -> testdata.InnerMessage
-	3,  // 24: testdata.EdgeCaseService.DeepNesting:input_type -> testdata.DeepNestingRequest
-	5,  // 25: testdata.EdgeCaseService.AllScalarTypes:input_type -> testdata.AllScalarTypesRequest
-	8,  // 26: testdata.EdgeCaseService.RepeatedMessages:input_type -> testdata.RepeatedMessagesRequest
-	10, // 27: testdata.EdgeCaseService.MapVariants:input_type -> testdata.MapVariantsRequest
-	12, // 28: testdata.EdgeCaseService.EnumFields:input_type -> testdata.EnumFieldsRequest
-	14, // 29: testdata.EdgeCaseService.MultipleOneofs:input_type -> testdata.MultipleOneofsRequest
-	16, // 30: testdata.EdgeCaseService.NumericValidation:input_type -> testdata.NumericValidationRequest
-	4,  // 31: testdata.EdgeCaseService.DeepNesting:output_type -> testdata.DeepNestingResponse
-	6,  // 32: testdata.EdgeCaseService.AllScalarTypes:output_type -> testdata.AllScalarTypesResponse
-	9,  // 33: testdata.EdgeCaseService.RepeatedMessages:output_type -> testdata.RepeatedMessagesResponse
-	11, // 34: testdata.EdgeCaseService.MapVariants:output_type -> testdata.MapVariantsResponse
-	13, // 35: testdata.EdgeCaseService.EnumFields:output_type -> testdata.EnumFieldsResponse
-	15, // 36: testdata.EdgeCaseService.MultipleOneofs:output_type -> testdata.MultipleOneofsResponse
-	17, // 37: testdata.EdgeCaseService.NumericValidation:output_type -> testdata.NumericValidationResponse
-	31, // [31:38] is the sub-list for method output_type
-	24, // [24:31] is the sub-list for method input_type
-	24, // [24:24] is the sub-list for extension type_name
-	24, // [24:24] is the sub-list for extension extendee
-	0,  // [0:24] is the sub-list for field type_name
+	17, // 22: testdata.TreeNode.children:type_name -> testdata.TreeNode
+	17, // 23: testdata.RecursiveTreeRequest.root:type_name -> testdata.TreeNode
+	1,  // 24: testdata.MiddleMessage.NamedItemsEntry.value:type_name -> testdata.InnerMessage
+	1,  // 25: testdata.MapVariantsRequest.StringToMessageEntry.value:type_name -> testdata.InnerMessage
+	3,  // 26: testdata.EdgeCaseService.DeepNesting:input_type -> testdata.DeepNestingRequest
+	5,  // 27: testdata.EdgeCaseService.AllScalarTypes:input_type -> testdata.AllScalarTypesRequest
+	8,  // 28: testdata.EdgeCaseService.RepeatedMessages:input_type -> testdata.RepeatedMessagesRequest
+	10, // 29: testdata.EdgeCaseService.MapVariants:input_type -> testdata.MapVariantsRequest
+	12, // 30: testdata.EdgeCaseService.EnumFields:input_type -> testdata.EnumFieldsRequest
+	14, // 31: testdata.EdgeCaseService.MultipleOneofs:input_type -> testdata.MultipleOneofsRequest
+	16, // 32: testdata.EdgeCaseService.NumericValidation:input_type -> testdata.NumericValidationRequest
+	18, // 33: testdata.EdgeCaseService.RecursiveTree:input_type -> testdata.RecursiveTreeRequest
+	4,  // 34: testdata.EdgeCaseService.DeepNesting:output_type -> testdata.DeepNestingResponse
+	6,  // 35: testdata.EdgeCaseService.AllScalarTypes:output_type -> testdata.AllScalarTypesResponse
+	9,  // 36: testdata.EdgeCaseService.RepeatedMessages:output_type -> testdata.RepeatedMessagesResponse
+	11, // 37: testdata.EdgeCaseService.MapVariants:output_type -> testdata.MapVariantsResponse
+	13, // 38: testdata.EdgeCaseService.EnumFields:output_type -> testdata.EnumFieldsResponse
+	15, // 39: testdata.EdgeCaseService.MultipleOneofs:output_type -> testdata.MultipleOneofsResponse
+	20, // 40: testdata.EdgeCaseService.NumericValidation:output_type -> testdata.NumericValidationResponse
+	19, // 41: testdata.EdgeCaseService.RecursiveTree:output_type -> testdata.RecursiveTreeResponse
+	34, // [34:42] is the sub-list for method output_type
+	26, // [26:34] is the sub-list for method input_type
+	26, // [26:26] is the sub-list for extension type_name
+	26, // [26:26] is the sub-list for extension extendee
+	0,  // [0:26] is the sub-list for field type_name
 }
 
 func init() { file_testdata_edge_cases_proto_init() }
@@ -1550,7 +1706,7 @@ func file_testdata_edge_cases_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_testdata_edge_cases_proto_rawDesc), len(file_testdata_edge_cases_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   27,
+			NumMessages:   30,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

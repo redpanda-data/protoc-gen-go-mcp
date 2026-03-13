@@ -46,6 +46,9 @@ service EdgeCaseService {
 
   // NumericValidation tests all numeric validation constraint types
   rpc NumericValidation(NumericValidationRequest) returns (NumericValidationResponse);
+
+  // RecursiveTree tests self-referencing message schemas
+  rpc RecursiveTree(RecursiveTreeRequest) returns (RecursiveTreeResponse);
 }
 
 // Deeply nested message: Inner has a map and a WKT
@@ -213,6 +216,20 @@ message NumericValidationRequest {
     (buf.validate.field).string.max_len = 10,
     (buf.validate.field).string.pattern = "^[A-Z0-9]+$"
   ];
+}
+
+// Recursive tree node (self-referencing message)
+message TreeNode {
+  string value = 1;
+  repeated TreeNode children = 2;
+}
+
+message RecursiveTreeRequest {
+  TreeNode root = 1;
+}
+
+message RecursiveTreeResponse {
+  bool success = 1;
 }
 
 message NumericValidationResponse {
