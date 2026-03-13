@@ -21,7 +21,7 @@ jobs:
         repository-cache: true
 
     - name: Build and test
-      run: bazelisk test //...
+      run: bazelisk test //... --test_output=all --test_arg=-test.v
 
     - name: Conformance tests
       if: >-
@@ -37,4 +37,5 @@ jobs:
           exit 0
         fi
         bazelisk test //conformancetest:conformancetest_test //integrationtest:integrationtest_test \
-          --test_env=GOOGLE_API_KEY --test_env=OPENAI_API_KEY --test_env=ANTHROPIC_API_KEY
+          --test_env=GOOGLE_API_KEY --test_env=OPENAI_API_KEY --test_env=ANTHROPIC_API_KEY \
+          --test_output=all --test_arg=-test.v
