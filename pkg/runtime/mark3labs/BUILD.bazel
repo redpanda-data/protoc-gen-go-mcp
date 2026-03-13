@@ -1,0 +1,13 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "mark3labs",
+    srcs = ["server.go"],
+    importpath = "github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime/mark3labs",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/runtime",
+        "@com_github_mark3labs_mcp_go//mcp",
+        "@com_github_mark3labs_mcp_go//server",
+    ],
+)

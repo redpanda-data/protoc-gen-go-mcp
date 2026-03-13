@@ -20,8 +20,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	mcpserver "github.com/mark3labs/mcp-go/server"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -69,7 +67,7 @@ type RegisterServiceOptions struct {
 // Unlike the generated code, this works at runtime with any service descriptor,
 // making it suitable for proxy/gateway scenarios where you don't have the
 // generated types at compile time.
-func RegisterService(s *mcpserver.MCPServer, sd protoreflect.ServiceDescriptor, handler Handler, opts RegisterServiceOptions) {
+func RegisterService(s runtime.MCPServer, sd protoreflect.ServiceDescriptor, handler Handler, opts RegisterServiceOptions) {
 	if opts.NewMessage == nil {
 		opts.NewMessage = DynamicNewMessage
 	}
@@ -105,7 +103,7 @@ func RegisterService(s *mcpserver.MCPServer, sd protoreflect.ServiceDescriptor, 
 			panic(err)
 		}
 
-		tool := mcp.Tool{
+		tool := runtime.Tool{
 			Name:           toolName,
 			Description:    CleanComment(comment),
 			RawInputSchema: json.RawMessage(marshaledSchema),
@@ -120,8 +118,8 @@ func RegisterService(s *mcpserver.MCPServer, sd protoreflect.ServiceDescriptor, 
 		md := method
 		newMsg := opts.NewMessage
 
-		s.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			message := request.GetArguments()
+		s.AddTool(tool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			message := request.Arguments
 
 			// Extract extra properties into context and remove them from
 			// the arguments map so they don't leak into proto unmarshaling.
@@ -163,7 +161,7 @@ func RegisterService(s *mcpserver.MCPServer, sd protoreflect.ServiceDescriptor, 
 				return nil, err
 			}
 
-			return mcp.NewToolResultText(string(marshaled)), nil
+			return runtime.NewToolResultText(string(marshaled)), nil
 		})
 	}
 }

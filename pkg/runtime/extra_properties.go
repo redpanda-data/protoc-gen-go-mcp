@@ -2,8 +2,6 @@ package runtime
 
 import (
 	"encoding/json"
-
-	"github.com/mark3labs/mcp-go/mcp"
 )
 
 // Option defines functional options for MCP functions
@@ -34,7 +32,7 @@ func NewConfig() *config {
 }
 
 // AddExtraPropertiesToTool modifies a tool's schema to include additional properties
-func AddExtraPropertiesToTool(tool mcp.Tool, properties []ExtraProperty) mcp.Tool {
+func AddExtraPropertiesToTool(tool Tool, properties []ExtraProperty) Tool {
 	if len(properties) == 0 {
 		return tool
 	}

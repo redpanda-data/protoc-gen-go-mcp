@@ -7,7 +7,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//pkg/gen",
-        "@com_github_mark3labs_mcp_go//mcp",
+        "//pkg/runtime",
         "@org_golang_google_protobuf//compiler/protogen",
         "@org_golang_google_protobuf//reflect/protoreflect",
         "@org_golang_google_protobuf//types/pluginpb",
@@ -33,10 +33,9 @@ go_test(
     gotags = ["bazel"],
     deps = [
         "//pkg/runtime",
+        "//pkg/runtime/mark3labs",
         "//pkg/testdata/gen/go/testdata",
         "//pkg/testdata/gen/go/testdata/testdatamcp",
-        "@com_github_mark3labs_mcp_go//mcp",
-        "@com_github_mark3labs_mcp_go//server",
         "@com_github_onsi_gomega//:gomega",
         "@com_github_santhosh_tekuri_jsonschema_v5//:jsonschema",
         "@org_golang_google_protobuf//compiler/protogen",

@@ -17,7 +17,7 @@
 
 ## Migration
 
-- [ ] **Migrate from mark3labs/mcp-go to modelcontextprotocol/go-sdk** -- add protoc option to select MCP library. For reflection-based (dynamic) mode, provide two conversion functions.
+- [x] **Migrate from mark3labs/mcp-go to modelcontextprotocol/go-sdk** -- runtime.MCPServer interface with adapter packages for both libraries. Generated code is MCP-library-agnostic.
 
 ## Bazel
 

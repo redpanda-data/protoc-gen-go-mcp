@@ -18,7 +18,6 @@ import (
 	"errors"
 
 	"connectrpc.com/connect"
-	"github.com/mark3labs/mcp-go/mcp"
 	apierrors "github.com/redpanda-data/common-go/api/errors"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
@@ -26,9 +25,9 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-// HandleError converts a gRPC/Connect error into a structured MCP tool result
-// It extracts error codes, messages, and detailed error information using common-go utilities
-func HandleError(err error) (*mcp.CallToolResult, error) {
+// HandleError converts a gRPC/Connect error into a structured MCP tool result.
+// It extracts error codes, messages, and detailed error information using common-go utilities.
+func HandleError(err error) (*CallToolResult, error) {
 	if err == nil {
 		return nil, nil
 	}
@@ -64,8 +63,8 @@ func HandleError(err error) (*mcp.CallToolResult, error) {
 	finalJSON, marshalErr := protojson.Marshal(niceStatus)
 	if marshalErr != nil {
 		// Fallback to simple error message if JSON marshaling fails
-		return mcp.NewToolResultError("Error: " + err.Error()), nil
+		return NewToolResultError("Error: " + err.Error()), nil
 	}
 
-	return mcp.NewToolResultError(string(finalJSON)), nil
+	return NewToolResultError(string(finalJSON)), nil
 }

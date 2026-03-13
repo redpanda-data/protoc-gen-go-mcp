@@ -21,8 +21,8 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/gen"
+	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/pluginpb"
@@ -53,8 +53,6 @@ package {{ .GoPackage }}
 
 import (
   "context"
-  "github.com/mark3labs/mcp-go/mcp"
-  mcpserver "github.com/mark3labs/mcp-go/server"
   "encoding/json"
   "google.golang.org/protobuf/encoding/protojson"
   "connectrpc.com/connect"
@@ -83,7 +81,7 @@ type {{$serviceName}}Server interface {
 
 {{- range $key, $val := .Services }}
 // Register{{$key}}Handler registers standard MCP handlers for {{$key}}
-func Register{{$key}}Handler(s *mcpserver.MCPServer, srv {{$key}}Server, opts ...runtime.Option) {
+func Register{{$key}}Handler(s runtime.MCPServer, srv {{$key}}Server, opts ...runtime.Option) {
   config := runtime.NewConfig()
   for _, opt := range opts {
     opt(config)
@@ -96,10 +94,10 @@ func Register{{$key}}Handler(s *mcpserver.MCPServer, srv {{$key}}Server, opts ..
     {{$tool_name}}Tool = runtime.AddExtraPropertiesToTool({{$tool_name}}Tool, config.ExtraProperties)
   }
 
-  s.AddTool({{$tool_name}}Tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+  s.AddTool({{$tool_name}}Tool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
 
-    message := request.GetArguments()
+    message := request.Arguments
 
     // Extract extra properties if configured
     for _, prop := range config.ExtraProperties {
@@ -127,13 +125,13 @@ func Register{{$key}}Handler(s *mcpserver.MCPServer, srv {{$key}}Server, opts ..
       return nil, err
     }
 
-    return mcp.NewToolResultText(string(marshaled)), nil
+    return runtime.NewToolResultText(string(marshaled)), nil
   })
   {{- end }}
 }
 
 // Register{{$key}}HandlerOpenAI registers OpenAI-compatible MCP handlers for {{$key}}
-func Register{{$key}}HandlerOpenAI(s *mcpserver.MCPServer, srv {{$key}}Server, opts ...runtime.Option) {
+func Register{{$key}}HandlerOpenAI(s runtime.MCPServer, srv {{$key}}Server, opts ...runtime.Option) {
   config := runtime.NewConfig()
   for _, opt := range opts {
     opt(config)
@@ -146,10 +144,10 @@ func Register{{$key}}HandlerOpenAI(s *mcpserver.MCPServer, srv {{$key}}Server, o
     {{$tool_name}}ToolOpenAI = runtime.AddExtraPropertiesToTool({{$tool_name}}ToolOpenAI, config.ExtraProperties)
   }
 
-  s.AddTool({{$tool_name}}ToolOpenAI, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+  s.AddTool({{$tool_name}}ToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
 
-    message := request.GetArguments()
+    message := request.Arguments
 
     // Extract extra properties if configured
     for _, prop := range config.ExtraProperties {
@@ -179,13 +177,13 @@ func Register{{$key}}HandlerOpenAI(s *mcpserver.MCPServer, srv {{$key}}Server, o
       return nil, err
     }
 
-    return mcp.NewToolResultText(string(marshaled)), nil
+    return runtime.NewToolResultText(string(marshaled)), nil
   })
   {{- end }}
 }
 
 // Register{{$key}}HandlerWithProvider registers handlers for the specified LLM provider
-func Register{{$key}}HandlerWithProvider(s *mcpserver.MCPServer, srv {{$key}}Server, provider runtime.LLMProvider, opts ...runtime.Option) {
+func Register{{$key}}HandlerWithProvider(s runtime.MCPServer, srv {{$key}}Server, provider runtime.LLMProvider, opts ...runtime.Option) {
   switch provider {
   case runtime.LLMProviderOpenAI:
     Register{{$key}}HandlerOpenAI(s, srv, opts...)
@@ -218,7 +216,7 @@ type Connect{{$serviceName}}Client interface {
 
 {{- range $key, $val := .Services }}
 // ForwardToConnect{{$key}}Client registers a connectrpc client, to forward MCP calls to it.
-func ForwardToConnect{{$key}}Client(s *mcpserver.MCPServer, client Connect{{$key}}Client, opts ...runtime.Option) {
+func ForwardToConnect{{$key}}Client(s runtime.MCPServer, client Connect{{$key}}Client, opts ...runtime.Option) {
   config := runtime.NewConfig()
   for _, opt := range opts {
     opt(config)
@@ -231,10 +229,10 @@ func ForwardToConnect{{$key}}Client(s *mcpserver.MCPServer, client Connect{{$key
     {{$tool_name}}Tool = runtime.AddExtraPropertiesToTool({{$tool_name}}Tool, config.ExtraProperties)
   }
 
-  s.AddTool({{$tool_name}}Tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+  s.AddTool({{$tool_name}}Tool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
 
-    message := request.GetArguments()
+    message := request.Arguments
 
     // Extract extra properties if configured
     for _, prop := range config.ExtraProperties {
@@ -261,7 +259,7 @@ func ForwardToConnect{{$key}}Client(s *mcpserver.MCPServer, client Connect{{$key
     if err != nil {
       return nil, err
     }
-    return mcp.NewToolResultText(string(marshaled)), nil
+    return runtime.NewToolResultText(string(marshaled)), nil
   })
   {{- end }}
 }
@@ -269,7 +267,7 @@ func ForwardToConnect{{$key}}Client(s *mcpserver.MCPServer, client Connect{{$key
 
 {{- range $key, $val := .Services }}
 // ForwardTo{{$key}}Client registers a gRPC client, to forward MCP calls to it.
-func ForwardTo{{$key}}Client(s *mcpserver.MCPServer, client {{$key}}Client, opts ...runtime.Option) {
+func ForwardTo{{$key}}Client(s runtime.MCPServer, client {{$key}}Client, opts ...runtime.Option) {
   config := runtime.NewConfig()
   for _, opt := range opts {
     opt(config)
@@ -282,10 +280,10 @@ func ForwardTo{{$key}}Client(s *mcpserver.MCPServer, client {{$key}}Client, opts
     {{$tool_name}}Tool = runtime.AddExtraPropertiesToTool({{$tool_name}}Tool, config.ExtraProperties)
   }
 
-  s.AddTool({{$tool_name}}Tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+  s.AddTool({{$tool_name}}Tool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
 
-    message := request.GetArguments()
+    message := request.Arguments
 
     // Extract extra properties if configured
     for _, prop := range config.ExtraProperties {
@@ -312,7 +310,7 @@ func ForwardTo{{$key}}Client(s *mcpserver.MCPServer, client {{$key}}Client, opts
     if err != nil {
       return nil, err
     }
-    return mcp.NewToolResultText(string(marshaled)), nil
+    return runtime.NewToolResultText(string(marshaled)), nil
   })
   {{- end }}
 }
@@ -325,16 +323,16 @@ type TplParams struct {
 	PackageName string
 	SourcePath  string
 	GoPackage   string
-	Tools       map[string]mcp.Tool
-	ToolsOpenAI map[string]mcp.Tool
+	Tools       map[string]runtime.Tool
+	ToolsOpenAI map[string]runtime.Tool
 	Services    map[string]map[string]Tool
 }
 
 type Tool struct {
 	RequestType   string
 	ResponseType  string
-	MCPTool       mcp.Tool
-	MCPToolOpenAI mcp.Tool
+	MCPTool       runtime.Tool
+	MCPToolOpenAI runtime.Tool
 }
 
 // Delegate to gen package - kept for backward compatibility with tests in this package.
@@ -395,8 +393,8 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 	}
 
 	services := map[string]map[string]Tool{}
-	tools := map[string]mcp.Tool{}
-	toolsOpenAI := map[string]mcp.Tool{}
+	tools := map[string]runtime.Tool{}
+	toolsOpenAI := map[string]runtime.Tool{}
 
 	for _, svc := range g.f.Services {
 		s := map[string]Tool{}

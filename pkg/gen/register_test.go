@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	mcpserver "github.com/mark3labs/mcp-go/server"
 	. "github.com/onsi/gomega"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
+	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime/mark3labs"
 	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -68,8 +68,8 @@ func TestRegisterService_Standard(t *testing.T) {
 		}
 	}
 
-	server := mcpserver.NewMCPServer("test", "1.0")
-	RegisterService(server, sd, handler, RegisterServiceOptions{
+	raw, adapter := mark3labs.NewServer("test", "1.0")
+	RegisterService(adapter, sd, handler, RegisterServiceOptions{
 		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 	})
@@ -78,7 +78,7 @@ func TestRegisterService_Standard(t *testing.T) {
 	ctx := context.Background()
 
 	// Call GetItem tool
-	result := server.HandleMessage(ctx, json.RawMessage(`{
+	result := raw.HandleMessage(ctx, json.RawMessage(`{
 		"jsonrpc": "2.0",
 		"id": 1,
 		"method": "tools/call",
@@ -113,15 +113,15 @@ func TestRegisterService_OpenAI(t *testing.T) {
 		return newTestMessage(method.Output()), nil
 	}
 
-	server := mcpserver.NewMCPServer("test", "1.0")
-	RegisterService(server, sd, handler, RegisterServiceOptions{
+	raw, adapter := mark3labs.NewServer("test", "1.0")
+	RegisterService(adapter, sd, handler, RegisterServiceOptions{
 		Provider:   runtime.LLMProviderOpenAI,
 		NewMessage: newTestMessage,
 	})
 
 	// Call CreateItem with OpenAI-format map (array of key-value pairs)
 	ctx := context.Background()
-	_ = server.HandleMessage(ctx, json.RawMessage(`{
+	_ = raw.HandleMessage(ctx, json.RawMessage(`{
 		"jsonrpc": "2.0",
 		"id": 1,
 		"method": "tools/call",
@@ -150,8 +150,8 @@ func TestRegisterService_WithExtraProperties(t *testing.T) {
 		return newTestMessage(method.Output()), nil
 	}
 
-	server := mcpserver.NewMCPServer("test", "1.0")
-	RegisterService(server, sd, handler, RegisterServiceOptions{
+	raw, adapter := mark3labs.NewServer("test", "1.0")
+	RegisterService(adapter, sd, handler, RegisterServiceOptions{
 		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 		ExtraProperties: []runtime.ExtraProperty{
@@ -165,7 +165,7 @@ func TestRegisterService_WithExtraProperties(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	_ = server.HandleMessage(ctx, json.RawMessage(`{
+	_ = raw.HandleMessage(ctx, json.RawMessage(`{
 		"jsonrpc": "2.0",
 		"id": 1,
 		"method": "tools/call",
@@ -187,8 +187,8 @@ func TestRegisterService_ToolList(t *testing.T) {
 		return newTestMessage(method.Output()), nil
 	}
 
-	server := mcpserver.NewMCPServer("test", "1.0")
-	RegisterService(server, sd, handler, RegisterServiceOptions{
+	raw, adapter := mark3labs.NewServer("test", "1.0")
+	RegisterService(adapter, sd, handler, RegisterServiceOptions{
 		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 		CommentProvider: func(method protoreflect.MethodDescriptor) string {
@@ -200,7 +200,7 @@ func TestRegisterService_ToolList(t *testing.T) {
 	ctx := context.Background()
 
 	// Initialize the server (required before listing tools)
-	initResult := server.HandleMessage(ctx, json.RawMessage(`{
+	initResult := raw.HandleMessage(ctx, json.RawMessage(`{
 		"jsonrpc": "2.0",
 		"id": 0,
 		"method": "initialize",
@@ -212,7 +212,7 @@ func TestRegisterService_ToolList(t *testing.T) {
 	}`))
 	g.Expect(initResult).ToNot(BeNil())
 
-	result := server.HandleMessage(ctx, json.RawMessage(`{
+	result := raw.HandleMessage(ctx, json.RawMessage(`{
 		"jsonrpc": "2.0",
 		"id": 1,
 		"method": "tools/list"
@@ -277,14 +277,14 @@ func TestRegisterService_ZeroConfigDynamicPB(t *testing.T) {
 	}
 
 	// Zero-config: no NewMessage provided, should default to DynamicNewMessage
-	server := mcpserver.NewMCPServer("test", "1.0")
-	RegisterService(server, sd, handler, RegisterServiceOptions{
+	raw, adapter := mark3labs.NewServer("test", "1.0")
+	RegisterService(adapter, sd, handler, RegisterServiceOptions{
 		Provider: runtime.LLMProviderStandard,
 		// NewMessage intentionally omitted - should default to dynamicpb
 	})
 
 	ctx := context.Background()
-	_ = server.HandleMessage(ctx, json.RawMessage(`{
+	_ = raw.HandleMessage(ctx, json.RawMessage(`{
 		"jsonrpc": "2.0",
 		"id": 1,
 		"method": "tools/call",

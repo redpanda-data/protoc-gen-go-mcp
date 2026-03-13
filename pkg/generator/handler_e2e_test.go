@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	mcpserver "github.com/mark3labs/mcp-go/server"
 	. "github.com/onsi/gomega"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
+	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime/mark3labs"
 	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
 	testdatamcp "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdatamcp"
 )
@@ -40,12 +40,12 @@ func (s *fullTestServer) TestValidation(_ context.Context, _ *testdata.TestValid
 func TestGeneratedHandlerE2E(t *testing.T) {
 	g := NewWithT(t)
 	srv := &fullTestServer{}
-	mcp := mcpserver.NewMCPServer("test", "1.0")
+	raw, adapter := mark3labs.NewServer("test", "1.0")
 
-	testdatamcp.RegisterTestServiceHandler(mcp, srv)
+	testdatamcp.RegisterTestServiceHandler(adapter, srv)
 
 	ctx := context.Background()
-	result := mcp.HandleMessage(ctx, json.RawMessage(`{
+	result := raw.HandleMessage(ctx, json.RawMessage(`{
 		"jsonrpc": "2.0",
 		"id": 1,
 		"method": "tools/call",
@@ -69,12 +69,12 @@ func TestGeneratedHandlerE2E(t *testing.T) {
 func TestGeneratedOpenAIHandlerE2E(t *testing.T) {
 	g := NewWithT(t)
 	srv := &fullTestServer{}
-	mcp := mcpserver.NewMCPServer("test", "1.0")
+	raw, adapter := mark3labs.NewServer("test", "1.0")
 
-	testdatamcp.RegisterTestServiceHandlerOpenAI(mcp, srv)
+	testdatamcp.RegisterTestServiceHandlerOpenAI(adapter, srv)
 
 	ctx := context.Background()
-	result := mcp.HandleMessage(ctx, json.RawMessage(`{
+	result := raw.HandleMessage(ctx, json.RawMessage(`{
 		"jsonrpc": "2.0",
 		"id": 1,
 		"method": "tools/call",
@@ -106,11 +106,11 @@ func TestGeneratedHandlerWithProviderSelection(t *testing.T) {
 
 	for _, provider := range []runtime.LLMProvider{runtime.LLMProviderStandard, runtime.LLMProviderOpenAI} {
 		t.Run(string(provider), func(t *testing.T) {
-			mcp := mcpserver.NewMCPServer("test", "1.0")
-			testdatamcp.RegisterTestServiceHandlerWithProvider(mcp, srv, provider)
+			raw, adapter := mark3labs.NewServer("test", "1.0")
+			testdatamcp.RegisterTestServiceHandlerWithProvider(adapter, srv, provider)
 
 			ctx := context.Background()
-			result := mcp.HandleMessage(ctx, json.RawMessage(`{
+			result := raw.HandleMessage(ctx, json.RawMessage(`{
 				"jsonrpc": "2.0",
 				"id": 1,
 				"method": "tools/call",

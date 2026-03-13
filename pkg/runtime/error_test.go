@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"connectrpc.com/connect"
-	"github.com/mark3labs/mcp-go/mcp"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -26,9 +25,8 @@ func TestHandleError_SimpleError(t *testing.T) {
 	}
 
 	// Parse the JSON error response
-	textContent := result.Content[0].(mcp.TextContent)
 	var errorResp map[string]interface{}
-	if jsonErr := json.Unmarshal([]byte(textContent.Text), &errorResp); jsonErr != nil {
+	if jsonErr := json.Unmarshal([]byte(result.Text), &errorResp); jsonErr != nil {
 		t.Fatalf("Failed to parse error JSON: %v", jsonErr)
 	}
 
@@ -64,9 +62,8 @@ func TestHandleError_GRPCStatus(t *testing.T) {
 	}
 
 	// Parse the JSON error response
-	textContent := result.Content[0].(mcp.TextContent)
 	var errorResp map[string]interface{}
-	if jsonErr := json.Unmarshal([]byte(textContent.Text), &errorResp); jsonErr != nil {
+	if jsonErr := json.Unmarshal([]byte(result.Text), &errorResp); jsonErr != nil {
 		t.Fatalf("Failed to parse error JSON: %v", jsonErr)
 	}
 
@@ -126,9 +123,8 @@ func TestHandleError_ConnectError(t *testing.T) {
 	}
 
 	// Parse the JSON error response
-	textContent := result.Content[0].(mcp.TextContent)
 	var errorResp map[string]interface{}
-	if jsonErr := json.Unmarshal([]byte(textContent.Text), &errorResp); jsonErr != nil {
+	if jsonErr := json.Unmarshal([]byte(result.Text), &errorResp); jsonErr != nil {
 		t.Fatalf("Failed to parse error JSON: %v", jsonErr)
 	}
 
@@ -175,9 +171,8 @@ func TestHandleError_GRPCStatusWithBadRequest(t *testing.T) {
 	}
 
 	// Parse the JSON error response
-	textContent := result.Content[0].(mcp.TextContent)
 	var errorResp map[string]interface{}
-	if jsonErr := json.Unmarshal([]byte(textContent.Text), &errorResp); jsonErr != nil {
+	if jsonErr := json.Unmarshal([]byte(result.Text), &errorResp); jsonErr != nil {
 		t.Fatalf("Failed to parse error JSON: %v", jsonErr)
 	}
 

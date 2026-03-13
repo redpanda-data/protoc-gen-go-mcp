@@ -6,12 +6,12 @@ go_library(
         "error.go",
         "extra_properties.go",
         "fix.go",
+        "server.go",
     ],
     importpath = "github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime",
     visibility = ["//visibility:public"],
     deps = [
         "@com_connectrpc_connect//:connect",
-        "@com_github_mark3labs_mcp_go//mcp",
         "@com_github_redpanda_data_common_go_api//errors",
         "@org_golang_google_genproto_googleapis_rpc//status",
         "@org_golang_google_grpc//codes",
@@ -35,7 +35,6 @@ go_test(
     deps = [
         "//pkg/testdata/gen/go/testdata",
         "@com_connectrpc_connect//:connect",
-        "@com_github_mark3labs_mcp_go//mcp",
         "@com_github_onsi_gomega//:gomega",
         "@org_golang_google_genproto_googleapis_rpc//errdetails",
         "@org_golang_google_grpc//codes",

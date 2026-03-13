@@ -20,6 +20,7 @@ use_repo(
     "com_connectrpc_connect",
     "com_github_anthropics_anthropic_sdk_go",
     "com_github_mark3labs_mcp_go",
+    "com_github_modelcontextprotocol_go_sdk",
     "com_github_onsi_gomega",
     "com_github_openai_openai_go",
     "com_github_redpanda_data_common_go_api",

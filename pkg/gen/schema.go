@@ -25,7 +25,7 @@ import (
 	"strings"
 
 	"buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
-	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -545,7 +545,7 @@ func MangleHeadIfTooLong(name string, maxLen int) string {
 
 // ToolForMethod generates standard and OpenAI-compatible MCP tools
 // for a given RPC method descriptor.
-func ToolForMethod(method protoreflect.MethodDescriptor, comment string) (standard, openAI mcp.Tool) {
+func ToolForMethod(method protoreflect.MethodDescriptor, comment string) (standard, openAI runtime.Tool) {
 	toolName := MangleHeadIfTooLong(strings.ReplaceAll(string(method.FullName()), ".", "_"), 64)
 	description := CleanComment(comment)
 
@@ -564,12 +564,12 @@ func ToolForMethod(method protoreflect.MethodDescriptor, comment string) (standa
 		panic(err)
 	}
 
-	standard = mcp.Tool{
+	standard = runtime.Tool{
 		Name:           toolName,
 		Description:    description,
 		RawInputSchema: json.RawMessage(marshaledStandard),
 	}
-	openAI = mcp.Tool{
+	openAI = runtime.Tool{
 		Name:           toolName,
 		Description:    description,
 		RawInputSchema: json.RawMessage(marshaledOpenAI),
