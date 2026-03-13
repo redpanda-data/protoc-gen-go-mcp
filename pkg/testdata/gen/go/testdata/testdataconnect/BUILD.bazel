@@ -1,0 +1,15 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "testdataconnect",
+    srcs = [
+        "edge_cases.connect.go",
+        "test_service.connect.go",
+    ],
+    importpath = "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdataconnect",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/testdata/gen/go/testdata",
+        "@com_connectrpc_connect//:connect",
+    ],
+)

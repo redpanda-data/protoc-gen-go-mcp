@@ -1,0 +1,5 @@
+filegroup(
+    name = "mcp_files",
+    srcs = glob(["**/*.pb.mcp.go"]),
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,14 @@
+load("@rules_go//go:def.bzl", "go_test")
+
+go_test(
+    name = "integrationtest_test",
+    srcs = ["openai_integration_test.go"],
+    gotags = ["integration"],
+    tags = ["manual"],
+    deps = [
+        "//pkg/testdata/gen/go/testdata/testdatamcp",
+        "@com_github_onsi_gomega//:gomega",
+        "@com_github_openai_openai_go//:openai-go",
+        "@com_github_openai_openai_go//option",
+    ],
+)

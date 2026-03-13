@@ -1,0 +1,18 @@
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "protoc-gen-go-mcp_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/redpanda-data/protoc-gen-go-mcp/cmd/protoc-gen-go-mcp",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//pkg/generator",
+        "@org_golang_google_protobuf//compiler/protogen",
+    ],
+)
+
+go_binary(
+    name = "protoc-gen-go-mcp",
+    embed = [":protoc-gen-go-mcp_lib"],
+    visibility = ["//visibility:public"],
+)

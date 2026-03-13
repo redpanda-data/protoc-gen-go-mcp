@@ -7,7 +7,15 @@ tasks:
   test:
     desc: Run all tests
     cmds:
-      - go test ./...
+      - go test -race ./...
+
+  test-cover:
+    desc: Run tests with coverage report
+    cmds:
+      - go test -race -coverprofile=coverage.out -covermode=atomic ./pkg/...
+      - go tool cover -func=coverage.out
+      - echo "HTML report at coverage.html"
+      - go tool cover -html=coverage.out -o coverage.html
 
   build:
     desc: Build the binary
@@ -19,16 +27,6 @@ tasks:
     cmds:
       - go install ./cmd/protoc-gen-go-mcp
 
-  generate-golden:
-    desc: Update golden test files
-    cmds:
-      - echo "Updating golden test files..."
-      - go test ./pkg/generator -update-golden -v
-      - task: fmt
-      - go run mvdan.cc/gofumpt@latest -l -w ./pkg/testdata/gen/go-golden/
-      - echo "Golden files updated successfully!"
-
-
   generate:
     desc: Generate testdata (including integration test protos)
     dir: pkg/testdata
@@ -36,18 +34,37 @@ tasks:
       - buf generate buf.build/googleapis/googleapis
       - buf generate --include-imports --exclude-path buf/validate
       - rm -rf gen/go/buf/  # Remove duplicate protovalidate files
+      - buf build -o gen/descriptors.binpb --exclude-path buf/validate
       - go run mvdan.cc/gofumpt@latest -l -w .
 
   integrationtest:
-    desc: Run integration tests (requires OPENAI_API_KEY)
-    deps: [generate]
+    desc: Run integration tests (requires API keys)
     cmds:
       - |
         if [ -f .env ]; then
-          export $(cat .env | xargs) && go test -tags=integration ./integrationtest -v
-        else
-          go test -tags=integration ./integrationtest -v
+          export $(cat .env | xargs)
         fi
+        go test -tags=integration ./integrationtest ./conformancetest -v -timeout=120s
+
+  conformancetest:
+    desc: Run conformance tests against all cloud providers (requires API keys)
+    cmds:
+      - go test -tags=integration ./conformancetest -v -timeout=300s
+
+  conformancetest-gemini:
+    desc: Run conformance tests against Google Gemini only
+    cmds:
+      - go test -tags=integration ./conformancetest -v -timeout=120s -run TestGemini
+
+  conformancetest-openai:
+    desc: Run conformance tests against OpenAI only
+    cmds:
+      - go test -tags=integration ./conformancetest -v -timeout=120s -run TestOpenAI
+
+  conformancetest-anthropic:
+    desc: Run conformance tests against Anthropic only
+    cmds:
+      - go test -tags=integration ./conformancetest -v -timeout=120s -run TestAnthropic
 
   lint:
     desc: Lint code

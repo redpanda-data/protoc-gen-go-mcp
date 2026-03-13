@@ -15,21 +15,15 @@
 package generator
 
 import (
-	"crypto/sha1"
-	"encoding/json"
 	"fmt"
 	"go/token"
-	"math/big"
 	"path"
 	"path/filepath"
-	"strings"
 	"text/template"
 
-	"buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	"github.com/mark3labs/mcp-go/mcp"
-	"google.golang.org/genproto/googleapis/api/annotations"
+	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/gen"
 	"google.golang.org/protobuf/compiler/protogen"
-	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/pluginpb"
 )
@@ -101,7 +95,7 @@ func Register{{$key}}Handler(s *mcpserver.MCPServer, srv {{$key}}Server, opts ..
   if len(config.ExtraProperties) > 0 {
     {{$tool_name}}Tool = runtime.AddExtraPropertiesToTool({{$tool_name}}Tool, config.ExtraProperties)
   }
-  
+
   s.AddTool({{$tool_name}}Tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
 
@@ -151,7 +145,7 @@ func Register{{$key}}HandlerOpenAI(s *mcpserver.MCPServer, srv {{$key}}Server, o
   if len(config.ExtraProperties) > 0 {
     {{$tool_name}}ToolOpenAI = runtime.AddExtraPropertiesToTool({{$tool_name}}ToolOpenAI, config.ExtraProperties)
   }
-  
+
   s.AddTool({{$tool_name}}ToolOpenAI, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
 
@@ -236,7 +230,7 @@ func ForwardToConnect{{$key}}Client(s *mcpserver.MCPServer, client Connect{{$key
   if len(config.ExtraProperties) > 0 {
     {{$tool_name}}Tool = runtime.AddExtraPropertiesToTool({{$tool_name}}Tool, config.ExtraProperties)
   }
-  
+
   s.AddTool({{$tool_name}}Tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
 
@@ -287,7 +281,7 @@ func ForwardTo{{$key}}Client(s *mcpserver.MCPServer, client {{$key}}Client, opts
   if len(config.ExtraProperties) > 0 {
     {{$tool_name}}Tool = runtime.AddExtraPropertiesToTool({{$tool_name}}Tool, config.ExtraProperties)
   }
-  
+
   s.AddTool({{$tool_name}}Tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
 
@@ -343,406 +337,22 @@ type Tool struct {
 	MCPToolOpenAI mcp.Tool
 }
 
-func kindToType(kind protoreflect.Kind) string {
-	switch kind {
-	case protoreflect.BoolKind:
-		return "boolean"
-	case protoreflect.StringKind:
-		return "string"
-	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind,
-		protoreflect.Uint32Kind, protoreflect.Fixed32Kind:
-		return "integer"
-	case protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind,
-		protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
-		return "string" // safely encode as string
-	case protoreflect.FloatKind, protoreflect.DoubleKind:
-		return "number"
-	case protoreflect.BytesKind:
-		return "string"
-	case protoreflect.EnumKind:
-		return "string" // optionally add enum values here
-	default:
-		return "string"
-	}
-}
+// Delegate to gen package - kept for backward compatibility with tests in this package.
+var (
+	kindToType          = gen.KindToType
+	cleanComment        = gen.CleanComment
+	MangleHeadIfTooLong = gen.MangleHeadIfTooLong
+	Base36String        = gen.Base36String
+)
 
-func isFieldRequired(fd protoreflect.FieldDescriptor) bool {
-	if proto.HasExtension(fd.Options(), annotations.E_FieldBehavior) {
-		behaviors := proto.GetExtension(fd.Options(), annotations.E_FieldBehavior).([]annotations.FieldBehavior)
-		for _, behavior := range behaviors {
-			if behavior == annotations.FieldBehavior_REQUIRED {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func extractValidateConstraints(fd protoreflect.FieldDescriptor) map[string]any {
-	constraints := make(map[string]any)
-
-	if !proto.HasExtension(fd.Options(), validate.E_Field) {
-		return constraints
-	}
-
-	fieldConstraints := proto.GetExtension(fd.Options(), validate.E_Field).(*validate.FieldRules)
-	if fieldConstraints == nil {
-		return constraints
-	}
-
-	// Handle string constraints
-	if stringRules := fieldConstraints.GetString(); stringRules != nil {
-		// UUID constraint
-		if stringRules.GetUuid() {
-			constraints["format"] = "uuid"
-		}
-
-		// Email constraint
-		if stringRules.GetEmail() {
-			constraints["format"] = "email"
-		}
-
-		// Pattern constraint
-		if pattern := stringRules.GetPattern(); pattern != "" {
-			constraints["pattern"] = pattern
-		}
-
-		// Length constraints
-		if stringRules.HasMinLen() {
-			constraints["minLength"] = int(stringRules.GetMinLen())
-		}
-		if stringRules.HasMaxLen() {
-			constraints["maxLength"] = int(stringRules.GetMaxLen())
-		}
-	}
-
-	// Handle numeric constraints (for completeness)
-	if int32Rules := fieldConstraints.GetInt32(); int32Rules != nil {
-		if int32Rules.HasGt() {
-			constraints["minimum"] = int(int32Rules.GetGt()) + 1
-		} else if int32Rules.HasGte() {
-			constraints["minimum"] = int(int32Rules.GetGte())
-		}
-		if int32Rules.HasLt() {
-			constraints["maximum"] = int(int32Rules.GetLt()) - 1
-		} else if int32Rules.HasLte() {
-			constraints["maximum"] = int(int32Rules.GetLte())
-		}
-	}
-
-	if int64Rules := fieldConstraints.GetInt64(); int64Rules != nil {
-		if int64Rules.HasGt() {
-			constraints["minimum"] = int(int64Rules.GetGt()) + 1
-		} else if int64Rules.HasGte() {
-			constraints["minimum"] = int(int64Rules.GetGte())
-		}
-		if int64Rules.HasLt() {
-			constraints["maximum"] = int(int64Rules.GetLt()) - 1
-		} else if int64Rules.HasLte() {
-			constraints["maximum"] = int(int64Rules.GetLte())
-		}
-	}
-
-	return constraints
-}
-
+// messageSchema delegates to the gen package.
 func (g *FileGenerator) messageSchema(md protoreflect.MessageDescriptor) map[string]any {
-	required := []string{}
-	// Fields that are not oneOf
-	normalFields := map[string]any{}
-	// One entry per oneOf block in the message.
-	oneOf := map[string][]map[string]any{}
-
-	// Process all fields in the message descriptor
-	for i := 0; i < md.Fields().Len(); i++ {
-		nestedFd := md.Fields().Get(i)
-		name := string(nestedFd.Name())
-
-		// OneOf handling
-		if oneof := nestedFd.ContainingOneof(); oneof != nil && !oneof.IsSynthetic() {
-			if !g.openAICompat {
-				if _, ok := oneOf[string(oneof.Name())]; !ok {
-					oneOf[string(oneof.Name())] = []map[string]any{}
-				}
-				oneOf[string(oneof.Name())] = append(oneOf[string(oneof.Name())], map[string]any{
-					"properties": map[string]any{
-						name: g.getType(nestedFd),
-					},
-					"required": []string{name},
-				})
-			} else {
-				// OpenAI compatibility mode. Oneof, Anyof are not supported, therefore just use ordinary fields, BUT add extra comments.
-				schema := g.getType(nestedFd)
-
-				// Replace type with a union of the actual type and null.
-				// This is the suggested way to work around OpenAI's requirement to make all fields
-				// required, but still allowing the LLM to not put a value (kind of).
-				// See https://platform.openai.com/docs/guides/structured-outputs/supported-schemas#all-fields-must-be-required
-				if v, ok := schema["type"].(string); ok {
-					schema["type"] = []string{v, "null"}
-				}
-				normalFields[name] = schema
-				schema["description"] = fmt.Sprintf("Note: This field is part of the '%s' oneof group. Only one field in this group can be set at a time. Setting multiple fields in the group WILL result in an error. Protobuf oneOf semantics apply.", oneof.Name())
-				if isFieldRequired(nestedFd) {
-					required = append(required, name)
-				}
-
-				// In OpenAI, all fields must be marked as required.
-				required = append(required, name)
-			}
-		} else {
-			// If not part of a oneof, handle as a normal field
-			normalFields[name] = g.getType(nestedFd)
-			if isFieldRequired(nestedFd) || g.openAICompat { // In OpenAI, everything is required.
-				required = append(required, name)
-			}
-		}
-	}
-
-	// OpenAPI works differently than protobuf, when it comes to oneOf.
-	// In proto, not the oneOf name's field name is used, but the actual field name of the oneOf ENTRY.
-	// Therefore, we use an anyOf, and add one oneOf entry per oneOf protobuf block.
-	var anyOf []map[string]any
-	for _, protoOneOf := range oneOf {
-		anyOf = append(anyOf, map[string]any{
-			"oneOf":    protoOneOf,
-			"$comment": "In this schema, there is a oneOf group for every protobuf oneOf block in the message.",
-		})
-	}
-
-	// Final schema includes both properties and anyOf for flexibility
-	result := map[string]any{
-		"type":       "object",
-		"properties": normalFields, // Regular properties defined
-		"required":   required,
-	}
-	if anyOf != nil {
-		result["anyOf"] = anyOf // Fields in properties are already allowed. anyOf is in addition - which covers all oneOf groups
-	}
-	// OpenAI requires "additionalProperties: false", always.
-	if g.openAICompat {
-		result["additionalProperties"] = false
-		// Replace type with a union of the actual type and null.
-		// This is the suggested way to work around OpenAI's requirement to make all fields
-		// required, but still allowing the LLM to not put a value (kind of).
-		// See https://platform.openai.com/docs/guides/structured-outputs/supported-schemas#all-fields-must-be-required
-		if v, ok := result["type"].(string); ok {
-			result["type"] = []string{v, "null"}
-		}
-
-	}
-
-	return result
+	return gen.MessageSchema(md, gen.SchemaOptions{OpenAICompat: g.openAICompat})
 }
 
+// getType delegates to the gen package.
 func (g *FileGenerator) getType(fd protoreflect.FieldDescriptor) map[string]any {
-	if fd.IsMap() {
-		keyType := fd.MapKey().Kind()
-		keyConstraints := map[string]any{"type": "string"}
-
-		switch keyType {
-		case protoreflect.BoolKind:
-			keyConstraints["enum"] = []string{"true", "false"}
-		case protoreflect.Uint32Kind, protoreflect.Fixed32Kind, protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
-			keyConstraints["pattern"] = "^(0|[1-9]\\d*)$"
-		case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind, protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
-			keyConstraints["pattern"] = "^-?(0|[1-9]\\d*)$"
-		}
-
-		if g.openAICompat {
-			return map[string]any{
-				"type":        "array",
-				"description": "List of key value pairs",
-				"items": map[string]any{
-					"type": "object",
-					"properties": map[string]any{
-						"key": map[string]any{"type": "string"},
-						"value": map[string]any{
-							"type": g.getType(fd.MapValue())["type"],
-						},
-					},
-					"required":             []string{"key", "value"},
-					"additionalProperties": false,
-				},
-			}
-		}
-
-		return map[string]any{
-			"type":                 "object",
-			"propertyNames":        keyConstraints,
-			"additionalProperties": g.getType(fd.MapValue()),
-		}
-	}
-
-	var schema map[string]any
-
-	switch fd.Kind() {
-	case protoreflect.MessageKind:
-		fullName := string(fd.Message().FullName())
-		switch fullName {
-		case "google.protobuf.Timestamp":
-			schema = map[string]any{"type": []string{"string", "null"}, "format": "date-time"}
-		case "google.protobuf.Duration":
-			schema = map[string]any{"type": []string{"string", "null"}, "pattern": `^-?[0-9]+(\.[0-9]+)?s$`}
-		case "google.protobuf.Struct":
-			if g.openAICompat {
-				schema = map[string]any{
-					"type":        "string",
-					"description": "string representation of any JSON object. represents a google.protobuf.Struct, a dynamic JSON object.",
-				}
-			} else {
-				schema = map[string]any{
-					"type":                 "object",
-					"additionalProperties": true,
-				}
-			}
-		case "google.protobuf.Value":
-			if g.openAICompat {
-				schema = map[string]any{
-					"type":        "string",
-					"description": "string representation of any JSON value. represents a google.protobuf.Value, a dynamic JSON value (string, number, boolean, array, object).",
-				}
-			} else {
-				schema = map[string]any{
-					"description": "represents a google.protobuf.Value, a dynamic JSON value (string, number, boolean, array, object).",
-				}
-			}
-		case "google.protobuf.ListValue":
-			if g.openAICompat {
-				schema = map[string]any{
-					"type":        "string",
-					"description": "string representation of a JSON array. represents a google.protobuf.ListValue, a JSON array of values.",
-				}
-			} else {
-				schema = map[string]any{
-					"type":        "array",
-					"description": "represents a google.protobuf.ListValue, a JSON array of values.",
-					"items":       map[string]any{},
-				}
-			}
-		case "google.protobuf.FieldMask":
-			if g.openAICompat {
-				schema = map[string]any{"type": []string{"string", "null"}}
-			} else {
-				schema = map[string]any{"type": "string"}
-			}
-		case "google.protobuf.Any":
-			if g.openAICompat {
-				schema = map[string]any{
-					"type": "object",
-					"properties": map[string]any{
-						"@type": map[string]any{"type": "string"},
-						"value": map[string]any{},
-					},
-					"required": []string{"@type"},
-				}
-			} else {
-				schema = map[string]any{
-					"type": []string{"object", "null"},
-					"properties": map[string]any{
-						"@type": map[string]any{"type": "string"},
-						"value": map[string]any{},
-					},
-					"required": []string{"@type"},
-				}
-			}
-		case "google.protobuf.DoubleValue", "google.protobuf.FloatValue",
-			"google.protobuf.Int32Value", "google.protobuf.UInt32Value":
-			schema = map[string]any{"type": "number", "nullable": true}
-		case "google.protobuf.Int64Value", "google.protobuf.UInt64Value":
-			schema = map[string]any{"type": "string", "nullable": true}
-		case "google.protobuf.StringValue":
-			schema = map[string]any{"type": "string", "nullable": true}
-		case "google.protobuf.BoolValue":
-			schema = map[string]any{"type": "boolean", "nullable": true}
-		case "google.protobuf.BytesValue":
-			if g.openAICompat {
-				schema = map[string]any{"type": "string", "nullable": true}
-			} else {
-				schema = map[string]any{"type": "string", "format": "byte", "nullable": true}
-			}
-		default:
-			schema = g.messageSchema(fd.Message())
-		}
-
-	case protoreflect.EnumKind:
-		var values []string
-		for i := 0; i < fd.Enum().Values().Len(); i++ {
-			values = append(values, string(fd.Enum().Values().Get(i).Name()))
-		}
-		schema = map[string]any{
-			"type": "string",
-			"enum": values,
-		}
-
-	default:
-		schema = map[string]any{
-			"type": kindToType(fd.Kind()),
-		}
-		if fd.Kind() == protoreflect.BytesKind {
-			schema["contentEncoding"] = "base64"
-			if !g.openAICompat {
-				schema["format"] = "byte"
-			}
-		}
-	}
-
-	// Apply protovalidate constraints to the schema
-	validateConstraints := extractValidateConstraints(fd)
-	for key, value := range validateConstraints {
-		schema[key] = value
-	}
-
-	// Handle repeated fields here, wrapping the actual schema in an array.
-	if fd.IsList() {
-		return map[string]any{
-			"type":  "array",
-			"items": schema,
-		}
-	}
-	return schema
-}
-
-var strippedCommentPrefixes = []string{"buf:lint:", "@ignore-comment"}
-
-func cleanComment(comment string) string {
-	var cleanedLines []string
-outer:
-	for _, line := range strings.Split(comment, "\n") {
-		trimmed := strings.TrimSpace(line)
-		for _, strip := range strippedCommentPrefixes {
-			if strings.HasPrefix(trimmed, strip) {
-				continue outer
-			}
-		}
-		cleanedLines = append(cleanedLines, trimmed)
-	}
-	return strings.Join(cleanedLines, "\n")
-}
-
-func Base32String(b []byte) string {
-	n := new(big.Int).SetBytes(b)
-	return n.Text(36)
-}
-
-func MangleHeadIfTooLong(name string, maxLen int) string {
-	if len(name) <= maxLen {
-		return name
-	}
-
-	// Generate short hash of full name
-	hash := sha1.Sum([]byte(name))
-	hashPrefix := Base32String(hash[:])[:6] // e.g. "3fj92a"
-
-	// Leave room for hash prefix + underscore
-	available := maxLen - len(hashPrefix) - 1
-	if available <= 0 {
-		return hashPrefix
-	}
-
-	// Preserve the end of the name (most specific)
-	tail := name[len(name)-available:]
-	return hashPrefix + "_" + tail
+	return gen.FieldSchema(fd, gen.SchemaOptions{OpenAICompat: g.openAICompat})
 }
 
 func (g *FileGenerator) Generate(packageSuffix string) {
@@ -791,42 +401,12 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 	for _, svc := range g.f.Services {
 		s := map[string]Tool{}
 		for _, meth := range svc.Methods {
-			// Only unary supported at the moment
 			if meth.Desc.IsStreamingClient() || meth.Desc.IsStreamingServer() {
 				continue
 			}
 
-			// Generate standard tool
-			toolStandard := mcp.Tool{
-				Name:        MangleHeadIfTooLong(strings.ReplaceAll(string(meth.Desc.FullName()), ".", "_"), 64),
-				Description: cleanComment(string(meth.Comments.Leading)),
-			}
-
-			// Generate standard schema
-			g.openAICompat = false
-			standardSchema := g.messageSchema(meth.Input.Desc)
-			marshaledStandard, err := json.Marshal(standardSchema)
-			if err != nil {
-				panic(err)
-			}
-			toolStandard.RawInputSchema = json.RawMessage(marshaledStandard)
-
-			// Generate OpenAI tool
-			toolOpenAI := mcp.Tool{
-				Name:        MangleHeadIfTooLong(strings.ReplaceAll(string(meth.Desc.FullName()), ".", "_"), 64),
-				Description: cleanComment(string(meth.Comments.Leading)),
-			}
-
-			// Generate OpenAI schema
-			g.openAICompat = true
-			openAISchema := g.messageSchema(meth.Input.Desc)
-			// In OpenAI mode, we use type ["my-type", "null"] to make it nullable, but many tools don't like this for the top-level schema object.
-			openAISchema["type"] = "object"
-			marshaledOpenAI, err := json.Marshal(openAISchema)
-			if err != nil {
-				panic(err)
-			}
-			toolOpenAI.RawInputSchema = json.RawMessage(marshaledOpenAI)
+			comment := string(meth.Comments.Leading)
+			toolStandard, toolOpenAI := gen.ToolForMethod(meth.Desc, comment)
 
 			s[meth.GoName] = Tool{
 				RequestType:   g.gf.QualifiedGoIdent(meth.Input.GoIdent),

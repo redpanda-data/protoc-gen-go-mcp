@@ -1,0 +1,22 @@
+{
+  "_base": {
+    "exclude_files": {
+      "external/": "third-party dependencies"
+    }
+  },
+  "shadow": {
+    "only_files": {
+      "DISABLED": "err shadowing is idiomatic Go"
+    }
+  },
+  "loopclosure": {
+    "only_files": {
+      "DISABLED": "Go 1.22+ fixed loop variable capture"
+    }
+  },
+  "SA5011": {
+    "exclude_files": {
+      "_test\\.go$": "t.Fatal guards are not understood by SA5011"
+    }
+  }
+}
