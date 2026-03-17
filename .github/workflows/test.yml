@@ -23,7 +23,7 @@ jobs:
     - name: Build and test
       run: bazelisk test //... --test_summary=detailed
 
-    - name: Conformance tests
+    - name: Conformance and integration tests
       if: >-
         github.event_name == 'push' ||
         (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork)
@@ -36,6 +36,6 @@ jobs:
           echo "::warning::API key secrets not available, skipping conformance tests"
           exit 0
         fi
-        bazelisk test //conformancetest:conformancetest_test //integrationtest:integrationtest_test \
+        bazelisk test //... \
           --test_env=GOOGLE_API_KEY --test_env=OPENAI_API_KEY --test_env=ANTHROPIC_API_KEY \
           --test_output=all --test_summary=detailed

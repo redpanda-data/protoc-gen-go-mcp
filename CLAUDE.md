@@ -84,7 +84,7 @@ standard, openAI := gen.ToolForMethod(methodDescriptor, "description")
 ## Testing
 
 - Unit tests: `go test ./pkg/...` (with -race, always)
-- Conformance tests: `go test -tags=integration ./conformancetest/` (needs API keys)
+- Conformance tests: `go test ./conformancetest/` (needs API keys, tests skip if missing)
 - Golden test: in-process generator re-run vs checked-in `gen/go/*.pb.mcp.go`
 - Edge case protos: `pkg/testdata/proto/testdata/edge_cases.proto`
 - Fuzz tests: `pkg/runtime/fix_fuzz_test.go`, `pkg/gen/schema_fuzz_test.go`

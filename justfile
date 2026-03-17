@@ -9,7 +9,7 @@ build:
 
 # Run all tests (unit, golden, conformance, integration). Needs API keys in env.
 test:
-    bazelisk test //... //conformancetest:conformancetest_test //integrationtest:integrationtest_test \
+    bazelisk test //... \
         --test_env=GOOGLE_API_KEY --test_env=OPENAI_API_KEY --test_env=ANTHROPIC_API_KEY
 
 # Run unit + golden tests only (no API keys needed)
@@ -24,11 +24,11 @@ test-cover:
 
 # Run conformance tests against all cloud providers (requires API keys)
 conformancetest:
-    go test -tags=integration ./conformancetest -v -timeout=300s
+    go test ./conformancetest -v -timeout=300s
 
 # Run integration tests (requires API keys)
 integrationtest:
-    go test -tags=integration ./integrationtest ./conformancetest -v -timeout=120s
+    go test ./integrationtest ./conformancetest -v -timeout=120s
 
 # Run gazelle to sync BUILD files from go.mod
 gazelle:
