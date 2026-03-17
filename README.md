@@ -152,6 +152,68 @@ testdatamcp.RegisterTestServiceHandler(s, &srv, option)
 testdatamcp.ForwardToTestServiceClient(s, client, option)
 ```
 
+### Tool name prefixing
+
+When registering the same service multiple times (e.g. separate database instances), use `WithNamePrefix` to namespace tools:
+
+```go
+sqlv1mcp.RegisterSQLServiceHandler(s, postgresHandler, runtime.WithNamePrefix("postgres"))
+sqlv1mcp.RegisterSQLServiceHandler(s, clickhouseHandler, runtime.WithNamePrefix("clickhouse"))
+// Tools: postgres_SQLService_Query, clickhouse_SQLService_Query, ...
+```
+
+## Migrating from mark3labs-only (pre-v0.2)
+
+Generated code no longer imports `mark3labs/mcp-go` directly. It programs against the `runtime.MCPServer` interface, and you pick the MCP library via an adapter package.
+
+### 1. Server creation
+
+```go
+// Before
+s := server.NewMCPServer("name", "1.0", server.WithToolCapabilities(true))
+
+// After -- mark3labs
+raw, s := mark3labs.NewServer("name", "1.0", server.WithToolCapabilities(true))
+// raw is *server.MCPServer for transport (ServeStdio, NewStreamableHTTPServer, etc.)
+// s is runtime.MCPServer for tool registration
+
+// After -- official go-sdk
+raw, s := gosdk.NewServer("name", "1.0")
+```
+
+### 2. Tool registration
+
+Generated `Register*Handler` functions now take `runtime.MCPServer` instead of `*server.MCPServer`. Just pass `s` from step 1.
+
+If you were calling `s.AddTool()` manually with mark3labs types to do name prefixing, delete that code and use `WithNamePrefix`:
+
+```go
+// Before: 60 lines of manual register.go per service
+sql.RegisterTools(s, "postgres", handler) // custom wrapper around s.AddTool(mcp.Tool, ...)
+
+// After: one line
+sqlv1mcp.RegisterSQLServiceHandler(s, handler, runtime.WithNamePrefix("postgres"))
+```
+
+### 3. HandleError return type
+
+`runtime.HandleError()` now returns `*runtime.CallToolResult` instead of `*mcp.CallToolResult`. If you call it from custom handlers, update the return type.
+
+### 4. Transport
+
+Transport setup is unchanged -- use the raw server from step 1:
+
+```go
+// mark3labs stdio
+server.ServeStdio(raw)
+
+// mark3labs streamable HTTP
+mcpserver.NewStreamableHTTPServer(raw)
+
+// go-sdk stdio
+raw.Run(ctx, &mcp.StdioTransport{})
+```
+
 ## LLM Provider Compatibility
 
 The generator creates both standard MCP and OpenAI-compatible handlers automatically. Choose which to use at runtime.
