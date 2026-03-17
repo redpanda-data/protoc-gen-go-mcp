@@ -38,8 +38,8 @@ func Wrap(s *mcpserver.MCPServer) runtime.MCPServer {
 // the runtime.MCPServer adapter. Callers use the raw *mcpserver.MCPServer
 // for transport setup (e.g. server.ServeStdio) and the adapter for
 // tool registration.
-func NewServer(name, version string) (*mcpserver.MCPServer, runtime.MCPServer) {
-	s := mcpserver.NewMCPServer(name, version)
+func NewServer(name, version string, opts ...mcpserver.ServerOption) (*mcpserver.MCPServer, runtime.MCPServer) {
+	s := mcpserver.NewMCPServer(name, version, opts...)
 	return s, Wrap(s)
 }
 

@@ -39,10 +39,7 @@ func RegisterIAMPolicyHandler(s runtime.MCPServer, srv IAMPolicyServer, opts ...
 		opt(config)
 	}
 	GetIamPolicyTool := IAMPolicy_GetIamPolicyTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		GetIamPolicyTool = runtime.AddExtraPropertiesToTool(GetIamPolicyTool, config.ExtraProperties)
-	}
+	GetIamPolicyTool = runtime.ApplyConfig(GetIamPolicyTool, config)
 
 	s.AddTool(GetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req iampb.GetIamPolicyRequest
@@ -78,10 +75,7 @@ func RegisterIAMPolicyHandler(s runtime.MCPServer, srv IAMPolicyServer, opts ...
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	SetIamPolicyTool := IAMPolicy_SetIamPolicyTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		SetIamPolicyTool = runtime.AddExtraPropertiesToTool(SetIamPolicyTool, config.ExtraProperties)
-	}
+	SetIamPolicyTool = runtime.ApplyConfig(SetIamPolicyTool, config)
 
 	s.AddTool(SetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req iampb.SetIamPolicyRequest
@@ -117,10 +111,7 @@ func RegisterIAMPolicyHandler(s runtime.MCPServer, srv IAMPolicyServer, opts ...
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	TestIamPermissionsTool := IAMPolicy_TestIamPermissionsTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		TestIamPermissionsTool = runtime.AddExtraPropertiesToTool(TestIamPermissionsTool, config.ExtraProperties)
-	}
+	TestIamPermissionsTool = runtime.ApplyConfig(TestIamPermissionsTool, config)
 
 	s.AddTool(TestIamPermissionsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req iampb.TestIamPermissionsRequest
@@ -164,10 +155,7 @@ func RegisterIAMPolicyHandlerOpenAI(s runtime.MCPServer, srv IAMPolicyServer, op
 		opt(config)
 	}
 	GetIamPolicyToolOpenAI := IAMPolicy_GetIamPolicyToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		GetIamPolicyToolOpenAI = runtime.AddExtraPropertiesToTool(GetIamPolicyToolOpenAI, config.ExtraProperties)
-	}
+	GetIamPolicyToolOpenAI = runtime.ApplyConfig(GetIamPolicyToolOpenAI, config)
 
 	s.AddTool(GetIamPolicyToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req iampb.GetIamPolicyRequest
@@ -205,10 +193,7 @@ func RegisterIAMPolicyHandlerOpenAI(s runtime.MCPServer, srv IAMPolicyServer, op
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	SetIamPolicyToolOpenAI := IAMPolicy_SetIamPolicyToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		SetIamPolicyToolOpenAI = runtime.AddExtraPropertiesToTool(SetIamPolicyToolOpenAI, config.ExtraProperties)
-	}
+	SetIamPolicyToolOpenAI = runtime.ApplyConfig(SetIamPolicyToolOpenAI, config)
 
 	s.AddTool(SetIamPolicyToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req iampb.SetIamPolicyRequest
@@ -246,10 +231,7 @@ func RegisterIAMPolicyHandlerOpenAI(s runtime.MCPServer, srv IAMPolicyServer, op
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	TestIamPermissionsToolOpenAI := IAMPolicy_TestIamPermissionsToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		TestIamPermissionsToolOpenAI = runtime.AddExtraPropertiesToTool(TestIamPermissionsToolOpenAI, config.ExtraProperties)
-	}
+	TestIamPermissionsToolOpenAI = runtime.ApplyConfig(TestIamPermissionsToolOpenAI, config)
 
 	s.AddTool(TestIamPermissionsToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req iampb.TestIamPermissionsRequest
@@ -321,10 +303,7 @@ func ForwardToConnectIAMPolicyClient(s runtime.MCPServer, client ConnectIAMPolic
 		opt(config)
 	}
 	GetIamPolicyTool := IAMPolicy_GetIamPolicyTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		GetIamPolicyTool = runtime.AddExtraPropertiesToTool(GetIamPolicyTool, config.ExtraProperties)
-	}
+	GetIamPolicyTool = runtime.ApplyConfig(GetIamPolicyTool, config)
 
 	s.AddTool(GetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req iampb.GetIamPolicyRequest
@@ -359,10 +338,7 @@ func ForwardToConnectIAMPolicyClient(s runtime.MCPServer, client ConnectIAMPolic
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	SetIamPolicyTool := IAMPolicy_SetIamPolicyTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		SetIamPolicyTool = runtime.AddExtraPropertiesToTool(SetIamPolicyTool, config.ExtraProperties)
-	}
+	SetIamPolicyTool = runtime.ApplyConfig(SetIamPolicyTool, config)
 
 	s.AddTool(SetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req iampb.SetIamPolicyRequest
@@ -397,10 +373,7 @@ func ForwardToConnectIAMPolicyClient(s runtime.MCPServer, client ConnectIAMPolic
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	TestIamPermissionsTool := IAMPolicy_TestIamPermissionsTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		TestIamPermissionsTool = runtime.AddExtraPropertiesToTool(TestIamPermissionsTool, config.ExtraProperties)
-	}
+	TestIamPermissionsTool = runtime.ApplyConfig(TestIamPermissionsTool, config)
 
 	s.AddTool(TestIamPermissionsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req iampb.TestIamPermissionsRequest
@@ -443,10 +416,7 @@ func ForwardToIAMPolicyClient(s runtime.MCPServer, client IAMPolicyClient, opts 
 		opt(config)
 	}
 	GetIamPolicyTool := IAMPolicy_GetIamPolicyTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		GetIamPolicyTool = runtime.AddExtraPropertiesToTool(GetIamPolicyTool, config.ExtraProperties)
-	}
+	GetIamPolicyTool = runtime.ApplyConfig(GetIamPolicyTool, config)
 
 	s.AddTool(GetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req iampb.GetIamPolicyRequest
@@ -481,10 +451,7 @@ func ForwardToIAMPolicyClient(s runtime.MCPServer, client IAMPolicyClient, opts 
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	SetIamPolicyTool := IAMPolicy_SetIamPolicyTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		SetIamPolicyTool = runtime.AddExtraPropertiesToTool(SetIamPolicyTool, config.ExtraProperties)
-	}
+	SetIamPolicyTool = runtime.ApplyConfig(SetIamPolicyTool, config)
 
 	s.AddTool(SetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req iampb.SetIamPolicyRequest
@@ -519,10 +486,7 @@ func ForwardToIAMPolicyClient(s runtime.MCPServer, client IAMPolicyClient, opts 
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	TestIamPermissionsTool := IAMPolicy_TestIamPermissionsTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		TestIamPermissionsTool = runtime.AddExtraPropertiesToTool(TestIamPermissionsTool, config.ExtraProperties)
-	}
+	TestIamPermissionsTool = runtime.ApplyConfig(TestIamPermissionsTool, config)
 
 	s.AddTool(TestIamPermissionsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req iampb.TestIamPermissionsRequest

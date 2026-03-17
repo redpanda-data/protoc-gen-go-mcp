@@ -7,7 +7,6 @@ go_test(
         "conformance_test.go",
         "openai_conformance_test.go",
     ],
-
     deps = [
         "//pkg/runtime",
         "//pkg/testdata/gen/go/testdata",

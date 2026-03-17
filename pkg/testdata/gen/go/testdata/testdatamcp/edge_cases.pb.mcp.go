@@ -54,10 +54,7 @@ func RegisterEdgeCaseServiceHandler(s runtime.MCPServer, srv EdgeCaseServiceServ
 		opt(config)
 	}
 	AllScalarTypesTool := EdgeCaseService_AllScalarTypesTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		AllScalarTypesTool = runtime.AddExtraPropertiesToTool(AllScalarTypesTool, config.ExtraProperties)
-	}
+	AllScalarTypesTool = runtime.ApplyConfig(AllScalarTypesTool, config)
 
 	s.AddTool(AllScalarTypesTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.AllScalarTypesRequest
@@ -93,10 +90,7 @@ func RegisterEdgeCaseServiceHandler(s runtime.MCPServer, srv EdgeCaseServiceServ
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	DeepNestingTool := EdgeCaseService_DeepNestingTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		DeepNestingTool = runtime.AddExtraPropertiesToTool(DeepNestingTool, config.ExtraProperties)
-	}
+	DeepNestingTool = runtime.ApplyConfig(DeepNestingTool, config)
 
 	s.AddTool(DeepNestingTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.DeepNestingRequest
@@ -132,10 +126,7 @@ func RegisterEdgeCaseServiceHandler(s runtime.MCPServer, srv EdgeCaseServiceServ
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	EnumFieldsTool := EdgeCaseService_EnumFieldsTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		EnumFieldsTool = runtime.AddExtraPropertiesToTool(EnumFieldsTool, config.ExtraProperties)
-	}
+	EnumFieldsTool = runtime.ApplyConfig(EnumFieldsTool, config)
 
 	s.AddTool(EnumFieldsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.EnumFieldsRequest
@@ -171,10 +162,7 @@ func RegisterEdgeCaseServiceHandler(s runtime.MCPServer, srv EdgeCaseServiceServ
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	MapVariantsTool := EdgeCaseService_MapVariantsTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		MapVariantsTool = runtime.AddExtraPropertiesToTool(MapVariantsTool, config.ExtraProperties)
-	}
+	MapVariantsTool = runtime.ApplyConfig(MapVariantsTool, config)
 
 	s.AddTool(MapVariantsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.MapVariantsRequest
@@ -210,10 +198,7 @@ func RegisterEdgeCaseServiceHandler(s runtime.MCPServer, srv EdgeCaseServiceServ
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	MultipleOneofsTool := EdgeCaseService_MultipleOneofsTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		MultipleOneofsTool = runtime.AddExtraPropertiesToTool(MultipleOneofsTool, config.ExtraProperties)
-	}
+	MultipleOneofsTool = runtime.ApplyConfig(MultipleOneofsTool, config)
 
 	s.AddTool(MultipleOneofsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.MultipleOneofsRequest
@@ -249,10 +234,7 @@ func RegisterEdgeCaseServiceHandler(s runtime.MCPServer, srv EdgeCaseServiceServ
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	NumericValidationTool := EdgeCaseService_NumericValidationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		NumericValidationTool = runtime.AddExtraPropertiesToTool(NumericValidationTool, config.ExtraProperties)
-	}
+	NumericValidationTool = runtime.ApplyConfig(NumericValidationTool, config)
 
 	s.AddTool(NumericValidationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.NumericValidationRequest
@@ -324,10 +306,7 @@ func RegisterEdgeCaseServiceHandler(s runtime.MCPServer, srv EdgeCaseServiceServ
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	RepeatedMessagesTool := EdgeCaseService_RepeatedMessagesTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		RepeatedMessagesTool = runtime.AddExtraPropertiesToTool(RepeatedMessagesTool, config.ExtraProperties)
-	}
+	RepeatedMessagesTool = runtime.ApplyConfig(RepeatedMessagesTool, config)
 
 	s.AddTool(RepeatedMessagesTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.RepeatedMessagesRequest
@@ -371,10 +350,7 @@ func RegisterEdgeCaseServiceHandlerOpenAI(s runtime.MCPServer, srv EdgeCaseServi
 		opt(config)
 	}
 	AllScalarTypesToolOpenAI := EdgeCaseService_AllScalarTypesToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		AllScalarTypesToolOpenAI = runtime.AddExtraPropertiesToTool(AllScalarTypesToolOpenAI, config.ExtraProperties)
-	}
+	AllScalarTypesToolOpenAI = runtime.ApplyConfig(AllScalarTypesToolOpenAI, config)
 
 	s.AddTool(AllScalarTypesToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.AllScalarTypesRequest
@@ -412,10 +388,7 @@ func RegisterEdgeCaseServiceHandlerOpenAI(s runtime.MCPServer, srv EdgeCaseServi
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	DeepNestingToolOpenAI := EdgeCaseService_DeepNestingToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		DeepNestingToolOpenAI = runtime.AddExtraPropertiesToTool(DeepNestingToolOpenAI, config.ExtraProperties)
-	}
+	DeepNestingToolOpenAI = runtime.ApplyConfig(DeepNestingToolOpenAI, config)
 
 	s.AddTool(DeepNestingToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.DeepNestingRequest
@@ -453,10 +426,7 @@ func RegisterEdgeCaseServiceHandlerOpenAI(s runtime.MCPServer, srv EdgeCaseServi
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	EnumFieldsToolOpenAI := EdgeCaseService_EnumFieldsToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		EnumFieldsToolOpenAI = runtime.AddExtraPropertiesToTool(EnumFieldsToolOpenAI, config.ExtraProperties)
-	}
+	EnumFieldsToolOpenAI = runtime.ApplyConfig(EnumFieldsToolOpenAI, config)
 
 	s.AddTool(EnumFieldsToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.EnumFieldsRequest
@@ -494,10 +464,7 @@ func RegisterEdgeCaseServiceHandlerOpenAI(s runtime.MCPServer, srv EdgeCaseServi
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	MapVariantsToolOpenAI := EdgeCaseService_MapVariantsToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		MapVariantsToolOpenAI = runtime.AddExtraPropertiesToTool(MapVariantsToolOpenAI, config.ExtraProperties)
-	}
+	MapVariantsToolOpenAI = runtime.ApplyConfig(MapVariantsToolOpenAI, config)
 
 	s.AddTool(MapVariantsToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.MapVariantsRequest
@@ -535,10 +502,7 @@ func RegisterEdgeCaseServiceHandlerOpenAI(s runtime.MCPServer, srv EdgeCaseServi
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	MultipleOneofsToolOpenAI := EdgeCaseService_MultipleOneofsToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		MultipleOneofsToolOpenAI = runtime.AddExtraPropertiesToTool(MultipleOneofsToolOpenAI, config.ExtraProperties)
-	}
+	MultipleOneofsToolOpenAI = runtime.ApplyConfig(MultipleOneofsToolOpenAI, config)
 
 	s.AddTool(MultipleOneofsToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.MultipleOneofsRequest
@@ -576,10 +540,7 @@ func RegisterEdgeCaseServiceHandlerOpenAI(s runtime.MCPServer, srv EdgeCaseServi
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	NumericValidationToolOpenAI := EdgeCaseService_NumericValidationToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		NumericValidationToolOpenAI = runtime.AddExtraPropertiesToTool(NumericValidationToolOpenAI, config.ExtraProperties)
-	}
+	NumericValidationToolOpenAI = runtime.ApplyConfig(NumericValidationToolOpenAI, config)
 
 	s.AddTool(NumericValidationToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.NumericValidationRequest
@@ -655,10 +616,7 @@ func RegisterEdgeCaseServiceHandlerOpenAI(s runtime.MCPServer, srv EdgeCaseServi
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	RepeatedMessagesToolOpenAI := EdgeCaseService_RepeatedMessagesToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		RepeatedMessagesToolOpenAI = runtime.AddExtraPropertiesToTool(RepeatedMessagesToolOpenAI, config.ExtraProperties)
-	}
+	RepeatedMessagesToolOpenAI = runtime.ApplyConfig(RepeatedMessagesToolOpenAI, config)
 
 	s.AddTool(RepeatedMessagesToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.RepeatedMessagesRequest
@@ -740,10 +698,7 @@ func ForwardToConnectEdgeCaseServiceClient(s runtime.MCPServer, client ConnectEd
 		opt(config)
 	}
 	AllScalarTypesTool := EdgeCaseService_AllScalarTypesTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		AllScalarTypesTool = runtime.AddExtraPropertiesToTool(AllScalarTypesTool, config.ExtraProperties)
-	}
+	AllScalarTypesTool = runtime.ApplyConfig(AllScalarTypesTool, config)
 
 	s.AddTool(AllScalarTypesTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.AllScalarTypesRequest
@@ -778,10 +733,7 @@ func ForwardToConnectEdgeCaseServiceClient(s runtime.MCPServer, client ConnectEd
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	DeepNestingTool := EdgeCaseService_DeepNestingTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		DeepNestingTool = runtime.AddExtraPropertiesToTool(DeepNestingTool, config.ExtraProperties)
-	}
+	DeepNestingTool = runtime.ApplyConfig(DeepNestingTool, config)
 
 	s.AddTool(DeepNestingTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.DeepNestingRequest
@@ -816,10 +768,7 @@ func ForwardToConnectEdgeCaseServiceClient(s runtime.MCPServer, client ConnectEd
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	EnumFieldsTool := EdgeCaseService_EnumFieldsTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		EnumFieldsTool = runtime.AddExtraPropertiesToTool(EnumFieldsTool, config.ExtraProperties)
-	}
+	EnumFieldsTool = runtime.ApplyConfig(EnumFieldsTool, config)
 
 	s.AddTool(EnumFieldsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.EnumFieldsRequest
@@ -854,10 +803,7 @@ func ForwardToConnectEdgeCaseServiceClient(s runtime.MCPServer, client ConnectEd
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	MapVariantsTool := EdgeCaseService_MapVariantsTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		MapVariantsTool = runtime.AddExtraPropertiesToTool(MapVariantsTool, config.ExtraProperties)
-	}
+	MapVariantsTool = runtime.ApplyConfig(MapVariantsTool, config)
 
 	s.AddTool(MapVariantsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.MapVariantsRequest
@@ -892,10 +838,7 @@ func ForwardToConnectEdgeCaseServiceClient(s runtime.MCPServer, client ConnectEd
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	MultipleOneofsTool := EdgeCaseService_MultipleOneofsTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		MultipleOneofsTool = runtime.AddExtraPropertiesToTool(MultipleOneofsTool, config.ExtraProperties)
-	}
+	MultipleOneofsTool = runtime.ApplyConfig(MultipleOneofsTool, config)
 
 	s.AddTool(MultipleOneofsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.MultipleOneofsRequest
@@ -930,10 +873,7 @@ func ForwardToConnectEdgeCaseServiceClient(s runtime.MCPServer, client ConnectEd
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	NumericValidationTool := EdgeCaseService_NumericValidationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		NumericValidationTool = runtime.AddExtraPropertiesToTool(NumericValidationTool, config.ExtraProperties)
-	}
+	NumericValidationTool = runtime.ApplyConfig(NumericValidationTool, config)
 
 	s.AddTool(NumericValidationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.NumericValidationRequest
@@ -1003,10 +943,7 @@ func ForwardToConnectEdgeCaseServiceClient(s runtime.MCPServer, client ConnectEd
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	RepeatedMessagesTool := EdgeCaseService_RepeatedMessagesTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		RepeatedMessagesTool = runtime.AddExtraPropertiesToTool(RepeatedMessagesTool, config.ExtraProperties)
-	}
+	RepeatedMessagesTool = runtime.ApplyConfig(RepeatedMessagesTool, config)
 
 	s.AddTool(RepeatedMessagesTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.RepeatedMessagesRequest
@@ -1049,10 +986,7 @@ func ForwardToEdgeCaseServiceClient(s runtime.MCPServer, client EdgeCaseServiceC
 		opt(config)
 	}
 	AllScalarTypesTool := EdgeCaseService_AllScalarTypesTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		AllScalarTypesTool = runtime.AddExtraPropertiesToTool(AllScalarTypesTool, config.ExtraProperties)
-	}
+	AllScalarTypesTool = runtime.ApplyConfig(AllScalarTypesTool, config)
 
 	s.AddTool(AllScalarTypesTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.AllScalarTypesRequest
@@ -1087,10 +1021,7 @@ func ForwardToEdgeCaseServiceClient(s runtime.MCPServer, client EdgeCaseServiceC
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	DeepNestingTool := EdgeCaseService_DeepNestingTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		DeepNestingTool = runtime.AddExtraPropertiesToTool(DeepNestingTool, config.ExtraProperties)
-	}
+	DeepNestingTool = runtime.ApplyConfig(DeepNestingTool, config)
 
 	s.AddTool(DeepNestingTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.DeepNestingRequest
@@ -1125,10 +1056,7 @@ func ForwardToEdgeCaseServiceClient(s runtime.MCPServer, client EdgeCaseServiceC
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	EnumFieldsTool := EdgeCaseService_EnumFieldsTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		EnumFieldsTool = runtime.AddExtraPropertiesToTool(EnumFieldsTool, config.ExtraProperties)
-	}
+	EnumFieldsTool = runtime.ApplyConfig(EnumFieldsTool, config)
 
 	s.AddTool(EnumFieldsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.EnumFieldsRequest
@@ -1163,10 +1091,7 @@ func ForwardToEdgeCaseServiceClient(s runtime.MCPServer, client EdgeCaseServiceC
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	MapVariantsTool := EdgeCaseService_MapVariantsTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		MapVariantsTool = runtime.AddExtraPropertiesToTool(MapVariantsTool, config.ExtraProperties)
-	}
+	MapVariantsTool = runtime.ApplyConfig(MapVariantsTool, config)
 
 	s.AddTool(MapVariantsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.MapVariantsRequest
@@ -1201,10 +1126,7 @@ func ForwardToEdgeCaseServiceClient(s runtime.MCPServer, client EdgeCaseServiceC
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	MultipleOneofsTool := EdgeCaseService_MultipleOneofsTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		MultipleOneofsTool = runtime.AddExtraPropertiesToTool(MultipleOneofsTool, config.ExtraProperties)
-	}
+	MultipleOneofsTool = runtime.ApplyConfig(MultipleOneofsTool, config)
 
 	s.AddTool(MultipleOneofsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.MultipleOneofsRequest
@@ -1239,10 +1161,7 @@ func ForwardToEdgeCaseServiceClient(s runtime.MCPServer, client EdgeCaseServiceC
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	NumericValidationTool := EdgeCaseService_NumericValidationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		NumericValidationTool = runtime.AddExtraPropertiesToTool(NumericValidationTool, config.ExtraProperties)
-	}
+	NumericValidationTool = runtime.ApplyConfig(NumericValidationTool, config)
 
 	s.AddTool(NumericValidationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.NumericValidationRequest
@@ -1312,10 +1231,7 @@ func ForwardToEdgeCaseServiceClient(s runtime.MCPServer, client EdgeCaseServiceC
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	RepeatedMessagesTool := EdgeCaseService_RepeatedMessagesTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		RepeatedMessagesTool = runtime.AddExtraPropertiesToTool(RepeatedMessagesTool, config.ExtraProperties)
-	}
+	RepeatedMessagesTool = runtime.ApplyConfig(RepeatedMessagesTool, config)
 
 	s.AddTool(RepeatedMessagesTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.RepeatedMessagesRequest

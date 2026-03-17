@@ -89,10 +89,7 @@ func Register{{$key}}Handler(s runtime.MCPServer, srv {{$key}}Server, opts ...ru
 
   {{- range $tool_name, $tool_val := $val }}
   {{$tool_name}}Tool := {{$key}}_{{$tool_name}}Tool
-  // Add extra properties to schema if configured
-  if len(config.ExtraProperties) > 0 {
-    {{$tool_name}}Tool = runtime.AddExtraPropertiesToTool({{$tool_name}}Tool, config.ExtraProperties)
-  }
+  {{$tool_name}}Tool = runtime.ApplyConfig({{$tool_name}}Tool, config)
 
   s.AddTool({{$tool_name}}Tool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
@@ -139,10 +136,7 @@ func Register{{$key}}HandlerOpenAI(s runtime.MCPServer, srv {{$key}}Server, opts
 
   {{- range $tool_name, $tool_val := $val }}
   {{$tool_name}}ToolOpenAI := {{$key}}_{{$tool_name}}ToolOpenAI
-  // Add extra properties to schema if configured
-  if len(config.ExtraProperties) > 0 {
-    {{$tool_name}}ToolOpenAI = runtime.AddExtraPropertiesToTool({{$tool_name}}ToolOpenAI, config.ExtraProperties)
-  }
+  {{$tool_name}}ToolOpenAI = runtime.ApplyConfig({{$tool_name}}ToolOpenAI, config)
 
   s.AddTool({{$tool_name}}ToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
@@ -224,10 +218,7 @@ func ForwardToConnect{{$key}}Client(s runtime.MCPServer, client Connect{{$key}}C
 
   {{- range $tool_name, $tool_val := $val }}
   {{$tool_name}}Tool := {{$key}}_{{$tool_name}}Tool
-  // Add extra properties to schema if configured
-  if len(config.ExtraProperties) > 0 {
-    {{$tool_name}}Tool = runtime.AddExtraPropertiesToTool({{$tool_name}}Tool, config.ExtraProperties)
-  }
+  {{$tool_name}}Tool = runtime.ApplyConfig({{$tool_name}}Tool, config)
 
   s.AddTool({{$tool_name}}Tool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
@@ -275,10 +266,7 @@ func ForwardTo{{$key}}Client(s runtime.MCPServer, client {{$key}}Client, opts ..
 
   {{- range $tool_name, $tool_val := $val }}
   {{$tool_name}}Tool := {{$key}}_{{$tool_name}}Tool
-  // Add extra properties to schema if configured
-  if len(config.ExtraProperties) > 0 {
-    {{$tool_name}}Tool = runtime.AddExtraPropertiesToTool({{$tool_name}}Tool, config.ExtraProperties)
-  }
+  {{$tool_name}}Tool = runtime.ApplyConfig({{$tool_name}}Tool, config)
 
   s.AddTool({{$tool_name}}Tool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
     var req {{$tool_val.RequestType}}

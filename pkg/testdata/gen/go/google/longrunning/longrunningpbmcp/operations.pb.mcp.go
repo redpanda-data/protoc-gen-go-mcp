@@ -46,10 +46,7 @@ func RegisterOperationsHandler(s runtime.MCPServer, srv OperationsServer, opts .
 		opt(config)
 	}
 	CancelOperationTool := Operations_CancelOperationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		CancelOperationTool = runtime.AddExtraPropertiesToTool(CancelOperationTool, config.ExtraProperties)
-	}
+	CancelOperationTool = runtime.ApplyConfig(CancelOperationTool, config)
 
 	s.AddTool(CancelOperationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.CancelOperationRequest
@@ -85,10 +82,7 @@ func RegisterOperationsHandler(s runtime.MCPServer, srv OperationsServer, opts .
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	DeleteOperationTool := Operations_DeleteOperationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		DeleteOperationTool = runtime.AddExtraPropertiesToTool(DeleteOperationTool, config.ExtraProperties)
-	}
+	DeleteOperationTool = runtime.ApplyConfig(DeleteOperationTool, config)
 
 	s.AddTool(DeleteOperationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.DeleteOperationRequest
@@ -124,10 +118,7 @@ func RegisterOperationsHandler(s runtime.MCPServer, srv OperationsServer, opts .
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	GetOperationTool := Operations_GetOperationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		GetOperationTool = runtime.AddExtraPropertiesToTool(GetOperationTool, config.ExtraProperties)
-	}
+	GetOperationTool = runtime.ApplyConfig(GetOperationTool, config)
 
 	s.AddTool(GetOperationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.GetOperationRequest
@@ -163,10 +154,7 @@ func RegisterOperationsHandler(s runtime.MCPServer, srv OperationsServer, opts .
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	ListOperationsTool := Operations_ListOperationsTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		ListOperationsTool = runtime.AddExtraPropertiesToTool(ListOperationsTool, config.ExtraProperties)
-	}
+	ListOperationsTool = runtime.ApplyConfig(ListOperationsTool, config)
 
 	s.AddTool(ListOperationsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.ListOperationsRequest
@@ -202,10 +190,7 @@ func RegisterOperationsHandler(s runtime.MCPServer, srv OperationsServer, opts .
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	WaitOperationTool := Operations_WaitOperationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		WaitOperationTool = runtime.AddExtraPropertiesToTool(WaitOperationTool, config.ExtraProperties)
-	}
+	WaitOperationTool = runtime.ApplyConfig(WaitOperationTool, config)
 
 	s.AddTool(WaitOperationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.WaitOperationRequest
@@ -249,10 +234,7 @@ func RegisterOperationsHandlerOpenAI(s runtime.MCPServer, srv OperationsServer, 
 		opt(config)
 	}
 	CancelOperationToolOpenAI := Operations_CancelOperationToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		CancelOperationToolOpenAI = runtime.AddExtraPropertiesToTool(CancelOperationToolOpenAI, config.ExtraProperties)
-	}
+	CancelOperationToolOpenAI = runtime.ApplyConfig(CancelOperationToolOpenAI, config)
 
 	s.AddTool(CancelOperationToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.CancelOperationRequest
@@ -290,10 +272,7 @@ func RegisterOperationsHandlerOpenAI(s runtime.MCPServer, srv OperationsServer, 
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	DeleteOperationToolOpenAI := Operations_DeleteOperationToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		DeleteOperationToolOpenAI = runtime.AddExtraPropertiesToTool(DeleteOperationToolOpenAI, config.ExtraProperties)
-	}
+	DeleteOperationToolOpenAI = runtime.ApplyConfig(DeleteOperationToolOpenAI, config)
 
 	s.AddTool(DeleteOperationToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.DeleteOperationRequest
@@ -331,10 +310,7 @@ func RegisterOperationsHandlerOpenAI(s runtime.MCPServer, srv OperationsServer, 
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	GetOperationToolOpenAI := Operations_GetOperationToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		GetOperationToolOpenAI = runtime.AddExtraPropertiesToTool(GetOperationToolOpenAI, config.ExtraProperties)
-	}
+	GetOperationToolOpenAI = runtime.ApplyConfig(GetOperationToolOpenAI, config)
 
 	s.AddTool(GetOperationToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.GetOperationRequest
@@ -372,10 +348,7 @@ func RegisterOperationsHandlerOpenAI(s runtime.MCPServer, srv OperationsServer, 
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	ListOperationsToolOpenAI := Operations_ListOperationsToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		ListOperationsToolOpenAI = runtime.AddExtraPropertiesToTool(ListOperationsToolOpenAI, config.ExtraProperties)
-	}
+	ListOperationsToolOpenAI = runtime.ApplyConfig(ListOperationsToolOpenAI, config)
 
 	s.AddTool(ListOperationsToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.ListOperationsRequest
@@ -413,10 +386,7 @@ func RegisterOperationsHandlerOpenAI(s runtime.MCPServer, srv OperationsServer, 
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	WaitOperationToolOpenAI := Operations_WaitOperationToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		WaitOperationToolOpenAI = runtime.AddExtraPropertiesToTool(WaitOperationToolOpenAI, config.ExtraProperties)
-	}
+	WaitOperationToolOpenAI = runtime.ApplyConfig(WaitOperationToolOpenAI, config)
 
 	s.AddTool(WaitOperationToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.WaitOperationRequest
@@ -492,10 +462,7 @@ func ForwardToConnectOperationsClient(s runtime.MCPServer, client ConnectOperati
 		opt(config)
 	}
 	CancelOperationTool := Operations_CancelOperationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		CancelOperationTool = runtime.AddExtraPropertiesToTool(CancelOperationTool, config.ExtraProperties)
-	}
+	CancelOperationTool = runtime.ApplyConfig(CancelOperationTool, config)
 
 	s.AddTool(CancelOperationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.CancelOperationRequest
@@ -530,10 +497,7 @@ func ForwardToConnectOperationsClient(s runtime.MCPServer, client ConnectOperati
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	DeleteOperationTool := Operations_DeleteOperationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		DeleteOperationTool = runtime.AddExtraPropertiesToTool(DeleteOperationTool, config.ExtraProperties)
-	}
+	DeleteOperationTool = runtime.ApplyConfig(DeleteOperationTool, config)
 
 	s.AddTool(DeleteOperationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.DeleteOperationRequest
@@ -568,10 +532,7 @@ func ForwardToConnectOperationsClient(s runtime.MCPServer, client ConnectOperati
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	GetOperationTool := Operations_GetOperationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		GetOperationTool = runtime.AddExtraPropertiesToTool(GetOperationTool, config.ExtraProperties)
-	}
+	GetOperationTool = runtime.ApplyConfig(GetOperationTool, config)
 
 	s.AddTool(GetOperationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.GetOperationRequest
@@ -606,10 +567,7 @@ func ForwardToConnectOperationsClient(s runtime.MCPServer, client ConnectOperati
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	ListOperationsTool := Operations_ListOperationsTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		ListOperationsTool = runtime.AddExtraPropertiesToTool(ListOperationsTool, config.ExtraProperties)
-	}
+	ListOperationsTool = runtime.ApplyConfig(ListOperationsTool, config)
 
 	s.AddTool(ListOperationsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.ListOperationsRequest
@@ -644,10 +602,7 @@ func ForwardToConnectOperationsClient(s runtime.MCPServer, client ConnectOperati
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	WaitOperationTool := Operations_WaitOperationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		WaitOperationTool = runtime.AddExtraPropertiesToTool(WaitOperationTool, config.ExtraProperties)
-	}
+	WaitOperationTool = runtime.ApplyConfig(WaitOperationTool, config)
 
 	s.AddTool(WaitOperationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.WaitOperationRequest
@@ -690,10 +645,7 @@ func ForwardToOperationsClient(s runtime.MCPServer, client OperationsClient, opt
 		opt(config)
 	}
 	CancelOperationTool := Operations_CancelOperationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		CancelOperationTool = runtime.AddExtraPropertiesToTool(CancelOperationTool, config.ExtraProperties)
-	}
+	CancelOperationTool = runtime.ApplyConfig(CancelOperationTool, config)
 
 	s.AddTool(CancelOperationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.CancelOperationRequest
@@ -728,10 +680,7 @@ func ForwardToOperationsClient(s runtime.MCPServer, client OperationsClient, opt
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	DeleteOperationTool := Operations_DeleteOperationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		DeleteOperationTool = runtime.AddExtraPropertiesToTool(DeleteOperationTool, config.ExtraProperties)
-	}
+	DeleteOperationTool = runtime.ApplyConfig(DeleteOperationTool, config)
 
 	s.AddTool(DeleteOperationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.DeleteOperationRequest
@@ -766,10 +715,7 @@ func ForwardToOperationsClient(s runtime.MCPServer, client OperationsClient, opt
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	GetOperationTool := Operations_GetOperationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		GetOperationTool = runtime.AddExtraPropertiesToTool(GetOperationTool, config.ExtraProperties)
-	}
+	GetOperationTool = runtime.ApplyConfig(GetOperationTool, config)
 
 	s.AddTool(GetOperationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.GetOperationRequest
@@ -804,10 +750,7 @@ func ForwardToOperationsClient(s runtime.MCPServer, client OperationsClient, opt
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	ListOperationsTool := Operations_ListOperationsTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		ListOperationsTool = runtime.AddExtraPropertiesToTool(ListOperationsTool, config.ExtraProperties)
-	}
+	ListOperationsTool = runtime.ApplyConfig(ListOperationsTool, config)
 
 	s.AddTool(ListOperationsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.ListOperationsRequest
@@ -842,10 +785,7 @@ func ForwardToOperationsClient(s runtime.MCPServer, client OperationsClient, opt
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	WaitOperationTool := Operations_WaitOperationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		WaitOperationTool = runtime.AddExtraPropertiesToTool(WaitOperationTool, config.ExtraProperties)
-	}
+	WaitOperationTool = runtime.ApplyConfig(WaitOperationTool, config)
 
 	s.AddTool(WaitOperationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req longrunningpb.WaitOperationRequest

@@ -48,6 +48,9 @@ type RegisterServiceOptions struct {
 	// Provider selects the schema mode (standard or OpenAI-compatible).
 	Provider runtime.LLMProvider
 
+	// NamePrefix prepends prefix + "_" to every tool name.
+	NamePrefix string
+
 	// ExtraProperties adds additional properties to all tool schemas.
 	ExtraProperties []runtime.ExtraProperty
 
@@ -109,7 +112,10 @@ func RegisterService(s runtime.MCPServer, sd protoreflect.ServiceDescriptor, han
 			RawInputSchema: json.RawMessage(marshaledSchema),
 		}
 
-		// Apply extra properties
+		// Apply name prefix and extra properties
+		if opts.NamePrefix != "" {
+			tool.Name = opts.NamePrefix + "_" + tool.Name
+		}
 		if len(opts.ExtraProperties) > 0 {
 			tool = runtime.AddExtraPropertiesToTool(tool, opts.ExtraProperties)
 		}

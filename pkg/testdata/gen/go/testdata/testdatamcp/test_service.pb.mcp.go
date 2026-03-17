@@ -42,10 +42,7 @@ func RegisterTestServiceHandler(s runtime.MCPServer, srv TestServiceServer, opts
 		opt(config)
 	}
 	CreateItemTool := TestService_CreateItemTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		CreateItemTool = runtime.AddExtraPropertiesToTool(CreateItemTool, config.ExtraProperties)
-	}
+	CreateItemTool = runtime.ApplyConfig(CreateItemTool, config)
 
 	s.AddTool(CreateItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.CreateItemRequest
@@ -81,10 +78,7 @@ func RegisterTestServiceHandler(s runtime.MCPServer, srv TestServiceServer, opts
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	GetItemTool := TestService_GetItemTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		GetItemTool = runtime.AddExtraPropertiesToTool(GetItemTool, config.ExtraProperties)
-	}
+	GetItemTool = runtime.ApplyConfig(GetItemTool, config)
 
 	s.AddTool(GetItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.GetItemRequest
@@ -120,10 +114,7 @@ func RegisterTestServiceHandler(s runtime.MCPServer, srv TestServiceServer, opts
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	ProcessWellKnownTypesTool := TestService_ProcessWellKnownTypesTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		ProcessWellKnownTypesTool = runtime.AddExtraPropertiesToTool(ProcessWellKnownTypesTool, config.ExtraProperties)
-	}
+	ProcessWellKnownTypesTool = runtime.ApplyConfig(ProcessWellKnownTypesTool, config)
 
 	s.AddTool(ProcessWellKnownTypesTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.ProcessWellKnownTypesRequest
@@ -159,10 +150,7 @@ func RegisterTestServiceHandler(s runtime.MCPServer, srv TestServiceServer, opts
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	TestValidationTool := TestService_TestValidationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		TestValidationTool = runtime.AddExtraPropertiesToTool(TestValidationTool, config.ExtraProperties)
-	}
+	TestValidationTool = runtime.ApplyConfig(TestValidationTool, config)
 
 	s.AddTool(TestValidationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.TestValidationRequest
@@ -206,10 +194,7 @@ func RegisterTestServiceHandlerOpenAI(s runtime.MCPServer, srv TestServiceServer
 		opt(config)
 	}
 	CreateItemToolOpenAI := TestService_CreateItemToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		CreateItemToolOpenAI = runtime.AddExtraPropertiesToTool(CreateItemToolOpenAI, config.ExtraProperties)
-	}
+	CreateItemToolOpenAI = runtime.ApplyConfig(CreateItemToolOpenAI, config)
 
 	s.AddTool(CreateItemToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.CreateItemRequest
@@ -247,10 +232,7 @@ func RegisterTestServiceHandlerOpenAI(s runtime.MCPServer, srv TestServiceServer
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	GetItemToolOpenAI := TestService_GetItemToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		GetItemToolOpenAI = runtime.AddExtraPropertiesToTool(GetItemToolOpenAI, config.ExtraProperties)
-	}
+	GetItemToolOpenAI = runtime.ApplyConfig(GetItemToolOpenAI, config)
 
 	s.AddTool(GetItemToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.GetItemRequest
@@ -288,10 +270,7 @@ func RegisterTestServiceHandlerOpenAI(s runtime.MCPServer, srv TestServiceServer
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	ProcessWellKnownTypesToolOpenAI := TestService_ProcessWellKnownTypesToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		ProcessWellKnownTypesToolOpenAI = runtime.AddExtraPropertiesToTool(ProcessWellKnownTypesToolOpenAI, config.ExtraProperties)
-	}
+	ProcessWellKnownTypesToolOpenAI = runtime.ApplyConfig(ProcessWellKnownTypesToolOpenAI, config)
 
 	s.AddTool(ProcessWellKnownTypesToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.ProcessWellKnownTypesRequest
@@ -329,10 +308,7 @@ func RegisterTestServiceHandlerOpenAI(s runtime.MCPServer, srv TestServiceServer
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	TestValidationToolOpenAI := TestService_TestValidationToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		TestValidationToolOpenAI = runtime.AddExtraPropertiesToTool(TestValidationToolOpenAI, config.ExtraProperties)
-	}
+	TestValidationToolOpenAI = runtime.ApplyConfig(TestValidationToolOpenAI, config)
 
 	s.AddTool(TestValidationToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.TestValidationRequest
@@ -406,10 +382,7 @@ func ForwardToConnectTestServiceClient(s runtime.MCPServer, client ConnectTestSe
 		opt(config)
 	}
 	CreateItemTool := TestService_CreateItemTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		CreateItemTool = runtime.AddExtraPropertiesToTool(CreateItemTool, config.ExtraProperties)
-	}
+	CreateItemTool = runtime.ApplyConfig(CreateItemTool, config)
 
 	s.AddTool(CreateItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.CreateItemRequest
@@ -444,10 +417,7 @@ func ForwardToConnectTestServiceClient(s runtime.MCPServer, client ConnectTestSe
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	GetItemTool := TestService_GetItemTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		GetItemTool = runtime.AddExtraPropertiesToTool(GetItemTool, config.ExtraProperties)
-	}
+	GetItemTool = runtime.ApplyConfig(GetItemTool, config)
 
 	s.AddTool(GetItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.GetItemRequest
@@ -482,10 +452,7 @@ func ForwardToConnectTestServiceClient(s runtime.MCPServer, client ConnectTestSe
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	ProcessWellKnownTypesTool := TestService_ProcessWellKnownTypesTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		ProcessWellKnownTypesTool = runtime.AddExtraPropertiesToTool(ProcessWellKnownTypesTool, config.ExtraProperties)
-	}
+	ProcessWellKnownTypesTool = runtime.ApplyConfig(ProcessWellKnownTypesTool, config)
 
 	s.AddTool(ProcessWellKnownTypesTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.ProcessWellKnownTypesRequest
@@ -520,10 +487,7 @@ func ForwardToConnectTestServiceClient(s runtime.MCPServer, client ConnectTestSe
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	TestValidationTool := TestService_TestValidationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		TestValidationTool = runtime.AddExtraPropertiesToTool(TestValidationTool, config.ExtraProperties)
-	}
+	TestValidationTool = runtime.ApplyConfig(TestValidationTool, config)
 
 	s.AddTool(TestValidationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.TestValidationRequest
@@ -566,10 +530,7 @@ func ForwardToTestServiceClient(s runtime.MCPServer, client TestServiceClient, o
 		opt(config)
 	}
 	CreateItemTool := TestService_CreateItemTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		CreateItemTool = runtime.AddExtraPropertiesToTool(CreateItemTool, config.ExtraProperties)
-	}
+	CreateItemTool = runtime.ApplyConfig(CreateItemTool, config)
 
 	s.AddTool(CreateItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.CreateItemRequest
@@ -604,10 +565,7 @@ func ForwardToTestServiceClient(s runtime.MCPServer, client TestServiceClient, o
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	GetItemTool := TestService_GetItemTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		GetItemTool = runtime.AddExtraPropertiesToTool(GetItemTool, config.ExtraProperties)
-	}
+	GetItemTool = runtime.ApplyConfig(GetItemTool, config)
 
 	s.AddTool(GetItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.GetItemRequest
@@ -642,10 +600,7 @@ func ForwardToTestServiceClient(s runtime.MCPServer, client TestServiceClient, o
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	ProcessWellKnownTypesTool := TestService_ProcessWellKnownTypesTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		ProcessWellKnownTypesTool = runtime.AddExtraPropertiesToTool(ProcessWellKnownTypesTool, config.ExtraProperties)
-	}
+	ProcessWellKnownTypesTool = runtime.ApplyConfig(ProcessWellKnownTypesTool, config)
 
 	s.AddTool(ProcessWellKnownTypesTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.ProcessWellKnownTypesRequest
@@ -680,10 +635,7 @@ func ForwardToTestServiceClient(s runtime.MCPServer, client TestServiceClient, o
 		return runtime.NewToolResultText(string(marshaled)), nil
 	})
 	TestValidationTool := TestService_TestValidationTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		TestValidationTool = runtime.AddExtraPropertiesToTool(TestValidationTool, config.ExtraProperties)
-	}
+	TestValidationTool = runtime.ApplyConfig(TestValidationTool, config)
 
 	s.AddTool(TestValidationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req testdata.TestValidationRequest

@@ -33,10 +33,7 @@ func RegisterByteStreamHandler(s runtime.MCPServer, srv ByteStreamServer, opts .
 		opt(config)
 	}
 	QueryWriteStatusTool := ByteStream_QueryWriteStatusTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		QueryWriteStatusTool = runtime.AddExtraPropertiesToTool(QueryWriteStatusTool, config.ExtraProperties)
-	}
+	QueryWriteStatusTool = runtime.ApplyConfig(QueryWriteStatusTool, config)
 
 	s.AddTool(QueryWriteStatusTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req bytestream.QueryWriteStatusRequest
@@ -80,10 +77,7 @@ func RegisterByteStreamHandlerOpenAI(s runtime.MCPServer, srv ByteStreamServer, 
 		opt(config)
 	}
 	QueryWriteStatusToolOpenAI := ByteStream_QueryWriteStatusToolOpenAI
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		QueryWriteStatusToolOpenAI = runtime.AddExtraPropertiesToTool(QueryWriteStatusToolOpenAI, config.ExtraProperties)
-	}
+	QueryWriteStatusToolOpenAI = runtime.ApplyConfig(QueryWriteStatusToolOpenAI, config)
 
 	s.AddTool(QueryWriteStatusToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req bytestream.QueryWriteStatusRequest
@@ -151,10 +145,7 @@ func ForwardToConnectByteStreamClient(s runtime.MCPServer, client ConnectByteStr
 		opt(config)
 	}
 	QueryWriteStatusTool := ByteStream_QueryWriteStatusTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		QueryWriteStatusTool = runtime.AddExtraPropertiesToTool(QueryWriteStatusTool, config.ExtraProperties)
-	}
+	QueryWriteStatusTool = runtime.ApplyConfig(QueryWriteStatusTool, config)
 
 	s.AddTool(QueryWriteStatusTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req bytestream.QueryWriteStatusRequest
@@ -197,10 +188,7 @@ func ForwardToByteStreamClient(s runtime.MCPServer, client ByteStreamClient, opt
 		opt(config)
 	}
 	QueryWriteStatusTool := ByteStream_QueryWriteStatusTool
-	// Add extra properties to schema if configured
-	if len(config.ExtraProperties) > 0 {
-		QueryWriteStatusTool = runtime.AddExtraPropertiesToTool(QueryWriteStatusTool, config.ExtraProperties)
-	}
+	QueryWriteStatusTool = runtime.ApplyConfig(QueryWriteStatusTool, config)
 
 	s.AddTool(QueryWriteStatusTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		var req bytestream.QueryWriteStatusRequest
