@@ -1,6 +1,3 @@
-//go:build integration
-// +build integration
-
 // OpenAI conformance tests: validates that generated MCP tool schemas are
 // accepted by the OpenAI API and that the model can correctly call tools.
 package conformancetest

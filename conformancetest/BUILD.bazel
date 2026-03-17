@@ -7,7 +7,6 @@ go_test(
         "conformance_test.go",
         "openai_conformance_test.go",
     ],
-    gotags = ["integration"],
     tags = ["manual"],
     deps = [
         "//pkg/runtime",

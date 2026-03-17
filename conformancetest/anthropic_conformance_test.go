@@ -1,6 +1,3 @@
-//go:build integration
-// +build integration
-
 // Package conformancetest validates that generated MCP tool schemas are accepted
 // by real LLM providers and that the providers can correctly call the tools.
 package conformancetest
