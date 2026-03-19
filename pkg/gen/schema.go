@@ -18,7 +18,7 @@
 package gen
 
 import (
-	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"math/big"
@@ -39,12 +39,48 @@ type SchemaOptions struct {
 	// - maps become arrays of key-value pairs
 	// - well-known types (Struct, Value, ListValue) become JSON strings
 	OpenAICompat bool
+
+	// MaxRecursionDepth controls how many times a recursive message type
+	// can be expanded before being replaced with a JSON-string placeholder.
+	// Zero uses the default (3). OpenAI documents a 5-level nesting limit
+	// (though it's not strictly enforced), so the default keeps total depth
+	// manageable while still giving LLMs useful field-level detail.
+	MaxRecursionDepth int
 }
 
 // MessageSchema generates a JSON schema for a protobuf message descriptor.
 // This is the main entry point for schema generation and can be used both
 // at codegen time and at runtime with protoreflect.
 func MessageSchema(md protoreflect.MessageDescriptor, opts SchemaOptions) map[string]any {
+	return messageSchema(md, opts, nil)
+}
+
+// defaultMaxRecursionDepth is used when SchemaOptions.MaxRecursionDepth is 0.
+const defaultMaxRecursionDepth = 3
+
+// messageSchema is the internal recursive implementation with depth-limited
+// expansion. The seen map tracks how many times each message type has been
+// expanded on the current recursion path. After MaxRecursionDepth expansions,
+// a JSON-string placeholder is emitted instead of a full schema.
+func messageSchema(md protoreflect.MessageDescriptor, opts SchemaOptions, seen map[protoreflect.FullName]int) map[string]any {
+	if seen == nil {
+		seen = make(map[protoreflect.FullName]int)
+	}
+	maxDepth := opts.MaxRecursionDepth
+	if maxDepth <= 0 {
+		maxDepth = defaultMaxRecursionDepth
+	}
+	if seen[md.FullName()] >= maxDepth {
+		// Depth limit reached: emit a string placeholder. The caller (FixOpenAI)
+		// parses it back to a JSON object at runtime.
+		return map[string]any{
+			"type":        "string",
+			"description": fmt.Sprintf("JSON-encoded %s. Provide a JSON object as a string.", md.Name()),
+		}
+	}
+	seen[md.FullName()]++
+	defer func() { seen[md.FullName()]-- }()
+
 	required := []string{}
 	normalFields := map[string]any{}
 	oneOf := map[string][]map[string]any{}
@@ -60,21 +96,37 @@ func MessageSchema(md protoreflect.MessageDescriptor, opts SchemaOptions) map[st
 				}
 				oneOf[string(oneof.Name())] = append(oneOf[string(oneof.Name())], map[string]any{
 					"properties": map[string]any{
-						name: FieldSchema(nestedFd, opts),
+						name: fieldSchema(nestedFd, opts, seen),
 					},
 					"required": []string{name},
 				})
 			} else {
-				schema := FieldSchema(nestedFd, opts)
-				if v, ok := schema["type"].(string); ok {
+				schema := fieldSchema(nestedFd, opts, seen)
+				// Make oneof fields nullable. Handle both string and []string
+				// type values (WKTs like Timestamp already return []string).
+				switch v := schema["type"].(type) {
+				case string:
 					schema["type"] = []string{v, "null"}
+				case []string:
+					// Already has type list (e.g., ["string", "null"] from WKTs).
+					// Ensure "null" is present.
+					hasNull := false
+					for _, s := range v {
+						if s == "null" {
+							hasNull = true
+							break
+						}
+					}
+					if !hasNull {
+						schema["type"] = append(v, "null")
+					}
 				}
 				normalFields[name] = schema
 				schema["description"] = fmt.Sprintf("Note: This field is part of the '%s' oneof group. Only one field in this group can be set at a time. Setting multiple fields in the group WILL result in an error. Protobuf oneOf semantics apply.", oneof.Name())
 				required = append(required, name)
 			}
 		} else {
-			normalFields[name] = FieldSchema(nestedFd, opts)
+			normalFields[name] = fieldSchema(nestedFd, opts, seen)
 			if IsFieldRequired(nestedFd) || opts.OpenAICompat {
 				required = append(required, name)
 			}
@@ -107,9 +159,6 @@ func MessageSchema(md protoreflect.MessageDescriptor, opts SchemaOptions) map[st
 	}
 	if opts.OpenAICompat {
 		result["additionalProperties"] = false
-		if v, ok := result["type"].(string); ok {
-			result["type"] = []string{v, "null"}
-		}
 	}
 
 	return result
@@ -117,15 +166,20 @@ func MessageSchema(md protoreflect.MessageDescriptor, opts SchemaOptions) map[st
 
 // FieldSchema generates a JSON schema for a single protobuf field descriptor.
 func FieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions) map[string]any {
+	return fieldSchema(fd, opts, nil)
+}
+
+// fieldSchema is the internal implementation that threads the seen set for cycle detection.
+func fieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions, seen map[protoreflect.FullName]int) map[string]any {
 	if fd.IsMap() {
-		return mapFieldSchema(fd, opts)
+		return mapFieldSchema(fd, opts, seen)
 	}
 
 	var schema map[string]any
 
 	switch fd.Kind() {
 	case protoreflect.MessageKind:
-		schema = messageFieldSchema(fd, opts)
+		schema = messageFieldSchema(fd, opts, seen)
 	case protoreflect.EnumKind:
 		schema = enumFieldSchema(fd)
 	default:
@@ -146,7 +200,7 @@ func FieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions) map[string
 	return schema
 }
 
-func mapFieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions) map[string]any {
+func mapFieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions, seen map[protoreflect.FullName]int) map[string]any {
 	keyType := fd.MapKey().Kind()
 	keyConstraints := map[string]any{"type": "string"}
 
@@ -166,8 +220,8 @@ func mapFieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions) map[str
 			"items": map[string]any{
 				"type": "object",
 				"properties": map[string]any{
-					"key":   map[string]any{"type": "string"},
-					"value": FieldSchema(fd.MapValue(), opts),
+					"key":   keyConstraints,
+					"value": fieldSchema(fd.MapValue(), opts, seen),
 				},
 				"required":             []string{"key", "value"},
 				"additionalProperties": false,
@@ -178,11 +232,11 @@ func mapFieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions) map[str
 	return map[string]any{
 		"type":                 "object",
 		"propertyNames":        keyConstraints,
-		"additionalProperties": FieldSchema(fd.MapValue(), opts),
+		"additionalProperties": fieldSchema(fd.MapValue(), opts, seen),
 	}
 }
 
-func messageFieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions) map[string]any {
+func messageFieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions, seen map[protoreflect.FullName]int) map[string]any {
 	fullName := string(fd.Message().FullName())
 	switch fullName {
 	case "google.protobuf.Timestamp":
@@ -262,7 +316,7 @@ func messageFieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions) map
 		}
 		return map[string]any{"type": []string{"string", "null"}, "format": "byte"}
 	default:
-		return MessageSchema(fd.Message(), opts)
+		return messageSchema(fd.Message(), opts, seen)
 	}
 }
 
@@ -472,11 +526,11 @@ func MangleHeadIfTooLong(name string, maxLen int) string {
 	if len(name) <= maxLen {
 		return name
 	}
-	hash := sha1.Sum([]byte(name))
+	hash := sha256.Sum256([]byte(name))
 	fullHash := Base36String(hash[:])
 	hashPrefix := fullHash
-	if len(hashPrefix) > 6 {
-		hashPrefix = hashPrefix[:6]
+	if len(hashPrefix) > 10 {
+		hashPrefix = hashPrefix[:10]
 	}
 	if maxLen <= len(hashPrefix) {
 		return hashPrefix[:maxLen]

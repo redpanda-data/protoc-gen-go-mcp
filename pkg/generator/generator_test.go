@@ -210,8 +210,8 @@ func TestMessageSchemaOpenAI(t *testing.T) {
 	msgDesc := (&testdata.WktTestMessage{}).ProtoReflect().Descriptor()
 	schema := fg.messageSchema(msgDesc)
 
-	// In OpenAI mode, the type becomes ["object", "null"]
-	g.Expect(schema["type"]).To(Equal([]string{"object", "null"}))
+	// Message schemas are plain "object" (nullable only for oneof fields)
+	g.Expect(schema["type"]).To(Equal("object"))
 	g.Expect(schema).To(HaveKey("properties"))
 	g.Expect(schema).To(HaveKey("required"))
 	// OpenAI mode should have additionalProperties: false

@@ -17,6 +17,7 @@ package gen
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -122,10 +123,12 @@ func RegisterService(s *mcpserver.MCPServer, sd protoreflect.ServiceDescriptor, 
 		s.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			message := request.GetArguments()
 
-			// Extract extra properties into context
+			// Extract extra properties into context and remove them from
+			// the arguments map so they don't leak into proto unmarshaling.
 			for _, prop := range opts.ExtraProperties {
 				if propVal, ok := message[prop.Name]; ok {
 					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+					delete(message, prop.Name)
 				}
 			}
 
@@ -141,6 +144,9 @@ func RegisterService(s *mcpserver.MCPServer, sd protoreflect.ServiceDescriptor, 
 			}
 
 			req := newMsg(md.Input())
+			if req == nil {
+				return nil, fmt.Errorf("NewMessage returned nil for %s", md.Input().FullName())
+			}
 			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, req); err != nil {
 				return nil, err
 			}

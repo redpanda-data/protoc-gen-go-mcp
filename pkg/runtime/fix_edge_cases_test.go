@@ -178,10 +178,11 @@ func TestFixOpenAI_MapKeyValueMissingFields(t *testing.T) {
 
 	FixOpenAI(descriptor.ProtoReflect().Descriptor(), input)
 
-	// Only the valid pair should survive
+	// Valid pair + non-string key (now coerced to "42") should survive
 	labels := input["labels"].(map[string]any)
-	g.Expect(labels).To(HaveLen(1))
+	g.Expect(labels).To(HaveLen(2))
 	g.Expect(labels["good"]).To(Equal("pair"))
+	g.Expect(labels["42"]).To(Equal("non-string-key"))
 }
 
 func TestFixOpenAI_CamelCaseFieldNames(t *testing.T) {

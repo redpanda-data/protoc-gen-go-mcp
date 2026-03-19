@@ -68,6 +68,9 @@ const (
 	// EdgeCaseServiceNumericValidationProcedure is the fully-qualified name of the EdgeCaseService's
 	// NumericValidation RPC.
 	EdgeCaseServiceNumericValidationProcedure = "/testdata.EdgeCaseService/NumericValidation"
+	// EdgeCaseServiceRecursiveTreeProcedure is the fully-qualified name of the EdgeCaseService's
+	// RecursiveTree RPC.
+	EdgeCaseServiceRecursiveTreeProcedure = "/testdata.EdgeCaseService/RecursiveTree"
 )
 
 // EdgeCaseServiceClient is a client for the testdata.EdgeCaseService service.
@@ -86,6 +89,8 @@ type EdgeCaseServiceClient interface {
 	MultipleOneofs(context.Context, *connect.Request[testdata.MultipleOneofsRequest]) (*connect.Response[testdata.MultipleOneofsResponse], error)
 	// NumericValidation tests all numeric validation constraint types
 	NumericValidation(context.Context, *connect.Request[testdata.NumericValidationRequest]) (*connect.Response[testdata.NumericValidationResponse], error)
+	// RecursiveTree tests self-referencing message schemas
+	RecursiveTree(context.Context, *connect.Request[testdata.RecursiveTreeRequest]) (*connect.Response[testdata.RecursiveTreeResponse], error)
 }
 
 // NewEdgeCaseServiceClient constructs a client for the testdata.EdgeCaseService service. By
@@ -141,6 +146,12 @@ func NewEdgeCaseServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(edgeCaseServiceMethods.ByName("NumericValidation")),
 			connect.WithClientOptions(opts...),
 		),
+		recursiveTree: connect.NewClient[testdata.RecursiveTreeRequest, testdata.RecursiveTreeResponse](
+			httpClient,
+			baseURL+EdgeCaseServiceRecursiveTreeProcedure,
+			connect.WithSchema(edgeCaseServiceMethods.ByName("RecursiveTree")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -153,6 +164,7 @@ type edgeCaseServiceClient struct {
 	enumFields        *connect.Client[testdata.EnumFieldsRequest, testdata.EnumFieldsResponse]
 	multipleOneofs    *connect.Client[testdata.MultipleOneofsRequest, testdata.MultipleOneofsResponse]
 	numericValidation *connect.Client[testdata.NumericValidationRequest, testdata.NumericValidationResponse]
+	recursiveTree     *connect.Client[testdata.RecursiveTreeRequest, testdata.RecursiveTreeResponse]
 }
 
 // DeepNesting calls testdata.EdgeCaseService.DeepNesting.
@@ -190,6 +202,11 @@ func (c *edgeCaseServiceClient) NumericValidation(ctx context.Context, req *conn
 	return c.numericValidation.CallUnary(ctx, req)
 }
 
+// RecursiveTree calls testdata.EdgeCaseService.RecursiveTree.
+func (c *edgeCaseServiceClient) RecursiveTree(ctx context.Context, req *connect.Request[testdata.RecursiveTreeRequest]) (*connect.Response[testdata.RecursiveTreeResponse], error) {
+	return c.recursiveTree.CallUnary(ctx, req)
+}
+
 // EdgeCaseServiceHandler is an implementation of the testdata.EdgeCaseService service.
 type EdgeCaseServiceHandler interface {
 	// DeepNesting tests deeply nested messages with maps and WKTs
@@ -206,6 +223,8 @@ type EdgeCaseServiceHandler interface {
 	MultipleOneofs(context.Context, *connect.Request[testdata.MultipleOneofsRequest]) (*connect.Response[testdata.MultipleOneofsResponse], error)
 	// NumericValidation tests all numeric validation constraint types
 	NumericValidation(context.Context, *connect.Request[testdata.NumericValidationRequest]) (*connect.Response[testdata.NumericValidationResponse], error)
+	// RecursiveTree tests self-referencing message schemas
+	RecursiveTree(context.Context, *connect.Request[testdata.RecursiveTreeRequest]) (*connect.Response[testdata.RecursiveTreeResponse], error)
 }
 
 // NewEdgeCaseServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -257,6 +276,12 @@ func NewEdgeCaseServiceHandler(svc EdgeCaseServiceHandler, opts ...connect.Handl
 		connect.WithSchema(edgeCaseServiceMethods.ByName("NumericValidation")),
 		connect.WithHandlerOptions(opts...),
 	)
+	edgeCaseServiceRecursiveTreeHandler := connect.NewUnaryHandler(
+		EdgeCaseServiceRecursiveTreeProcedure,
+		svc.RecursiveTree,
+		connect.WithSchema(edgeCaseServiceMethods.ByName("RecursiveTree")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/testdata.EdgeCaseService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case EdgeCaseServiceDeepNestingProcedure:
@@ -273,6 +298,8 @@ func NewEdgeCaseServiceHandler(svc EdgeCaseServiceHandler, opts ...connect.Handl
 			edgeCaseServiceMultipleOneofsHandler.ServeHTTP(w, r)
 		case EdgeCaseServiceNumericValidationProcedure:
 			edgeCaseServiceNumericValidationHandler.ServeHTTP(w, r)
+		case EdgeCaseServiceRecursiveTreeProcedure:
+			edgeCaseServiceRecursiveTreeHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -308,4 +335,8 @@ func (UnimplementedEdgeCaseServiceHandler) MultipleOneofs(context.Context, *conn
 
 func (UnimplementedEdgeCaseServiceHandler) NumericValidation(context.Context, *connect.Request[testdata.NumericValidationRequest]) (*connect.Response[testdata.NumericValidationResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("testdata.EdgeCaseService.NumericValidation is not implemented"))
+}
+
+func (UnimplementedEdgeCaseServiceHandler) RecursiveTree(context.Context, *connect.Request[testdata.RecursiveTreeRequest]) (*connect.Response[testdata.RecursiveTreeResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("testdata.EdgeCaseService.RecursiveTree is not implemented"))
 }
