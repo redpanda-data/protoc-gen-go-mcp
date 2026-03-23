@@ -19,10 +19,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	mcpserver "github.com/mark3labs/mcp-go/server"
 	. "github.com/onsi/gomega"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
+	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime/mark3labs"
 	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
 )
 
@@ -56,7 +55,7 @@ func TestExtraPropertiesSchemaModification(t *testing.T) {
 	schemaBytes, err := json.Marshal(originalSchema)
 	g.Expect(err).ToNot(HaveOccurred())
 
-	originalTool := mcp.Tool{
+	originalTool := runtime.Tool{
 		Name:           "test_CreateItem",
 		Description:    "Creates a new item",
 		RawInputSchema: json.RawMessage(schemaBytes),
@@ -134,7 +133,7 @@ func TestExtraPropertiesSchemaModificationWithCustomField(t *testing.T) {
 	schemaBytes, err := json.Marshal(originalSchema)
 	g.Expect(err).ToNot(HaveOccurred())
 
-	originalTool := mcp.Tool{
+	originalTool := runtime.Tool{
 		Name:           "test_CreateItem",
 		Description:    "Creates a new item",
 		RawInputSchema: json.RawMessage(schemaBytes),
@@ -222,7 +221,7 @@ func TestExtraPropertiesContextIntegration(t *testing.T) {
 	server := &testServer{}
 
 	// Create an MCP server
-	mcpServer := mcpserver.NewMCPServer("test-server", "1.0.0")
+	rawServer, mcpAdapter := mark3labs.NewServer("test-server", "1.0.0")
 
 	// Create a mock tool with extra properties (simulating what the generated code would do)
 	originalSchema := map[string]interface{}{
@@ -238,7 +237,7 @@ func TestExtraPropertiesContextIntegration(t *testing.T) {
 	schemaBytes, err := json.Marshal(originalSchema)
 	g.Expect(err).ToNot(HaveOccurred())
 
-	baseTool := mcp.Tool{
+	baseTool := runtime.Tool{
 		Name:           "testdata_TestService_CreateItem",
 		Description:    "Creates a new item",
 		RawInputSchema: json.RawMessage(schemaBytes),
@@ -256,9 +255,9 @@ func TestExtraPropertiesContextIntegration(t *testing.T) {
 	modifiedTool := runtime.AddExtraPropertiesToTool(baseTool, extraProps)
 
 	// Register the tool with a handler that simulates the generated handler logic
-	mcpServer.AddTool(modifiedTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	mcpAdapter.AddTool(modifiedTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
 		// Extract extra properties (simulating generated code)
-		message := request.GetArguments()
+		message := request.Arguments
 		for _, prop := range extraProps {
 			if propVal, ok := message[prop.Name]; ok {
 				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
@@ -277,7 +276,7 @@ func TestExtraPropertiesContextIntegration(t *testing.T) {
 		}
 
 		// Return mock response
-		return mcp.NewToolResultText(`{"id": "` + resp.Id + `"}`), nil
+		return runtime.NewToolResultText(`{"id": "` + resp.Id + `"}`), nil
 	})
 
 	// Simulate an MCP call_tool request message
@@ -299,7 +298,7 @@ func TestExtraPropertiesContextIntegration(t *testing.T) {
 	g.Expect(err).ToNot(HaveOccurred())
 
 	// Handle the message through the MCP server
-	response := mcpServer.HandleMessage(context.Background(), json.RawMessage(messageBytes))
+	response := rawServer.HandleMessage(context.Background(), json.RawMessage(messageBytes))
 	g.Expect(response).ToNot(BeNil())
 
 	// Verify the URL string was set in context and received by server

@@ -21,6 +21,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
+	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime/mark3labs"
 	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdataconnect"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdatamcp"
@@ -39,8 +40,8 @@ var (
 )
 
 func main() {
-	// Create MCP server
-	s := server.NewMCPServer(
+	// Create MCP server using mark3labs adapter
+	raw, s := mark3labs.NewServer(
 		"Example auto-generated gRPC-MCP with runtime LLM provider selection",
 		"1.0.0",
 	)
@@ -68,14 +69,10 @@ func main() {
 	// testdatamcp.RegisterTestServiceHandler(s, &srv)        // Standard
 	// testdatamcp.RegisterTestServiceHandlerOpenAI(s, &srv)  // OpenAI
 
-	// Alternative: Register both for different tool names
-	// testdatamcp.RegisterTestServiceHandler(s, &srv)
-	// testdatamcp.RegisterTestServiceHandlerOpenAI(s, &srv)
-
 	testdatamcp.ForwardToConnectTestServiceClient(s, connectClient)
 	testdatamcp.ForwardToTestServiceClient(s, grpcClient)
 
-	if err := server.ServeStdio(s); err != nil {
+	if err := server.ServeStdio(raw); err != nil {
 		fmt.Printf("Server error: %v\n", err)
 	}
 }

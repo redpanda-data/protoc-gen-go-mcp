@@ -18,8 +18,6 @@ go_library(
         "//pkg/runtime",
         "//pkg/testdata/gen/go/testdata",
         "@com_connectrpc_connect//:connect",
-        "@com_github_mark3labs_mcp_go//mcp",
-        "@com_github_mark3labs_mcp_go//server",
         "@org_golang_google_grpc//:grpc",
         "@org_golang_google_protobuf//encoding/protojson",
     ],

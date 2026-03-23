@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/mark3labs/mcp-go/mcp"
 	. "github.com/onsi/gomega"
 )
 
@@ -47,7 +46,7 @@ func TestAddExtraPropertiesToTool(t *testing.T) {
 	schemaBytes, err := json.Marshal(originalSchema)
 	g.Expect(err).ToNot(HaveOccurred())
 
-	tool := mcp.Tool{
+	tool := Tool{
 		Name:           "test_tool",
 		Description:    "A test tool",
 		RawInputSchema: json.RawMessage(schemaBytes),
@@ -111,7 +110,7 @@ func TestAddExtraPropertiesToToolWithNoProperties(t *testing.T) {
 	schemaBytes, err := json.Marshal(originalSchema)
 	g.Expect(err).ToNot(HaveOccurred())
 
-	tool := mcp.Tool{
+	tool := Tool{
 		Name:           "test_tool",
 		Description:    "A test tool",
 		RawInputSchema: json.RawMessage(schemaBytes),
@@ -150,7 +149,7 @@ func TestAddExtraPropertiesToToolWithInvalidSchema(t *testing.T) {
 	g := NewWithT(t)
 
 	// Create a tool with invalid JSON schema
-	tool := mcp.Tool{
+	tool := Tool{
 		Name:           "test_tool",
 		Description:    "A test tool",
 		RawInputSchema: json.RawMessage([]byte("invalid json")),
@@ -188,7 +187,7 @@ func TestAddExtraPropertiesToToolWithCustomFieldName(t *testing.T) {
 	schemaBytes, err := json.Marshal(originalSchema)
 	g.Expect(err).ToNot(HaveOccurred())
 
-	tool := mcp.Tool{
+	tool := Tool{
 		Name:           "test_tool",
 		Description:    "A test tool",
 		RawInputSchema: json.RawMessage(schemaBytes),

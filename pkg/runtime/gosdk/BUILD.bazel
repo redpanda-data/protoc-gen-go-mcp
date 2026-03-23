@@ -1,0 +1,12 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "gosdk",
+    srcs = ["server.go"],
+    importpath = "github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime/gosdk",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/runtime",
+        "@com_github_modelcontextprotocol_go_sdk//mcp",
+    ],
+)

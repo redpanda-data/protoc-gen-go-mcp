@@ -8,6 +8,7 @@ go_library(
     deps = [
         "//pkg/gen",
         "//pkg/runtime",
+        "//pkg/runtime/mark3labs",
         "//pkg/testdata/gen/go/testdata",
         "@com_github_mark3labs_mcp_go//server",
         "@org_golang_google_protobuf//encoding/protojson",

@@ -2,8 +2,6 @@ package runtime
 
 import (
 	"encoding/json"
-
-	"github.com/mark3labs/mcp-go/mcp"
 )
 
 // Option defines functional options for MCP functions
@@ -19,6 +17,16 @@ type ExtraProperty struct {
 
 type config struct {
 	ExtraProperties []ExtraProperty
+	NamePrefix      string
+}
+
+// WithNamePrefix prepends prefix + "_" to every tool name at registration
+// time. Useful when the same service is registered multiple times under
+// different names (e.g. separate database instances).
+func WithNamePrefix(prefix string) Option {
+	return func(c *config) {
+		c.NamePrefix = prefix
+	}
 }
 
 // WithExtraProperties adds extra properties to tool schemas and extracts them from request arguments
@@ -33,8 +41,19 @@ func NewConfig() *config {
 	return &config{}
 }
 
+// ApplyConfig applies all config options (name prefix, extra properties) to a tool.
+func ApplyConfig(tool Tool, config *config) Tool {
+	if config.NamePrefix != "" {
+		tool.Name = config.NamePrefix + "_" + tool.Name
+	}
+	if len(config.ExtraProperties) > 0 {
+		tool = AddExtraPropertiesToTool(tool, config.ExtraProperties)
+	}
+	return tool
+}
+
 // AddExtraPropertiesToTool modifies a tool's schema to include additional properties
-func AddExtraPropertiesToTool(tool mcp.Tool, properties []ExtraProperty) mcp.Tool {
+func AddExtraPropertiesToTool(tool Tool, properties []ExtraProperty) Tool {
 	if len(properties) == 0 {
 		return tool
 	}

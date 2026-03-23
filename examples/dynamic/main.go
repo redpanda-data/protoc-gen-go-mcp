@@ -27,6 +27,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/gen"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
+	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime/mark3labs"
 	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -34,7 +35,7 @@ import (
 )
 
 func main() {
-	s := server.NewMCPServer(
+	raw, s := mark3labs.NewServer(
 		"Dynamic MCP server - no codegen needed",
 		"1.0.0",
 	)
@@ -55,7 +56,7 @@ func main() {
 
 	fmt.Printf("Registered %d tools from %s\n", sd.Methods().Len(), sd.FullName())
 
-	if err := server.ServeStdio(s); err != nil {
+	if err := server.ServeStdio(raw); err != nil {
 		fmt.Printf("Server error: %v\n", err)
 	}
 }

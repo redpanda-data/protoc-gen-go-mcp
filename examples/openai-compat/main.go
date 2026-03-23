@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime/mark3labs"
 	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdataconnect"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdatamcp"
@@ -37,8 +38,8 @@ var (
 )
 
 func main() {
-	// Create MCP server
-	s := server.NewMCPServer(
+	// Create MCP server using mark3labs adapter
+	raw, s := mark3labs.NewServer(
 		"Example auto-generated gRPC-MCP (OpenAI-compatible)",
 		"1.0.0",
 	)
@@ -46,14 +47,13 @@ func main() {
 	srv := testServer{}
 
 	// This example demonstrates OpenAI-compatible handlers
-	// Now that we generate both, we can choose the OpenAI variant explicitly
 	fmt.Printf("Using OpenAI-compatible MCP handlers\n")
 	testdatamcp.RegisterTestServiceHandlerOpenAI(s, &srv)
 
 	testdatamcp.ForwardToConnectTestServiceClient(s, connectClient)
 	testdatamcp.ForwardToTestServiceClient(s, grpcClient)
 
-	if err := server.ServeStdio(s); err != nil {
+	if err := server.ServeStdio(raw); err != nil {
 		fmt.Printf("Server error: %v\n", err)
 	}
 }
