@@ -58,12 +58,15 @@ func NewToolResultText(text string) *CallToolResult {
 
 // NewToolResultJSON creates a successful result that carries the same JSON
 // payload as both unstructured text content (for backward compatibility) and
-// structured content (matching the tool's output schema). The bytes must be
-// a valid JSON object.
+// structured content (matching the tool's output schema). The caller is
+// responsible for passing JSON-encoded bytes; no validation is performed.
+// The slice is copied into StructuredContent so callers may safely reuse
+// the buffer afterwards.
 func NewToolResultJSON(jsonBytes []byte) *CallToolResult {
+	structured := append(json.RawMessage(nil), jsonBytes...)
 	return &CallToolResult{
 		Text:              string(jsonBytes),
-		StructuredContent: json.RawMessage(jsonBytes),
+		StructuredContent: structured,
 	}
 }
 
