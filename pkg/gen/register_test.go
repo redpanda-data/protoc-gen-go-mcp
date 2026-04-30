@@ -40,6 +40,76 @@ func newTestMessage(md protoreflect.MessageDescriptor) proto.Message {
 	}
 }
 
+// recordingServer is a runtime.MCPServer that captures every registered tool
+// and its handler so tests can inspect both the schemas attached to the tool
+// and the result that flows back from the handler.
+type recordingServer struct {
+	tools    []runtime.Tool
+	handlers map[string]runtime.ToolHandler
+}
+
+func (r *recordingServer) AddTool(tool runtime.Tool, handler runtime.ToolHandler) {
+	if r.handlers == nil {
+		r.handlers = map[string]runtime.ToolHandler{}
+	}
+	r.tools = append(r.tools, tool)
+	r.handlers[tool.Name] = handler
+}
+
+func TestRegisterService_OutputSchemaAndStructuredContent(t *testing.T) {
+	g := NewWithT(t)
+
+	file := (&testdata.CreateItemRequest{}).ProtoReflect().Descriptor().ParentFile()
+	sd := file.Services().ByName("TestService")
+
+	handler := func(ctx context.Context, method protoreflect.MethodDescriptor, req proto.Message) (proto.Message, error) {
+		if string(method.Name()) != "GetItem" {
+			return newTestMessage(method.Output()), nil
+		}
+		return &testdata.GetItemResponse{
+			Item: &testdata.Item{Id: req.(*testdata.GetItemRequest).Id, Name: "found"},
+		}, nil
+	}
+
+	rec := &recordingServer{}
+	RegisterService(rec, sd, handler, RegisterServiceOptions{
+		Provider:   runtime.LLMProviderStandard,
+		NewMessage: newTestMessage,
+	})
+
+	// Every registered tool should now carry a non-empty output schema.
+	g.Expect(rec.tools).ToNot(BeEmpty())
+	for _, tool := range rec.tools {
+		g.Expect(tool.RawOutputSchema).ToNot(BeEmpty(), "tool %q missing output schema", tool.Name)
+
+		var schema map[string]any
+		g.Expect(json.Unmarshal(tool.RawOutputSchema, &schema)).To(Succeed())
+		g.Expect(schema["type"]).To(Equal("object"), "tool %q output schema must be a JSON object", tool.Name)
+	}
+
+	// The result returned by the handler should populate StructuredContent
+	// with the same JSON payload as Text, so MCP clients that prefer the
+	// structured field don't have to re-parse the text.
+	getItem := rec.handlers["testdata_TestService_GetItem"]
+	g.Expect(getItem).ToNot(BeNil())
+
+	result, err := getItem(context.Background(), &runtime.CallToolRequest{
+		Arguments: map[string]any{"id": "abc"},
+	})
+	g.Expect(err).ToNot(HaveOccurred())
+	g.Expect(result.IsError).To(BeFalse())
+	g.Expect(result.Text).ToNot(BeEmpty())
+	g.Expect(result.StructuredContent).ToNot(BeNil())
+
+	rawJSON, ok := result.StructuredContent.(json.RawMessage)
+	g.Expect(ok).To(BeTrue(), "StructuredContent should carry the JSON bytes verbatim for the adapter layer")
+	g.Expect(string(rawJSON)).To(Equal(result.Text))
+
+	var decoded map[string]any
+	g.Expect(json.Unmarshal(rawJSON, &decoded)).To(Succeed())
+	g.Expect(decoded).To(HaveKey("item"))
+}
+
 func TestRegisterService_Standard(t *testing.T) {
 	g := NewWithT(t)
 

@@ -45,9 +45,10 @@ func NewServer(name, version string, opts ...mcpserver.ServerOption) (*mcpserver
 
 func (w *server) AddTool(tool runtime.Tool, handler runtime.ToolHandler) {
 	mcpTool := mcp.Tool{
-		Name:           tool.Name,
-		Description:    tool.Description,
-		RawInputSchema: json.RawMessage(tool.RawInputSchema),
+		Name:            tool.Name,
+		Description:     tool.Description,
+		RawInputSchema:  json.RawMessage(tool.RawInputSchema),
+		RawOutputSchema: json.RawMessage(tool.RawOutputSchema),
 	}
 	w.s.AddTool(mcpTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		result, err := handler(ctx, &runtime.CallToolRequest{
@@ -62,6 +63,8 @@ func (w *server) AddTool(tool runtime.Tool, handler runtime.ToolHandler) {
 		if result.IsError {
 			return mcp.NewToolResultError(result.Text), nil
 		}
-		return mcp.NewToolResultText(result.Text), nil
+		mcpResult := mcp.NewToolResultText(result.Text)
+		mcpResult.StructuredContent = result.StructuredContent
+		return mcpResult, nil
 	})
 }
