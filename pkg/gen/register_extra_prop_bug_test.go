@@ -8,6 +8,7 @@ import (
 	mcpserver "github.com/mark3labs/mcp-go/server"
 	. "github.com/onsi/gomega"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
+	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime/mark3labs"
 	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -45,7 +46,7 @@ func TestExtraPropBug_NameCollisionWithProtoField(t *testing.T) {
 	}
 
 	server := mcpserver.NewMCPServer("test", "1.0")
-	RegisterService(server, sd, handler, RegisterServiceOptions{
+	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
 		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 		ExtraProperties: []runtime.ExtraProperty{
@@ -118,7 +119,7 @@ func TestExtraPropBug_ExtraPropsNotStrippedBeforeUnmarshal(t *testing.T) {
 	}
 
 	server := mcpserver.NewMCPServer("test", "1.0")
-	RegisterService(server, sd, handler, RegisterServiceOptions{
+	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
 		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 		ExtraProperties: []runtime.ExtraProperty{

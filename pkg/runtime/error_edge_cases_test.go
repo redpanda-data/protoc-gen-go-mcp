@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"connectrpc.com/connect"
-	"github.com/mark3labs/mcp-go/mcp"
 	. "github.com/onsi/gomega"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
@@ -48,9 +47,8 @@ func TestHandleError_AllGRPCCodes(t *testing.T) {
 			g.Expect(result).ToNot(BeNil())
 			g.Expect(result.IsError).To(BeTrue())
 
-			textContent := result.Content[0].(mcp.TextContent)
 			var errorResp map[string]any
-			g.Expect(json.Unmarshal([]byte(textContent.Text), &errorResp)).To(Succeed())
+			g.Expect(json.Unmarshal([]byte(result.Text), &errorResp)).To(Succeed())
 			g.Expect(errorResp["code"]).To(Equal(tt.expected))
 			g.Expect(errorResp["message"]).To(Equal("test error for " + tt.expected))
 		})
@@ -82,9 +80,8 @@ func TestHandleError_ConnectErrorCodes(t *testing.T) {
 			g.Expect(result).ToNot(BeNil())
 			g.Expect(result.IsError).To(BeTrue())
 
-			textContent := result.Content[0].(mcp.TextContent)
 			var errorResp map[string]any
-			g.Expect(json.Unmarshal([]byte(textContent.Text), &errorResp)).To(Succeed())
+			g.Expect(json.Unmarshal([]byte(result.Text), &errorResp)).To(Succeed())
 			g.Expect(errorResp["code"]).To(Equal(tt.expected))
 		})
 	}
@@ -101,9 +98,8 @@ func TestHandleError_WrappedError(t *testing.T) {
 	g.Expect(err).ToNot(HaveOccurred())
 	g.Expect(result).ToNot(BeNil())
 
-	textContent := result.Content[0].(mcp.TextContent)
 	var errorResp map[string]any
-	g.Expect(json.Unmarshal([]byte(textContent.Text), &errorResp)).To(Succeed())
+	g.Expect(json.Unmarshal([]byte(result.Text), &errorResp)).To(Succeed())
 	g.Expect(errorResp["code"]).To(Equal("UNKNOWN"))
 	g.Expect(errorResp["message"]).To(Equal("context: root cause"))
 }
@@ -131,9 +127,8 @@ func TestHandleError_GRPCWithMultipleDetails(t *testing.T) {
 	g.Expect(handleErr).ToNot(HaveOccurred())
 	g.Expect(result).ToNot(BeNil())
 
-	textContent := result.Content[0].(mcp.TextContent)
 	var errorResp map[string]any
-	g.Expect(json.Unmarshal([]byte(textContent.Text), &errorResp)).To(Succeed())
+	g.Expect(json.Unmarshal([]byte(result.Text), &errorResp)).To(Succeed())
 
 	details, ok := errorResp["details"].([]any)
 	g.Expect(ok).To(BeTrue())
@@ -166,9 +161,8 @@ func TestHandleError_GRPCWithResourceInfo(t *testing.T) {
 	g.Expect(handleErr).ToNot(HaveOccurred())
 	g.Expect(result).ToNot(BeNil())
 
-	textContent := result.Content[0].(mcp.TextContent)
 	var errorResp map[string]any
-	g.Expect(json.Unmarshal([]byte(textContent.Text), &errorResp)).To(Succeed())
+	g.Expect(json.Unmarshal([]byte(result.Text), &errorResp)).To(Succeed())
 
 	details := errorResp["details"].([]any)
 	g.Expect(details).To(HaveLen(1))
@@ -197,9 +191,8 @@ func TestHandleError_GRPCWithErrorInfo(t *testing.T) {
 	g.Expect(handleErr).ToNot(HaveOccurred())
 	g.Expect(result).ToNot(BeNil())
 
-	textContent := result.Content[0].(mcp.TextContent)
 	var errorResp map[string]any
-	g.Expect(json.Unmarshal([]byte(textContent.Text), &errorResp)).To(Succeed())
+	g.Expect(json.Unmarshal([]byte(result.Text), &errorResp)).To(Succeed())
 
 	details := errorResp["details"].([]any)
 	g.Expect(details).To(HaveLen(1))
@@ -216,9 +209,8 @@ func TestHandleError_EmptyMessage(t *testing.T) {
 	g.Expect(err).ToNot(HaveOccurred())
 	g.Expect(result).ToNot(BeNil())
 
-	textContent := result.Content[0].(mcp.TextContent)
 	var errorResp map[string]any
-	g.Expect(json.Unmarshal([]byte(textContent.Text), &errorResp)).To(Succeed())
+	g.Expect(json.Unmarshal([]byte(result.Text), &errorResp)).To(Succeed())
 	g.Expect(errorResp["code"]).To(Equal("INTERNAL"))
 	// Message might be empty string or absent depending on StatusToNice behavior
 	if msg, ok := errorResp["message"]; ok {
@@ -235,9 +227,8 @@ func TestHandleError_LongErrorMessage(t *testing.T) {
 	g.Expect(err).ToNot(HaveOccurred())
 	g.Expect(result).ToNot(BeNil())
 
-	textContent := result.Content[0].(mcp.TextContent)
 	var errorResp map[string]any
-	g.Expect(json.Unmarshal([]byte(textContent.Text), &errorResp)).To(Succeed())
+	g.Expect(json.Unmarshal([]byte(result.Text), &errorResp)).To(Succeed())
 	g.Expect(errorResp["message"]).To(Equal(longMsg))
 }
 
@@ -250,9 +241,8 @@ func TestHandleError_SpecialCharsInMessage(t *testing.T) {
 	g.Expect(err).ToNot(HaveOccurred())
 	g.Expect(result).ToNot(BeNil())
 
-	textContent := result.Content[0].(mcp.TextContent)
 	var errorResp map[string]any
-	g.Expect(json.Unmarshal([]byte(textContent.Text), &errorResp)).To(Succeed())
+	g.Expect(json.Unmarshal([]byte(result.Text), &errorResp)).To(Succeed())
 	g.Expect(errorResp["message"]).To(Equal(specialMsg))
 }
 
@@ -265,9 +255,8 @@ func TestHandleError_GRPCNoDetails(t *testing.T) {
 	g.Expect(err).ToNot(HaveOccurred())
 	g.Expect(result).ToNot(BeNil())
 
-	textContent := result.Content[0].(mcp.TextContent)
 	var errorResp map[string]any
-	g.Expect(json.Unmarshal([]byte(textContent.Text), &errorResp)).To(Succeed())
+	g.Expect(json.Unmarshal([]byte(result.Text), &errorResp)).To(Succeed())
 	g.Expect(errorResp["code"]).To(Equal("NOT_FOUND"))
 	// No details field or empty details
 }
@@ -282,6 +271,5 @@ func TestHandleError_PlainErrorFormatsAsJSON(t *testing.T) {
 	g.Expect(result.IsError).To(BeTrue())
 
 	// Should be valid JSON
-	textContent := result.Content[0].(mcp.TextContent)
-	g.Expect(json.Valid([]byte(textContent.Text))).To(BeTrue())
+	g.Expect(json.Valid([]byte(result.Text))).To(BeTrue())
 }

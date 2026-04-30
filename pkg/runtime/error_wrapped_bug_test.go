@@ -8,17 +8,15 @@ import (
 	"testing"
 
 	"connectrpc.com/connect"
-	"github.com/mark3labs/mcp-go/mcp"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func parseErrorResult(t *testing.T, result *mcp.CallToolResult) map[string]interface{} {
+func parseErrorResult(t *testing.T, result *CallToolResult) map[string]interface{} {
 	t.Helper()
-	textContent := result.Content[0].(mcp.TextContent)
 	var resp map[string]interface{}
-	if err := json.Unmarshal([]byte(textContent.Text), &resp); err != nil {
-		t.Fatalf("failed to parse error JSON %q: %v", textContent.Text, err)
+	if err := json.Unmarshal([]byte(result.Text), &resp); err != nil {
+		t.Fatalf("failed to parse error JSON %q: %v", result.Text, err)
 	}
 	return resp
 }
