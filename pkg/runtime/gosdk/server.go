@@ -49,8 +49,11 @@ func (w *server) AddTool(tool runtime.Tool, handler runtime.ToolHandler) {
 	mcpTool := &mcp.Tool{
 		Name:        tool.Name,
 		Description: tool.Description,
-		// InputSchema accepts any JSON-marshalable value; json.RawMessage works.
+		// InputSchema/OutputSchema accept any JSON-marshalable value; json.RawMessage works.
 		InputSchema: json.RawMessage(tool.RawInputSchema),
+	}
+	if len(tool.RawOutputSchema) > 0 {
+		mcpTool.OutputSchema = json.RawMessage(tool.RawOutputSchema)
 	}
 
 	w.s.AddTool(mcpTool, func(ctx context.Context, request *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -73,8 +76,9 @@ func (w *server) AddTool(tool runtime.Tool, handler runtime.ToolHandler) {
 			return nil, nil
 		}
 		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: result.Text}},
-			IsError: result.IsError,
+			Content:           []mcp.Content{&mcp.TextContent{Text: result.Text}},
+			StructuredContent: result.StructuredContent,
+			IsError:           result.IsError,
 		}, nil
 	})
 }

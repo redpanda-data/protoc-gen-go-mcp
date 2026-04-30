@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/mark3labs/mcp-go/mcp"
 	. "github.com/onsi/gomega"
 )
 
@@ -18,7 +17,7 @@ func TestAddExtraProperties_EmptyList(t *testing.T) {
 	}
 	schemaBytes, _ := json.Marshal(schema)
 
-	tool := mcp.Tool{
+	tool := Tool{
 		Name:           "test",
 		RawInputSchema: json.RawMessage(schemaBytes),
 	}
@@ -33,7 +32,7 @@ func TestAddExtraProperties_NilList(t *testing.T) {
 	schema := map[string]any{"type": "object"}
 	schemaBytes, _ := json.Marshal(schema)
 
-	tool := mcp.Tool{
+	tool := Tool{
 		Name:           "test",
 		RawInputSchema: json.RawMessage(schemaBytes),
 	}
@@ -51,7 +50,7 @@ func TestAddExtraProperties_AllOptional(t *testing.T) {
 	}
 	schemaBytes, _ := json.Marshal(schema)
 
-	tool := mcp.Tool{
+	tool := Tool{
 		Name:           "test",
 		RawInputSchema: json.RawMessage(schemaBytes),
 	}
@@ -84,7 +83,7 @@ func TestAddExtraProperties_CollisionOverwritesExisting(t *testing.T) {
 	}
 	schemaBytes, _ := json.Marshal(schema)
 
-	tool := mcp.Tool{
+	tool := Tool{
 		Name:           "test",
 		RawInputSchema: json.RawMessage(schemaBytes),
 	}
@@ -115,7 +114,7 @@ func TestAddExtraProperties_NoExistingRequired(t *testing.T) {
 	}
 	schemaBytes, _ := json.Marshal(schema)
 
-	tool := mcp.Tool{
+	tool := Tool{
 		Name:           "test",
 		RawInputSchema: json.RawMessage(schemaBytes),
 	}
@@ -145,7 +144,7 @@ func TestAddExtraProperties_PreservesOtherSchemaFields(t *testing.T) {
 	}
 	schemaBytes, _ := json.Marshal(schema)
 
-	tool := mcp.Tool{
+	tool := Tool{
 		Name:           "test",
 		RawInputSchema: json.RawMessage(schemaBytes),
 	}
@@ -169,7 +168,7 @@ func TestAddExtraProperties_PreservesOtherSchemaFields(t *testing.T) {
 func TestAddExtraProperties_EmptySchema(t *testing.T) {
 	g := NewWithT(t)
 
-	tool := mcp.Tool{
+	tool := Tool{
 		Name:           "test",
 		RawInputSchema: json.RawMessage(`{}`),
 	}
@@ -192,7 +191,7 @@ func TestAddExtraProperties_SchemaWithArrayType(t *testing.T) {
 	g := NewWithT(t)
 
 	// A schema that has properties as null (edge case)
-	tool := mcp.Tool{
+	tool := Tool{
 		Name:           "test",
 		RawInputSchema: json.RawMessage(`{"type": "object", "properties": null}`),
 	}
@@ -219,7 +218,7 @@ func TestAddExtraProperties_DoesNotMutateOriginal(t *testing.T) {
 	}
 	schemaBytes, _ := json.Marshal(schema)
 
-	original := mcp.Tool{
+	original := Tool{
 		Name:           "test",
 		RawInputSchema: json.RawMessage(schemaBytes),
 	}
@@ -241,7 +240,7 @@ func TestAddExtraProperties_ManyProperties(t *testing.T) {
 	schema := map[string]any{"type": "object", "properties": map[string]any{}}
 	schemaBytes, _ := json.Marshal(schema)
 
-	tool := mcp.Tool{
+	tool := Tool{
 		Name:           "test",
 		RawInputSchema: json.RawMessage(schemaBytes),
 	}

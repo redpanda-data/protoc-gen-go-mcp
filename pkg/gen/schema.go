@@ -549,30 +549,36 @@ func ToolForMethod(method protoreflect.MethodDescriptor, comment string) (standa
 	toolName := MangleHeadIfTooLong(strings.ReplaceAll(string(method.FullName()), ".", "_"), 64)
 	description := CleanComment(comment)
 
-	// Standard schema
-	standardSchema := MessageSchema(method.Input(), SchemaOptions{OpenAICompat: false})
-	marshaledStandard, err := json.Marshal(standardSchema)
-	if err != nil {
-		panic(err)
-	}
-
-	// OpenAI schema
-	openAISchema := MessageSchema(method.Input(), SchemaOptions{OpenAICompat: true})
-	openAISchema["type"] = "object" // Top-level must be plain "object", not ["object","null"]
-	marshaledOpenAI, err := json.Marshal(openAISchema)
-	if err != nil {
-		panic(err)
-	}
+	standardIn := marshalTopLevelSchema(method.Input(), SchemaOptions{OpenAICompat: false})
+	standardOut := marshalTopLevelSchema(method.Output(), SchemaOptions{OpenAICompat: false})
+	openAIIn := marshalTopLevelSchema(method.Input(), SchemaOptions{OpenAICompat: true})
+	openAIOut := marshalTopLevelSchema(method.Output(), SchemaOptions{OpenAICompat: true})
 
 	standard = runtime.Tool{
-		Name:           toolName,
-		Description:    description,
-		RawInputSchema: json.RawMessage(marshaledStandard),
+		Name:            toolName,
+		Description:     description,
+		RawInputSchema:  standardIn,
+		RawOutputSchema: standardOut,
 	}
 	openAI = runtime.Tool{
-		Name:           toolName,
-		Description:    description,
-		RawInputSchema: json.RawMessage(marshaledOpenAI),
+		Name:            toolName,
+		Description:     description,
+		RawInputSchema:  openAIIn,
+		RawOutputSchema: openAIOut,
 	}
 	return
+}
+
+// marshalTopLevelSchema generates and marshals a JSON schema for a top-level
+// message (RPC input or output). It forces the top-level "type" to plain
+// "object" so the schema satisfies MCP's requirement even when the underlying
+// MessageSchema would emit a nullable type.
+func marshalTopLevelSchema(md protoreflect.MessageDescriptor, opts SchemaOptions) json.RawMessage {
+	schema := MessageSchema(md, opts)
+	schema["type"] = "object"
+	marshaled, err := json.Marshal(schema)
+	if err != nil {
+		panic(err)
+	}
+	return json.RawMessage(marshaled)
 }

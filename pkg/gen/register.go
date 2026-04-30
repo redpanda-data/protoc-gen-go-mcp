@@ -95,21 +95,12 @@ func RegisterService(s runtime.MCPServer, sd protoreflect.ServiceDescriptor, han
 			strings.ReplaceAll(string(method.FullName()), ".", "_"),
 			64,
 		)
-		inputSchema := MessageSchema(method.Input(), schemaOpts)
-		if openAI {
-			// Top-level schema must be plain "object", not ["object","null"]
-			inputSchema["type"] = "object"
-		}
-
-		marshaledSchema, err := json.Marshal(inputSchema)
-		if err != nil {
-			panic(err)
-		}
 
 		tool := runtime.Tool{
-			Name:           toolName,
-			Description:    CleanComment(comment),
-			RawInputSchema: json.RawMessage(marshaledSchema),
+			Name:            toolName,
+			Description:     CleanComment(comment),
+			RawInputSchema:  marshalTopLevelSchema(method.Input(), schemaOpts),
+			RawOutputSchema: marshalTopLevelSchema(method.Output(), schemaOpts),
 		}
 
 		// Apply name prefix and extra properties
@@ -167,7 +158,7 @@ func RegisterService(s runtime.MCPServer, sd protoreflect.ServiceDescriptor, han
 				return nil, err
 			}
 
-			return runtime.NewToolResultText(string(marshaled)), nil
+			return runtime.NewToolResultJSON(marshaled), nil
 		})
 	}
 }

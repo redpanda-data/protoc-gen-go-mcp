@@ -30,9 +30,10 @@ type MCPServer interface {
 
 // Tool describes an MCP tool independent of any MCP library.
 type Tool struct {
-	Name           string
-	Description    string
-	RawInputSchema json.RawMessage
+	Name            string
+	Description     string
+	RawInputSchema  json.RawMessage
+	RawOutputSchema json.RawMessage
 }
 
 // ToolHandler is the callback invoked when an MCP client calls a tool.
@@ -45,13 +46,28 @@ type CallToolRequest struct {
 
 // CallToolResult is the response from a tool handler.
 type CallToolResult struct {
-	Text    string
-	IsError bool
+	Text              string
+	StructuredContent any
+	IsError           bool
 }
 
 // NewToolResultText creates a successful text result.
 func NewToolResultText(text string) *CallToolResult {
 	return &CallToolResult{Text: text}
+}
+
+// NewToolResultJSON creates a successful result that carries the same JSON
+// payload as both unstructured text content (for backward compatibility) and
+// structured content (matching the tool's output schema). The caller is
+// responsible for passing JSON-encoded bytes; no validation is performed.
+// The slice is copied into StructuredContent so callers may safely reuse
+// the buffer afterwards.
+func NewToolResultJSON(jsonBytes []byte) *CallToolResult {
+	structured := append(json.RawMessage(nil), jsonBytes...)
+	return &CallToolResult{
+		Text:              string(jsonBytes),
+		StructuredContent: structured,
+	}
 }
 
 // NewToolResultError creates an error text result.

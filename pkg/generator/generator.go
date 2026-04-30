@@ -122,7 +122,7 @@ func Register{{$key}}Handler(s runtime.MCPServer, srv {{$key}}Server, opts ...ru
       return nil, err
     }
 
-    return runtime.NewToolResultText(string(marshaled)), nil
+    return runtime.NewToolResultJSON(marshaled), nil
   })
   {{- end }}
 }
@@ -171,7 +171,7 @@ func Register{{$key}}HandlerOpenAI(s runtime.MCPServer, srv {{$key}}Server, opts
       return nil, err
     }
 
-    return runtime.NewToolResultText(string(marshaled)), nil
+    return runtime.NewToolResultJSON(marshaled), nil
   })
   {{- end }}
 }
@@ -250,7 +250,7 @@ func ForwardToConnect{{$key}}Client(s runtime.MCPServer, client Connect{{$key}}C
     if err != nil {
       return nil, err
     }
-    return runtime.NewToolResultText(string(marshaled)), nil
+    return runtime.NewToolResultJSON(marshaled), nil
   })
   {{- end }}
 }
@@ -298,7 +298,7 @@ func ForwardTo{{$key}}Client(s runtime.MCPServer, client {{$key}}Client, opts ..
     if err != nil {
       return nil, err
     }
-    return runtime.NewToolResultText(string(marshaled)), nil
+    return runtime.NewToolResultJSON(marshaled), nil
   })
   {{- end }}
 }

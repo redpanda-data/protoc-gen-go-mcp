@@ -104,6 +104,33 @@ func TestToolForMethod(t *testing.T) {
 	g.Expect(err).ToNot(HaveOccurred())
 	g.Expect(oaiSchema["additionalProperties"]).To(Equal(false))
 	g.Expect(oaiSchema["type"]).To(Equal("object")) // Not ["object","null"] at top level
+
+	// Both variants must include an output schema derived from method.Output().
+	g.Expect(standard.RawOutputSchema).ToNot(BeEmpty())
+	g.Expect(openAI.RawOutputSchema).ToNot(BeEmpty())
+
+	var stdOut map[string]any
+	g.Expect(json.Unmarshal(standard.RawOutputSchema, &stdOut)).To(Succeed())
+	g.Expect(stdOut["type"]).To(Equal("object"))
+	stdOutProps := stdOut["properties"].(map[string]any)
+	g.Expect(stdOutProps).To(HaveKey("id"))
+	g.Expect(stdOutProps).To(HaveKey("created_at"))
+
+	var oaiOut map[string]any
+	g.Expect(json.Unmarshal(openAI.RawOutputSchema, &oaiOut)).To(Succeed())
+	g.Expect(oaiOut["type"]).To(Equal("object"))
+	g.Expect(oaiOut["additionalProperties"]).To(Equal(false))
+}
+
+func TestNewToolResultJSON(t *testing.T) {
+	g := NewWithT(t)
+
+	payload := []byte(`{"id":"42","name":"thing"}`)
+	result := runtime.NewToolResultJSON(payload)
+
+	g.Expect(result.IsError).To(BeFalse())
+	g.Expect(result.Text).To(Equal(string(payload)))
+	g.Expect(result.StructuredContent).To(Equal(json.RawMessage(payload)))
 }
 
 func TestMangleHeadIfTooLong_Deterministic(t *testing.T) {
