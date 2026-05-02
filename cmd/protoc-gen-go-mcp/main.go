@@ -18,6 +18,8 @@ import (
 
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/generator"
 	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/types/descriptorpb"
+	"google.golang.org/protobuf/types/pluginpb"
 )
 
 func main() {
@@ -31,6 +33,11 @@ func main() {
 	protogen.Options{
 		ParamFunc: flagSet.Set,
 	}.Run(func(gen *protogen.Plugin) error {
+		// Set supported editions and features on the plugin
+		gen.SupportedFeatures = uint64(pluginpb.CodeGeneratorResponse_FEATURE_SUPPORTS_EDITIONS)
+		gen.SupportedEditionsMinimum = descriptorpb.Edition_EDITION_PROTO2
+		gen.SupportedEditionsMaximum = descriptorpb.Edition_EDITION_2023
+
 		for _, f := range gen.Files {
 			if !f.Generate {
 				continue
