@@ -1071,12 +1071,18 @@ func TestFileInputSchema_Standard(t *testing.T) {
 
 	fileProps := fileSchema["properties"].(map[string]any)
 	g.Expect(fileProps).To(HaveKey("content"))
-	g.Expect(fileProps).To(HaveKey("file_path"))
+	g.Expect(fileProps).To(HaveKey("path"))
+	g.Expect(fileProps).To(HaveKey("s3"))
 	g.Expect(fileProps).To(HaveKey("filename"))
 	g.Expect(fileProps).To(HaveKey("mime_type"))
 
 	contentSchema := fileProps["content"].(map[string]any)
 	g.Expect(contentSchema["contentEncoding"]).To(Equal("base64"))
+
+	s3Schema := fileProps["s3"].(map[string]any)
+	g.Expect(s3Schema["type"]).To(Equal("object"))
+	s3Props := s3Schema["properties"].(map[string]any)
+	g.Expect(s3Props).To(HaveKey("presigned_url"))
 }
 
 func TestFileInputSchema_OpenAI(t *testing.T) {
@@ -1094,7 +1100,8 @@ func TestFileInputSchema_OpenAI(t *testing.T) {
 
 	required := fileSchema["required"].([]string)
 	g.Expect(required).To(ContainElement("content"))
-	g.Expect(required).To(ContainElement("file_path"))
+	g.Expect(required).To(ContainElement("path"))
+	g.Expect(required).To(ContainElement("s3"))
 	g.Expect(required).To(ContainElement("filename"))
 	g.Expect(required).To(ContainElement("mime_type"))
 }
@@ -1113,7 +1120,8 @@ func TestFileOutputSchema_Standard(t *testing.T) {
 
 	fileProps := fileSchema["properties"].(map[string]any)
 	g.Expect(fileProps).To(HaveKey("content"))
-	g.Expect(fileProps).To(HaveKey("file_path"))
+	g.Expect(fileProps).To(HaveKey("path"))
+	g.Expect(fileProps).To(HaveKey("s3"))
 	g.Expect(fileProps).To(HaveKey("filename"))
 	g.Expect(fileProps).To(HaveKey("mime_type"))
 	g.Expect(fileProps).To(HaveKey("size_bytes"))
@@ -1129,8 +1137,9 @@ func TestFileOutputSchema_OpenAI(t *testing.T) {
 	g.Expect(fileSchema["additionalProperties"]).To(Equal(false))
 
 	fileProps := fileSchema["properties"].(map[string]any)
-	g.Expect(fileProps["file_path"].(map[string]any)["type"]).To(Equal([]string{"string", "null"}))
+	g.Expect(fileProps["path"].(map[string]any)["type"]).To(Equal([]string{"string", "null"}))
 	g.Expect(fileProps["size_bytes"].(map[string]any)["type"]).To(Equal([]string{"string", "null"}))
+	g.Expect(fileProps["s3"].(map[string]any)["type"]).To(Equal([]string{"object", "null"}))
 }
 
 func TestFileInput_FQN_Constants(t *testing.T) {

@@ -35,29 +35,85 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// S3Reference points at an object in S3 via a presigned URL.
+// The URL is time-limited and scoped to a single object, so no IAM
+// cross-wiring is needed between MCPs that pass files to each other.
+type S3Reference struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Presigned URL for GET (on FileOutput) or PUT (on FileInput).
+	PresignedUrl  string `protobuf:"bytes,1,opt,name=presigned_url,json=presignedUrl,proto3" json:"presigned_url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *S3Reference) Reset() {
+	*x = S3Reference{}
+	mi := &file_mcp_v1_file_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *S3Reference) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S3Reference) ProtoMessage() {}
+
+func (x *S3Reference) ProtoReflect() protoreflect.Message {
+	mi := &file_mcp_v1_file_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S3Reference.ProtoReflect.Descriptor instead.
+func (*S3Reference) Descriptor() ([]byte, []int) {
+	return file_mcp_v1_file_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *S3Reference) GetPresignedUrl() string {
+	if x != nil {
+		return x.PresignedUrl
+	}
+	return ""
+}
+
 // FileInput is a well-known MCP type for file data flowing into a tool.
 //
-// In hosted mode the agent provides content inline (bytes, base64-encoded
-// in JSON). In sandbox mode the agent provides a file_path on the shared
-// filesystem. The generator emits a schema marker that the runtime uses
-// to strip the irrelevant fields based on the configured FileMode.
+// The source oneof selects the transport. The generator emits a schema
+// marker (`x-mcp-file-mode`) that the runtime uses to expose only the
+// variant matching the deployment's FileMode:
+//   - FileModeInline: only content is visible
+//   - FileModePath:   only path is visible
+//   - FileModeS3:     only s3 is visible
+//   - FileModeAll:    all variants visible, agent picks
+//
+// MCP handlers never inspect the oneof directly. The framework resolves
+// the source to raw bytes before the handler sees the request.
 type FileInput struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Inline file content (hosted mode).
-	Content []byte `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
-	// Path on the shared filesystem (sandbox mode).
-	FilePath string `protobuf:"bytes,2,opt,name=file_path,json=filePath,proto3" json:"file_path,omitempty"`
+	// Types that are valid to be assigned to Source:
+	//
+	//	*FileInput_Content
+	//	*FileInput_Path
+	//	*FileInput_S3
+	Source isFileInput_Source `protobuf_oneof:"source"`
 	// Original filename.
-	Filename string `protobuf:"bytes,3,opt,name=filename,proto3" json:"filename,omitempty"`
+	Filename string `protobuf:"bytes,4,opt,name=filename,proto3" json:"filename,omitempty"`
 	// MIME type hint.
-	MimeType      string `protobuf:"bytes,4,opt,name=mime_type,json=mimeType,proto3" json:"mime_type,omitempty"`
+	MimeType      string `protobuf:"bytes,5,opt,name=mime_type,json=mimeType,proto3" json:"mime_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *FileInput) Reset() {
 	*x = FileInput{}
-	mi := &file_mcp_v1_file_proto_msgTypes[0]
+	mi := &file_mcp_v1_file_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -69,7 +125,7 @@ func (x *FileInput) String() string {
 func (*FileInput) ProtoMessage() {}
 
 func (x *FileInput) ProtoReflect() protoreflect.Message {
-	mi := &file_mcp_v1_file_proto_msgTypes[0]
+	mi := &file_mcp_v1_file_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -82,21 +138,41 @@ func (x *FileInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FileInput.ProtoReflect.Descriptor instead.
 func (*FileInput) Descriptor() ([]byte, []int) {
-	return file_mcp_v1_file_proto_rawDescGZIP(), []int{0}
+	return file_mcp_v1_file_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *FileInput) GetContent() []byte {
+func (x *FileInput) GetSource() isFileInput_Source {
 	if x != nil {
-		return x.Content
+		return x.Source
 	}
 	return nil
 }
 
-func (x *FileInput) GetFilePath() string {
+func (x *FileInput) GetContent() []byte {
 	if x != nil {
-		return x.FilePath
+		if x, ok := x.Source.(*FileInput_Content); ok {
+			return x.Content
+		}
+	}
+	return nil
+}
+
+func (x *FileInput) GetPath() string {
+	if x != nil {
+		if x, ok := x.Source.(*FileInput_Path); ok {
+			return x.Path
+		}
 	}
 	return ""
+}
+
+func (x *FileInput) GetS3() *S3Reference {
+	if x != nil {
+		if x, ok := x.Source.(*FileInput_S3); ok {
+			return x.S3
+		}
+	}
+	return nil
 }
 
 func (x *FileInput) GetFilename() string {
@@ -113,29 +189,57 @@ func (x *FileInput) GetMimeType() string {
 	return ""
 }
 
+type isFileInput_Source interface {
+	isFileInput_Source()
+}
+
+type FileInput_Content struct {
+	// Inline file content (hosted mode, small files).
+	Content []byte `protobuf:"bytes,1,opt,name=content,proto3,oneof"`
+}
+
+type FileInput_Path struct {
+	// Path on the shared filesystem (sandbox mode).
+	Path string `protobuf:"bytes,2,opt,name=path,proto3,oneof"`
+}
+
+type FileInput_S3 struct {
+	// S3 presigned URL (cloud-native transport).
+	S3 *S3Reference `protobuf:"bytes,3,opt,name=s3,proto3,oneof"`
+}
+
+func (*FileInput_Content) isFileInput_Source() {}
+
+func (*FileInput_Path) isFileInput_Source() {}
+
+func (*FileInput_S3) isFileInput_Source() {}
+
 // FileOutput is a well-known MCP type for file data flowing out of a tool.
 //
-// In hosted mode the tool returns content inline. In sandbox mode the tool
-// writes to a scratch directory and returns the path.
+// The destination oneof selects the transport. The framework intercepts
+// the handler's raw bytes and rewrites to the configured transport before
+// the response reaches the LLM.
 type FileOutput struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Inline file content (hosted mode).
-	Content []byte `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
-	// Path where the tool wrote the file (sandbox mode).
-	FilePath string `protobuf:"bytes,2,opt,name=file_path,json=filePath,proto3" json:"file_path,omitempty"`
+	// Types that are valid to be assigned to Destination:
+	//
+	//	*FileOutput_Content
+	//	*FileOutput_Path
+	//	*FileOutput_S3
+	Destination isFileOutput_Destination `protobuf_oneof:"destination"`
 	// Filename.
-	Filename string `protobuf:"bytes,3,opt,name=filename,proto3" json:"filename,omitempty"`
+	Filename string `protobuf:"bytes,4,opt,name=filename,proto3" json:"filename,omitempty"`
 	// MIME type.
-	MimeType string `protobuf:"bytes,4,opt,name=mime_type,json=mimeType,proto3" json:"mime_type,omitempty"`
+	MimeType string `protobuf:"bytes,5,opt,name=mime_type,json=mimeType,proto3" json:"mime_type,omitempty"`
 	// File size in bytes.
-	SizeBytes     int64 `protobuf:"varint,5,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
+	SizeBytes     int64 `protobuf:"varint,6,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *FileOutput) Reset() {
 	*x = FileOutput{}
-	mi := &file_mcp_v1_file_proto_msgTypes[1]
+	mi := &file_mcp_v1_file_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -147,7 +251,7 @@ func (x *FileOutput) String() string {
 func (*FileOutput) ProtoMessage() {}
 
 func (x *FileOutput) ProtoReflect() protoreflect.Message {
-	mi := &file_mcp_v1_file_proto_msgTypes[1]
+	mi := &file_mcp_v1_file_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -160,21 +264,41 @@ func (x *FileOutput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FileOutput.ProtoReflect.Descriptor instead.
 func (*FileOutput) Descriptor() ([]byte, []int) {
-	return file_mcp_v1_file_proto_rawDescGZIP(), []int{1}
+	return file_mcp_v1_file_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *FileOutput) GetContent() []byte {
+func (x *FileOutput) GetDestination() isFileOutput_Destination {
 	if x != nil {
-		return x.Content
+		return x.Destination
 	}
 	return nil
 }
 
-func (x *FileOutput) GetFilePath() string {
+func (x *FileOutput) GetContent() []byte {
 	if x != nil {
-		return x.FilePath
+		if x, ok := x.Destination.(*FileOutput_Content); ok {
+			return x.Content
+		}
+	}
+	return nil
+}
+
+func (x *FileOutput) GetPath() string {
+	if x != nil {
+		if x, ok := x.Destination.(*FileOutput_Path); ok {
+			return x.Path
+		}
 	}
 	return ""
+}
+
+func (x *FileOutput) GetS3() *S3Reference {
+	if x != nil {
+		if x, ok := x.Destination.(*FileOutput_S3); ok {
+			return x.S3
+		}
+	}
+	return nil
 }
 
 func (x *FileOutput) GetFilename() string {
@@ -198,24 +322,55 @@ func (x *FileOutput) GetSizeBytes() int64 {
 	return 0
 }
 
+type isFileOutput_Destination interface {
+	isFileOutput_Destination()
+}
+
+type FileOutput_Content struct {
+	// Inline file content (hosted mode, small files).
+	Content []byte `protobuf:"bytes,1,opt,name=content,proto3,oneof"`
+}
+
+type FileOutput_Path struct {
+	// Path where the framework wrote the file (sandbox mode).
+	Path string `protobuf:"bytes,2,opt,name=path,proto3,oneof"`
+}
+
+type FileOutput_S3 struct {
+	// S3 presigned GET URL (cloud-native transport).
+	S3 *S3Reference `protobuf:"bytes,3,opt,name=s3,proto3,oneof"`
+}
+
+func (*FileOutput_Content) isFileOutput_Destination() {}
+
+func (*FileOutput_Path) isFileOutput_Destination() {}
+
+func (*FileOutput_S3) isFileOutput_Destination() {}
+
 var File_mcp_v1_file_proto protoreflect.FileDescriptor
 
 const file_mcp_v1_file_proto_rawDesc = "" +
 	"\n" +
-	"\x11mcp/v1/file.proto\x12\x06mcp.v1\"{\n" +
-	"\tFileInput\x12\x18\n" +
-	"\acontent\x18\x01 \x01(\fR\acontent\x12\x1b\n" +
-	"\tfile_path\x18\x02 \x01(\tR\bfilePath\x12\x1a\n" +
-	"\bfilename\x18\x03 \x01(\tR\bfilename\x12\x1b\n" +
-	"\tmime_type\x18\x04 \x01(\tR\bmimeType\"\x9b\x01\n" +
+	"\x11mcp/v1/file.proto\x12\x06mcp.v1\"2\n" +
+	"\vS3Reference\x12#\n" +
+	"\rpresigned_url\x18\x01 \x01(\tR\fpresignedUrl\"\xa7\x01\n" +
+	"\tFileInput\x12\x1a\n" +
+	"\acontent\x18\x01 \x01(\fH\x00R\acontent\x12\x14\n" +
+	"\x04path\x18\x02 \x01(\tH\x00R\x04path\x12%\n" +
+	"\x02s3\x18\x03 \x01(\v2\x13.mcp.v1.S3ReferenceH\x00R\x02s3\x12\x1a\n" +
+	"\bfilename\x18\x04 \x01(\tR\bfilename\x12\x1b\n" +
+	"\tmime_type\x18\x05 \x01(\tR\bmimeTypeB\b\n" +
+	"\x06source\"\xcc\x01\n" +
 	"\n" +
-	"FileOutput\x12\x18\n" +
-	"\acontent\x18\x01 \x01(\fR\acontent\x12\x1b\n" +
-	"\tfile_path\x18\x02 \x01(\tR\bfilePath\x12\x1a\n" +
-	"\bfilename\x18\x03 \x01(\tR\bfilename\x12\x1b\n" +
-	"\tmime_type\x18\x04 \x01(\tR\bmimeType\x12\x1d\n" +
+	"FileOutput\x12\x1a\n" +
+	"\acontent\x18\x01 \x01(\fH\x00R\acontent\x12\x14\n" +
+	"\x04path\x18\x02 \x01(\tH\x00R\x04path\x12%\n" +
+	"\x02s3\x18\x03 \x01(\v2\x13.mcp.v1.S3ReferenceH\x00R\x02s3\x12\x1a\n" +
+	"\bfilename\x18\x04 \x01(\tR\bfilename\x12\x1b\n" +
+	"\tmime_type\x18\x05 \x01(\tR\bmimeType\x12\x1d\n" +
 	"\n" +
-	"size_bytes\x18\x05 \x01(\x03R\tsizeBytesB\x9d\x01\n" +
+	"size_bytes\x18\x06 \x01(\x03R\tsizeBytesB\r\n" +
+	"\vdestinationB\x9d\x01\n" +
 	"\n" +
 	"com.mcp.v1B\tFileProtoP\x01ZKgithub.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/mcp/v1;mcpv1\xa2\x02\x03MXX\xaa\x02\x06Mcp.V1\xca\x02\x06Mcp\\V1\xe2\x02\x12Mcp\\V1\\GPBMetadata\xea\x02\aMcp::V1b\x06proto3"
 
@@ -231,17 +386,20 @@ func file_mcp_v1_file_proto_rawDescGZIP() []byte {
 	return file_mcp_v1_file_proto_rawDescData
 }
 
-var file_mcp_v1_file_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_mcp_v1_file_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_mcp_v1_file_proto_goTypes = []any{
-	(*FileInput)(nil),  // 0: mcp.v1.FileInput
-	(*FileOutput)(nil), // 1: mcp.v1.FileOutput
+	(*S3Reference)(nil), // 0: mcp.v1.S3Reference
+	(*FileInput)(nil),   // 1: mcp.v1.FileInput
+	(*FileOutput)(nil),  // 2: mcp.v1.FileOutput
 }
 var file_mcp_v1_file_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: mcp.v1.FileInput.s3:type_name -> mcp.v1.S3Reference
+	0, // 1: mcp.v1.FileOutput.s3:type_name -> mcp.v1.S3Reference
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_mcp_v1_file_proto_init() }
@@ -249,13 +407,23 @@ func file_mcp_v1_file_proto_init() {
 	if File_mcp_v1_file_proto != nil {
 		return
 	}
+	file_mcp_v1_file_proto_msgTypes[1].OneofWrappers = []any{
+		(*FileInput_Content)(nil),
+		(*FileInput_Path)(nil),
+		(*FileInput_S3)(nil),
+	}
+	file_mcp_v1_file_proto_msgTypes[2].OneofWrappers = []any{
+		(*FileOutput_Content)(nil),
+		(*FileOutput_Path)(nil),
+		(*FileOutput_S3)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mcp_v1_file_proto_rawDesc), len(file_mcp_v1_file_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -586,6 +586,20 @@ const FileOutputFQN = "mcp.v1.FileOutput"
 // locate file-typed properties and rewrite them based on FileMode.
 const FileSchemaMarkerKey = "x-mcp-file-mode"
 
+// s3ReferenceSchema returns the JSON schema for the S3Reference message.
+func s3ReferenceSchema() map[string]any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"presigned_url": map[string]any{
+				"type":        "string",
+				"description": "S3 presigned URL.",
+			},
+		},
+		"required": []string{"presigned_url"},
+	}
+}
+
 func fileInputSchema(opts SchemaOptions) map[string]any {
 	props := map[string]any{
 		"content": map[string]any{
@@ -593,10 +607,11 @@ func fileInputSchema(opts SchemaOptions) map[string]any {
 			"contentEncoding": "base64",
 			"description":     "Inline file content, base64-encoded.",
 		},
-		"file_path": map[string]any{
+		"path": map[string]any{
 			"type":        "string",
 			"description": "Path to the file on the shared filesystem.",
 		},
+		"s3": s3ReferenceSchema(),
 		"filename": map[string]any{
 			"type":        "string",
 			"description": "Original filename.",
@@ -608,18 +623,19 @@ func fileInputSchema(opts SchemaOptions) map[string]any {
 	}
 	required := []string{"filename"}
 	if opts.OpenAICompat {
-		required = []string{"content", "file_path", "filename", "mime_type"}
+		required = []string{"content", "path", "s3", "filename", "mime_type"}
 	}
 	schema := map[string]any{
-		"type":             "object",
+		"type":              "object",
 		FileSchemaMarkerKey: "input",
-		"properties":       props,
-		"required":         required,
+		"properties":        props,
+		"required":          required,
 	}
 	if opts.OpenAICompat {
 		schema["additionalProperties"] = false
 		props["content"].(map[string]any)["type"] = []string{"string", "null"}
-		props["file_path"].(map[string]any)["type"] = []string{"string", "null"}
+		props["path"].(map[string]any)["type"] = []string{"string", "null"}
+		props["s3"].(map[string]any)["type"] = []string{"object", "null"}
 		props["mime_type"].(map[string]any)["type"] = []string{"string", "null"}
 	}
 	return schema
@@ -632,10 +648,11 @@ func fileOutputSchema(opts SchemaOptions) map[string]any {
 			"contentEncoding": "base64",
 			"description":     "Inline file content, base64-encoded.",
 		},
-		"file_path": map[string]any{
+		"path": map[string]any{
 			"type":        "string",
-			"description": "Path where the tool wrote the file.",
+			"description": "Path where the framework wrote the file.",
 		},
+		"s3": s3ReferenceSchema(),
 		"filename": map[string]any{
 			"type":        "string",
 			"description": "Filename.",
@@ -651,18 +668,19 @@ func fileOutputSchema(opts SchemaOptions) map[string]any {
 	}
 	required := []string{"filename"}
 	if opts.OpenAICompat {
-		required = []string{"content", "file_path", "filename", "mime_type", "size_bytes"}
+		required = []string{"content", "path", "s3", "filename", "mime_type", "size_bytes"}
 	}
 	schema := map[string]any{
-		"type":             "object",
+		"type":              "object",
 		FileSchemaMarkerKey: "output",
-		"properties":       props,
-		"required":         required,
+		"properties":        props,
+		"required":          required,
 	}
 	if opts.OpenAICompat {
 		schema["additionalProperties"] = false
 		props["content"].(map[string]any)["type"] = []string{"string", "null"}
-		props["file_path"].(map[string]any)["type"] = []string{"string", "null"}
+		props["path"].(map[string]any)["type"] = []string{"string", "null"}
+		props["s3"].(map[string]any)["type"] = []string{"object", "null"}
 		props["size_bytes"].(map[string]any)["type"] = []string{"string", "null"}
 	}
 	return schema

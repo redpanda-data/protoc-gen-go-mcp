@@ -21,75 +21,54 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestRewriteFileSchemas_PathMode_Input(t *testing.T) {
-	g := NewWithT(t)
-
-	tool := Tool{
-		Name: "test_tool",
-		RawInputSchema: mustJSON(map[string]any{
-			"type": "object",
-			"properties": map[string]any{
-				"site_id": map[string]any{"type": "string"},
-				"file": map[string]any{
-					"type":             "object",
-					fileSchemaMarkerKey: "input",
-					"properties": map[string]any{
-						"content":   map[string]any{"type": "string", "contentEncoding": "base64"},
-						"file_path": map[string]any{"type": "string"},
-						"filename":  map[string]any{"type": "string"},
-						"mime_type": map[string]any{"type": "string"},
-					},
-					"required": []string{"filename"},
-				},
-			},
-			"required": []string{"site_id"},
-		}),
+func fileInputFixture() map[string]any {
+	return map[string]any{
+		"type":              "object",
+		fileSchemaMarkerKey: "input",
+		"properties": map[string]any{
+			"content":   map[string]any{"type": "string", "contentEncoding": "base64"},
+			"path":      map[string]any{"type": "string"},
+			"s3":        map[string]any{"type": "object", "properties": map[string]any{"presigned_url": map[string]any{"type": "string"}}},
+			"filename":  map[string]any{"type": "string"},
+			"mime_type": map[string]any{"type": "string"},
+		},
+		"required": []string{"filename"},
 	}
+}
 
-	rewritten := rewriteFileSchemas(tool, FileModePath)
+func fileOutputFixture() map[string]any {
+	return map[string]any{
+		"type":              "object",
+		fileSchemaMarkerKey: "output",
+		"properties": map[string]any{
+			"content":    map[string]any{"type": "string"},
+			"path":       map[string]any{"type": "string"},
+			"s3":         map[string]any{"type": "object", "properties": map[string]any{"presigned_url": map[string]any{"type": "string"}}},
+			"filename":   map[string]any{"type": "string"},
+			"mime_type":  map[string]any{"type": "string"},
+			"size_bytes": map[string]any{"type": "string"},
+		},
+		"required": []string{"filename"},
+	}
+}
 
-	var schema map[string]any
-	g.Expect(json.Unmarshal(rewritten.RawInputSchema, &schema)).To(Succeed())
-
-	fileProps := schema["properties"].(map[string]any)["file"].(map[string]any)
-	props := fileProps["properties"].(map[string]any)
-
-	g.Expect(props).ToNot(HaveKey("content"), "content should be stripped in path mode")
-	g.Expect(props).To(HaveKey("file_path"))
-	g.Expect(props).To(HaveKey("filename"))
-	g.Expect(props).To(HaveKey("mime_type"))
-	g.Expect(fileProps).ToNot(HaveKey(fileSchemaMarkerKey), "marker should be removed")
-
-	required := toStringSlice(fileProps["required"])
-	g.Expect(required).To(ContainElement("file_path"))
-	g.Expect(required).To(ContainElement("filename"))
-	g.Expect(required).ToNot(ContainElement("content"))
+func wrapInTool(fieldName string, fixture map[string]any, isOutput bool) Tool {
+	wrapper := map[string]any{
+		"type":       "object",
+		"properties": map[string]any{fieldName: fixture},
+	}
+	t := Tool{Name: "test_tool"}
+	if isOutput {
+		t.RawOutputSchema = mustJSON(wrapper)
+	} else {
+		t.RawInputSchema = mustJSON(wrapper)
+	}
+	return t
 }
 
 func TestRewriteFileSchemas_InlineMode_Input(t *testing.T) {
 	g := NewWithT(t)
-
-	tool := Tool{
-		Name: "test_tool",
-		RawInputSchema: mustJSON(map[string]any{
-			"type": "object",
-			"properties": map[string]any{
-				"file": map[string]any{
-					"type":             "object",
-					fileSchemaMarkerKey: "input",
-					"properties": map[string]any{
-						"content":   map[string]any{"type": "string", "contentEncoding": "base64"},
-						"file_path": map[string]any{"type": "string"},
-						"filename":  map[string]any{"type": "string"},
-						"mime_type": map[string]any{"type": "string"},
-					},
-					"required": []string{"filename"},
-				},
-			},
-			"required": []string{},
-		}),
-	}
-
+	tool := wrapInTool("file", fileInputFixture(), false)
 	rewritten := rewriteFileSchemas(tool, FileModeInline)
 
 	var schema map[string]any
@@ -99,114 +78,58 @@ func TestRewriteFileSchemas_InlineMode_Input(t *testing.T) {
 	props := fileProps["properties"].(map[string]any)
 
 	g.Expect(props).To(HaveKey("content"))
-	g.Expect(props).ToNot(HaveKey("file_path"), "file_path should be stripped in inline mode")
+	g.Expect(props).ToNot(HaveKey("path"))
+	g.Expect(props).ToNot(HaveKey("s3"))
 	g.Expect(props).To(HaveKey("filename"))
+	g.Expect(fileProps).ToNot(HaveKey(fileSchemaMarkerKey))
 
 	required := toStringSlice(fileProps["required"])
 	g.Expect(required).To(ContainElement("content"))
 	g.Expect(required).To(ContainElement("filename"))
-	g.Expect(required).ToNot(ContainElement("file_path"))
 }
 
-func TestRewriteFileSchemas_PathMode_Output(t *testing.T) {
+func TestRewriteFileSchemas_PathMode_Input(t *testing.T) {
 	g := NewWithT(t)
-
-	tool := Tool{
-		Name: "test_tool",
-		RawOutputSchema: mustJSON(map[string]any{
-			"type": "object",
-			"properties": map[string]any{
-				"result": map[string]any{
-					"type":             "object",
-					fileSchemaMarkerKey: "output",
-					"properties": map[string]any{
-						"content":    map[string]any{"type": "string"},
-						"file_path":  map[string]any{"type": "string"},
-						"filename":   map[string]any{"type": "string"},
-						"mime_type":  map[string]any{"type": "string"},
-						"size_bytes": map[string]any{"type": "string"},
-					},
-					"required": []string{"filename"},
-				},
-			},
-		}),
-	}
-
+	tool := wrapInTool("file", fileInputFixture(), false)
 	rewritten := rewriteFileSchemas(tool, FileModePath)
 
 	var schema map[string]any
-	g.Expect(json.Unmarshal(rewritten.RawOutputSchema, &schema)).To(Succeed())
+	g.Expect(json.Unmarshal(rewritten.RawInputSchema, &schema)).To(Succeed())
 
-	resultProps := schema["properties"].(map[string]any)["result"].(map[string]any)
-	props := resultProps["properties"].(map[string]any)
+	fileProps := schema["properties"].(map[string]any)["file"].(map[string]any)
+	props := fileProps["properties"].(map[string]any)
 
-	g.Expect(props).ToNot(HaveKey("content"), "content should be stripped in path mode")
-	g.Expect(props).To(HaveKey("file_path"))
-	g.Expect(props).To(HaveKey("size_bytes"))
+	g.Expect(props).ToNot(HaveKey("content"))
+	g.Expect(props).To(HaveKey("path"))
+	g.Expect(props).ToNot(HaveKey("s3"))
 
-	required := toStringSlice(resultProps["required"])
-	g.Expect(required).To(ContainElement("file_path"))
+	required := toStringSlice(fileProps["required"])
+	g.Expect(required).To(ContainElement("path"))
+	g.Expect(required).ToNot(ContainElement("content"))
 }
 
-func TestRewriteFileSchemas_InlineMode_Output(t *testing.T) {
+func TestRewriteFileSchemas_S3Mode_Input(t *testing.T) {
 	g := NewWithT(t)
-
-	tool := Tool{
-		Name: "test_tool",
-		RawOutputSchema: mustJSON(map[string]any{
-			"type": "object",
-			"properties": map[string]any{
-				"result": map[string]any{
-					"type":             "object",
-					fileSchemaMarkerKey: "output",
-					"properties": map[string]any{
-						"content":    map[string]any{"type": "string"},
-						"file_path":  map[string]any{"type": "string"},
-						"filename":   map[string]any{"type": "string"},
-						"mime_type":  map[string]any{"type": "string"},
-						"size_bytes": map[string]any{"type": "string"},
-					},
-					"required": []string{"filename"},
-				},
-			},
-		}),
-	}
-
-	rewritten := rewriteFileSchemas(tool, FileModeInline)
+	tool := wrapInTool("file", fileInputFixture(), false)
+	rewritten := rewriteFileSchemas(tool, FileModeS3)
 
 	var schema map[string]any
-	g.Expect(json.Unmarshal(rewritten.RawOutputSchema, &schema)).To(Succeed())
+	g.Expect(json.Unmarshal(rewritten.RawInputSchema, &schema)).To(Succeed())
 
-	resultProps := schema["properties"].(map[string]any)["result"].(map[string]any)
-	props := resultProps["properties"].(map[string]any)
+	fileProps := schema["properties"].(map[string]any)["file"].(map[string]any)
+	props := fileProps["properties"].(map[string]any)
 
-	g.Expect(props).To(HaveKey("content"))
-	g.Expect(props).ToNot(HaveKey("file_path"), "file_path should be stripped in inline mode")
+	g.Expect(props).ToNot(HaveKey("content"))
+	g.Expect(props).ToNot(HaveKey("path"))
+	g.Expect(props).To(HaveKey("s3"))
+
+	required := toStringSlice(fileProps["required"])
+	g.Expect(required).To(ContainElement("s3"))
 }
 
 func TestRewriteFileSchemas_AllMode_KeepsAllFields(t *testing.T) {
 	g := NewWithT(t)
-
-	tool := Tool{
-		Name: "test_tool",
-		RawInputSchema: mustJSON(map[string]any{
-			"type": "object",
-			"properties": map[string]any{
-				"file": map[string]any{
-					"type":             "object",
-					fileSchemaMarkerKey: "input",
-					"properties": map[string]any{
-						"content":   map[string]any{"type": "string", "contentEncoding": "base64"},
-						"file_path": map[string]any{"type": "string"},
-						"filename":  map[string]any{"type": "string"},
-						"mime_type": map[string]any{"type": "string"},
-					},
-					"required": []string{"filename"},
-				},
-			},
-		}),
-	}
-
+	tool := wrapInTool("file", fileInputFixture(), false)
 	rewritten := rewriteFileSchemas(tool, FileModeAll)
 
 	var schema map[string]any
@@ -215,11 +138,63 @@ func TestRewriteFileSchemas_AllMode_KeepsAllFields(t *testing.T) {
 	fileProps := schema["properties"].(map[string]any)["file"].(map[string]any)
 	props := fileProps["properties"].(map[string]any)
 
-	g.Expect(props).To(HaveKey("content"), "content should be kept in all mode")
-	g.Expect(props).To(HaveKey("file_path"), "file_path should be kept in all mode")
+	g.Expect(props).To(HaveKey("content"))
+	g.Expect(props).To(HaveKey("path"))
+	g.Expect(props).To(HaveKey("s3"))
 	g.Expect(props).To(HaveKey("filename"))
-	g.Expect(props).To(HaveKey("mime_type"))
-	g.Expect(fileProps).ToNot(HaveKey(fileSchemaMarkerKey), "marker should still be removed")
+	g.Expect(fileProps).ToNot(HaveKey(fileSchemaMarkerKey))
+}
+
+func TestRewriteFileSchemas_PathMode_Output(t *testing.T) {
+	g := NewWithT(t)
+	tool := wrapInTool("result", fileOutputFixture(), true)
+	rewritten := rewriteFileSchemas(tool, FileModePath)
+
+	var schema map[string]any
+	g.Expect(json.Unmarshal(rewritten.RawOutputSchema, &schema)).To(Succeed())
+
+	resultProps := schema["properties"].(map[string]any)["result"].(map[string]any)
+	props := resultProps["properties"].(map[string]any)
+
+	g.Expect(props).ToNot(HaveKey("content"))
+	g.Expect(props).To(HaveKey("path"))
+	g.Expect(props).ToNot(HaveKey("s3"))
+	g.Expect(props).To(HaveKey("size_bytes"))
+
+	required := toStringSlice(resultProps["required"])
+	g.Expect(required).ToNot(ContainElement("path"), "output path should not be required — framework populates it")
+}
+
+func TestRewriteFileSchemas_InlineMode_Output(t *testing.T) {
+	g := NewWithT(t)
+	tool := wrapInTool("result", fileOutputFixture(), true)
+	rewritten := rewriteFileSchemas(tool, FileModeInline)
+
+	var schema map[string]any
+	g.Expect(json.Unmarshal(rewritten.RawOutputSchema, &schema)).To(Succeed())
+
+	resultProps := schema["properties"].(map[string]any)["result"].(map[string]any)
+	props := resultProps["properties"].(map[string]any)
+
+	g.Expect(props).To(HaveKey("content"))
+	g.Expect(props).ToNot(HaveKey("path"))
+	g.Expect(props).ToNot(HaveKey("s3"))
+}
+
+func TestRewriteFileSchemas_S3Mode_Output(t *testing.T) {
+	g := NewWithT(t)
+	tool := wrapInTool("result", fileOutputFixture(), true)
+	rewritten := rewriteFileSchemas(tool, FileModeS3)
+
+	var schema map[string]any
+	g.Expect(json.Unmarshal(rewritten.RawOutputSchema, &schema)).To(Succeed())
+
+	resultProps := schema["properties"].(map[string]any)["result"].(map[string]any)
+	props := resultProps["properties"].(map[string]any)
+
+	g.Expect(props).ToNot(HaveKey("content"))
+	g.Expect(props).ToNot(HaveKey("path"))
+	g.Expect(props).To(HaveKey("s3"))
 }
 
 func TestRewriteFileSchemas_NoMarker_Unchanged(t *testing.T) {
@@ -233,11 +208,7 @@ func TestRewriteFileSchemas_NoMarker_Unchanged(t *testing.T) {
 		"required": []string{"name"},
 	})
 
-	tool := Tool{
-		Name:           "plain_tool",
-		RawInputSchema: original,
-	}
-
+	tool := Tool{Name: "plain_tool", RawInputSchema: original}
 	rewritten := rewriteFileSchemas(tool, FileModePath)
 	g.Expect(rewritten.RawInputSchema).To(Equal(original))
 }
@@ -257,25 +228,7 @@ func TestApplyConfig_WithFileMode(t *testing.T) {
 	cfg := NewConfig()
 	WithFileMode(FileModePath)(cfg)
 
-	tool := Tool{
-		Name: "upload_tool",
-		RawInputSchema: mustJSON(map[string]any{
-			"type": "object",
-			"properties": map[string]any{
-				"file": map[string]any{
-					"type":             "object",
-					fileSchemaMarkerKey: "input",
-					"properties": map[string]any{
-						"content":   map[string]any{"type": "string"},
-						"file_path": map[string]any{"type": "string"},
-						"filename":  map[string]any{"type": "string"},
-					},
-					"required": []string{"filename"},
-				},
-			},
-		}),
-	}
-
+	tool := wrapInTool("file", fileInputFixture(), false)
 	result := ApplyConfig(tool, cfg)
 
 	var schema map[string]any
@@ -284,43 +237,26 @@ func TestApplyConfig_WithFileMode(t *testing.T) {
 	fileProps := schema["properties"].(map[string]any)["file"].(map[string]any)
 	props := fileProps["properties"].(map[string]any)
 	g.Expect(props).ToNot(HaveKey("content"))
-	g.Expect(props).To(HaveKey("file_path"))
+	g.Expect(props).ToNot(HaveKey("s3"))
+	g.Expect(props).To(HaveKey("path"))
 }
 
 func TestApplyConfig_WithoutFileMode_PreservesMarker(t *testing.T) {
 	g := NewWithT(t)
 
 	cfg := NewConfig()
-
-	tool := Tool{
-		Name: "tool",
-		RawInputSchema: mustJSON(map[string]any{
-			"type": "object",
-			"properties": map[string]any{
-				"file": map[string]any{
-					"type":             "object",
-					fileSchemaMarkerKey: "input",
-					"properties": map[string]any{
-						"content":   map[string]any{"type": "string"},
-						"file_path": map[string]any{"type": "string"},
-						"filename":  map[string]any{"type": "string"},
-					},
-					"required": []string{"filename"},
-				},
-			},
-		}),
-	}
-
+	tool := wrapInTool("file", fileInputFixture(), false)
 	result := ApplyConfig(tool, cfg)
 
 	var schema map[string]any
 	g.Expect(json.Unmarshal(result.RawInputSchema, &schema)).To(Succeed())
 
 	fileProps := schema["properties"].(map[string]any)["file"].(map[string]any)
-	g.Expect(fileProps).To(HaveKey(fileSchemaMarkerKey), "marker should be preserved when FileModeSet is false")
+	g.Expect(fileProps).To(HaveKey(fileSchemaMarkerKey))
 	props := fileProps["properties"].(map[string]any)
 	g.Expect(props).To(HaveKey("content"))
-	g.Expect(props).To(HaveKey("file_path"))
+	g.Expect(props).To(HaveKey("path"))
+	g.Expect(props).To(HaveKey("s3"))
 }
 
 func mustJSON(v any) json.RawMessage {

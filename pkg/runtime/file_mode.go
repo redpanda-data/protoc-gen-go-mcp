@@ -22,16 +22,20 @@ import (
 type FileMode int
 
 const (
-	// FileModeInline is the default: file content flows inline through the
-	// JSON-RPC payload (bytes/base64). The file_path field is stripped from
-	// the schema. Suitable for hosted deployments.
+	// FileModeInline is the default: only the content oneof variant is
+	// exposed. File bytes flow inline through the JSON-RPC payload
+	// (base64-encoded). Suitable for hosted deployments.
 	FileModeInline FileMode = iota
-	// FileModePath exposes file_path instead of content. The agent
+	// FileModePath exposes only the path oneof variant. The agent
 	// provides/receives filesystem paths on a shared volume. Suitable for
 	// sandbox deployments where aigw and the agent share a filesystem.
 	FileModePath
-	// FileModeAll exposes both content and file_path. The LLM picks
-	// whichever is appropriate; the handler checks which field is populated.
+	// FileModeS3 exposes only the s3 oneof variant. The framework uploads
+	// to / downloads from S3 and passes presigned URLs. Suitable for
+	// cloud-native deployments where MCPs pass files via object storage.
+	FileModeS3
+	// FileModeAll exposes all oneof variants (content, path, s3). The LLM
+	// picks whichever is appropriate; the framework resolves accordingly.
 	FileModeAll
 )
 
@@ -127,6 +131,9 @@ func rewriteSchemaNode(node map[string]any, mode FileMode) bool {
 	return modified
 }
 
+// sourceVariants are the oneof variant field names in FileInput/FileOutput.
+var sourceVariants = []string{"content", "path", "s3"}
+
 func applyFileModeToNode(node map[string]any, markerType string, mode FileMode) {
 	props, _ := node["properties"].(map[string]any)
 	if props == nil {
@@ -135,19 +142,26 @@ func applyFileModeToNode(node map[string]any, markerType string, mode FileMode) 
 
 	required, _ := node["required"].([]any)
 
+	var keep string
 	switch mode {
-	case FileModePath:
-		delete(props, "content")
-		required = addToRequired(removeFromRequired(required, "content"), "file_path")
 	case FileModeInline:
-		delete(props, "file_path")
-		if markerType == "input" {
-			required = addToRequired(removeFromRequired(required, "file_path"), "content")
-		} else {
-			required = removeFromRequired(required, "file_path")
-		}
+		keep = "content"
+	case FileModePath:
+		keep = "path"
+	case FileModeS3:
+		keep = "s3"
 	case FileModeAll:
-		// Keep all fields, just strip the marker (done by caller).
+		return // keep everything, just strip the marker (done by caller)
+	}
+
+	for _, v := range sourceVariants {
+		if v != keep {
+			delete(props, v)
+			required = removeFromRequired(required, v)
+		}
+	}
+	if markerType == "input" {
+		required = addToRequired(required, keep)
 	}
 
 	node["required"] = required
