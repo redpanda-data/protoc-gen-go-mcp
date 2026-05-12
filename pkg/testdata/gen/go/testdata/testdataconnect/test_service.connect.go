@@ -57,6 +57,11 @@ const (
 	// TestServiceTestValidationProcedure is the fully-qualified name of the TestService's
 	// TestValidation RPC.
 	TestServiceTestValidationProcedure = "/testdata.TestService/TestValidation"
+	// TestServiceUploadFileProcedure is the fully-qualified name of the TestService's UploadFile RPC.
+	TestServiceUploadFileProcedure = "/testdata.TestService/UploadFile"
+	// TestServiceGetFileContentProcedure is the fully-qualified name of the TestService's
+	// GetFileContent RPC.
+	TestServiceGetFileContentProcedure = "/testdata.TestService/GetFileContent"
 )
 
 // TestServiceClient is a client for the testdata.TestService service.
@@ -69,6 +74,10 @@ type TestServiceClient interface {
 	ProcessWellKnownTypes(context.Context, *connect.Request[testdata.ProcessWellKnownTypesRequest]) (*connect.Response[testdata.ProcessWellKnownTypesResponse], error)
 	// Test protovalidate constraints
 	TestValidation(context.Context, *connect.Request[testdata.TestValidationRequest]) (*connect.Response[testdata.TestValidationResponse], error)
+	// Upload a file using the well-known FileInput type
+	UploadFile(context.Context, *connect.Request[testdata.UploadFileRequest]) (*connect.Response[testdata.UploadFileResponse], error)
+	// Get file content using the well-known FileOutput type
+	GetFileContent(context.Context, *connect.Request[testdata.GetFileContentRequest]) (*connect.Response[testdata.GetFileContentResponse], error)
 }
 
 // NewTestServiceClient constructs a client for the testdata.TestService service. By default, it
@@ -106,6 +115,18 @@ func NewTestServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(testServiceMethods.ByName("TestValidation")),
 			connect.WithClientOptions(opts...),
 		),
+		uploadFile: connect.NewClient[testdata.UploadFileRequest, testdata.UploadFileResponse](
+			httpClient,
+			baseURL+TestServiceUploadFileProcedure,
+			connect.WithSchema(testServiceMethods.ByName("UploadFile")),
+			connect.WithClientOptions(opts...),
+		),
+		getFileContent: connect.NewClient[testdata.GetFileContentRequest, testdata.GetFileContentResponse](
+			httpClient,
+			baseURL+TestServiceGetFileContentProcedure,
+			connect.WithSchema(testServiceMethods.ByName("GetFileContent")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -115,6 +136,8 @@ type testServiceClient struct {
 	getItem               *connect.Client[testdata.GetItemRequest, testdata.GetItemResponse]
 	processWellKnownTypes *connect.Client[testdata.ProcessWellKnownTypesRequest, testdata.ProcessWellKnownTypesResponse]
 	testValidation        *connect.Client[testdata.TestValidationRequest, testdata.TestValidationResponse]
+	uploadFile            *connect.Client[testdata.UploadFileRequest, testdata.UploadFileResponse]
+	getFileContent        *connect.Client[testdata.GetFileContentRequest, testdata.GetFileContentResponse]
 }
 
 // CreateItem calls testdata.TestService.CreateItem.
@@ -137,6 +160,16 @@ func (c *testServiceClient) TestValidation(ctx context.Context, req *connect.Req
 	return c.testValidation.CallUnary(ctx, req)
 }
 
+// UploadFile calls testdata.TestService.UploadFile.
+func (c *testServiceClient) UploadFile(ctx context.Context, req *connect.Request[testdata.UploadFileRequest]) (*connect.Response[testdata.UploadFileResponse], error) {
+	return c.uploadFile.CallUnary(ctx, req)
+}
+
+// GetFileContent calls testdata.TestService.GetFileContent.
+func (c *testServiceClient) GetFileContent(ctx context.Context, req *connect.Request[testdata.GetFileContentRequest]) (*connect.Response[testdata.GetFileContentResponse], error) {
+	return c.getFileContent.CallUnary(ctx, req)
+}
+
 // TestServiceHandler is an implementation of the testdata.TestService service.
 type TestServiceHandler interface {
 	// CreateItem creates a new item
@@ -147,6 +180,10 @@ type TestServiceHandler interface {
 	ProcessWellKnownTypes(context.Context, *connect.Request[testdata.ProcessWellKnownTypesRequest]) (*connect.Response[testdata.ProcessWellKnownTypesResponse], error)
 	// Test protovalidate constraints
 	TestValidation(context.Context, *connect.Request[testdata.TestValidationRequest]) (*connect.Response[testdata.TestValidationResponse], error)
+	// Upload a file using the well-known FileInput type
+	UploadFile(context.Context, *connect.Request[testdata.UploadFileRequest]) (*connect.Response[testdata.UploadFileResponse], error)
+	// Get file content using the well-known FileOutput type
+	GetFileContent(context.Context, *connect.Request[testdata.GetFileContentRequest]) (*connect.Response[testdata.GetFileContentResponse], error)
 }
 
 // NewTestServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -180,6 +217,18 @@ func NewTestServiceHandler(svc TestServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(testServiceMethods.ByName("TestValidation")),
 		connect.WithHandlerOptions(opts...),
 	)
+	testServiceUploadFileHandler := connect.NewUnaryHandler(
+		TestServiceUploadFileProcedure,
+		svc.UploadFile,
+		connect.WithSchema(testServiceMethods.ByName("UploadFile")),
+		connect.WithHandlerOptions(opts...),
+	)
+	testServiceGetFileContentHandler := connect.NewUnaryHandler(
+		TestServiceGetFileContentProcedure,
+		svc.GetFileContent,
+		connect.WithSchema(testServiceMethods.ByName("GetFileContent")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/testdata.TestService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case TestServiceCreateItemProcedure:
@@ -190,6 +239,10 @@ func NewTestServiceHandler(svc TestServiceHandler, opts ...connect.HandlerOption
 			testServiceProcessWellKnownTypesHandler.ServeHTTP(w, r)
 		case TestServiceTestValidationProcedure:
 			testServiceTestValidationHandler.ServeHTTP(w, r)
+		case TestServiceUploadFileProcedure:
+			testServiceUploadFileHandler.ServeHTTP(w, r)
+		case TestServiceGetFileContentProcedure:
+			testServiceGetFileContentHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -213,4 +266,12 @@ func (UnimplementedTestServiceHandler) ProcessWellKnownTypes(context.Context, *c
 
 func (UnimplementedTestServiceHandler) TestValidation(context.Context, *connect.Request[testdata.TestValidationRequest]) (*connect.Response[testdata.TestValidationResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("testdata.TestService.TestValidation is not implemented"))
+}
+
+func (UnimplementedTestServiceHandler) UploadFile(context.Context, *connect.Request[testdata.UploadFileRequest]) (*connect.Response[testdata.UploadFileResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("testdata.TestService.UploadFile is not implemented"))
+}
+
+func (UnimplementedTestServiceHandler) GetFileContent(context.Context, *connect.Request[testdata.GetFileContentRequest]) (*connect.Response[testdata.GetFileContentResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("testdata.TestService.GetFileContent is not implemented"))
 }

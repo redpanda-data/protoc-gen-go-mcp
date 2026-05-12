@@ -22,6 +22,7 @@ package testdata
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	v1 "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/mcp/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -759,11 +760,220 @@ func (x *TestValidationResponse) GetMessage() string {
 	return ""
 }
 
+// Messages using the well-known FileInput/FileOutput types.
+type UploadFileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SiteId        string                 `protobuf:"bytes,1,opt,name=site_id,json=siteId,proto3" json:"site_id,omitempty"`
+	FolderId      string                 `protobuf:"bytes,2,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	File          *v1.FileInput          `protobuf:"bytes,3,opt,name=file,proto3" json:"file,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UploadFileRequest) Reset() {
+	*x = UploadFileRequest{}
+	mi := &file_testdata_test_service_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UploadFileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UploadFileRequest) ProtoMessage() {}
+
+func (x *UploadFileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_testdata_test_service_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UploadFileRequest.ProtoReflect.Descriptor instead.
+func (*UploadFileRequest) Descriptor() ([]byte, []int) {
+	return file_testdata_test_service_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *UploadFileRequest) GetSiteId() string {
+	if x != nil {
+		return x.SiteId
+	}
+	return ""
+}
+
+func (x *UploadFileRequest) GetFolderId() string {
+	if x != nil {
+		return x.FolderId
+	}
+	return ""
+}
+
+func (x *UploadFileRequest) GetFile() *v1.FileInput {
+	if x != nil {
+		return x.File
+	}
+	return nil
+}
+
+type UploadFileResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	SizeBytes     int64                  `protobuf:"varint,3,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UploadFileResponse) Reset() {
+	*x = UploadFileResponse{}
+	mi := &file_testdata_test_service_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UploadFileResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UploadFileResponse) ProtoMessage() {}
+
+func (x *UploadFileResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_testdata_test_service_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UploadFileResponse.ProtoReflect.Descriptor instead.
+func (*UploadFileResponse) Descriptor() ([]byte, []int) {
+	return file_testdata_test_service_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *UploadFileResponse) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UploadFileResponse) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UploadFileResponse) GetSizeBytes() int64 {
+	if x != nil {
+		return x.SizeBytes
+	}
+	return 0
+}
+
+type GetFileContentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FileId        string                 `protobuf:"bytes,1,opt,name=file_id,json=fileId,proto3" json:"file_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetFileContentRequest) Reset() {
+	*x = GetFileContentRequest{}
+	mi := &file_testdata_test_service_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetFileContentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetFileContentRequest) ProtoMessage() {}
+
+func (x *GetFileContentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_testdata_test_service_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetFileContentRequest.ProtoReflect.Descriptor instead.
+func (*GetFileContentRequest) Descriptor() ([]byte, []int) {
+	return file_testdata_test_service_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *GetFileContentRequest) GetFileId() string {
+	if x != nil {
+		return x.FileId
+	}
+	return ""
+}
+
+type GetFileContentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	File          *v1.FileOutput         `protobuf:"bytes,1,opt,name=file,proto3" json:"file,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetFileContentResponse) Reset() {
+	*x = GetFileContentResponse{}
+	mi := &file_testdata_test_service_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetFileContentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetFileContentResponse) ProtoMessage() {}
+
+func (x *GetFileContentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_testdata_test_service_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetFileContentResponse.ProtoReflect.Descriptor instead.
+func (*GetFileContentResponse) Descriptor() ([]byte, []int) {
+	return file_testdata_test_service_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *GetFileContentResponse) GetFile() *v1.FileOutput {
+	if x != nil {
+		return x.File
+	}
+	return nil
+}
+
 var File_testdata_test_service_proto protoreflect.FileDescriptor
 
 const file_testdata_test_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1btestdata/test_service.proto\x12\btestdata\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x19google/protobuf/any.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bbuf/validate/validate.proto\"\x8a\x03\n" +
+	"\x1btestdata/test_service.proto\x12\btestdata\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x19google/protobuf/any.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bbuf/validate/validate.proto\x1a\x11mcp/v1/file.proto\"\x8a\x03\n" +
 	"\x11CreateItemRequest\x12\x17\n" +
 	"\x04name\x18\x01 \x01(\tB\x03\xe0A\x02R\x04name\x12%\n" +
 	"\vdescription\x18\x02 \x01(\tH\x01R\vdescription\x88\x01\x01\x12?\n" +
@@ -821,13 +1031,29 @@ const file_testdata_test_service_proto_rawDesc = "" +
 	"\ttimestamp\x18\x06 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\ttimestamp\"L\n" +
 	"\x16TestValidationResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage2\xd5\x02\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"z\n" +
+	"\x11UploadFileRequest\x12\x1c\n" +
+	"\asite_id\x18\x01 \x01(\tB\x03\xe0A\x02R\x06siteId\x12\x1b\n" +
+	"\tfolder_id\x18\x02 \x01(\tR\bfolderId\x12*\n" +
+	"\x04file\x18\x03 \x01(\v2\x11.mcp.v1.FileInputB\x03\xe0A\x02R\x04file\"W\n" +
+	"\x12UploadFileResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
+	"\n" +
+	"size_bytes\x18\x03 \x01(\x03R\tsizeBytes\"5\n" +
+	"\x15GetFileContentRequest\x12\x1c\n" +
+	"\afile_id\x18\x01 \x01(\tB\x03\xe0A\x02R\x06fileId\"@\n" +
+	"\x16GetFileContentResponse\x12&\n" +
+	"\x04file\x18\x01 \x01(\v2\x12.mcp.v1.FileOutputR\x04file2\xf3\x03\n" +
 	"\vTestService\x12G\n" +
 	"\n" +
 	"CreateItem\x12\x1b.testdata.CreateItemRequest\x1a\x1c.testdata.CreateItemResponse\x12>\n" +
 	"\aGetItem\x12\x18.testdata.GetItemRequest\x1a\x19.testdata.GetItemResponse\x12h\n" +
 	"\x15ProcessWellKnownTypes\x12&.testdata.ProcessWellKnownTypesRequest\x1a'.testdata.ProcessWellKnownTypesResponse\x12S\n" +
-	"\x0eTestValidation\x12\x1f.testdata.TestValidationRequest\x1a .testdata.TestValidationResponseB\xa9\x01\n" +
+	"\x0eTestValidation\x12\x1f.testdata.TestValidationRequest\x1a .testdata.TestValidationResponse\x12G\n" +
+	"\n" +
+	"UploadFile\x12\x1b.testdata.UploadFileRequest\x1a\x1c.testdata.UploadFileResponse\x12S\n" +
+	"\x0eGetFileContent\x12\x1f.testdata.GetFileContentRequest\x1a .testdata.GetFileContentResponseB\xa9\x01\n" +
 	"\fcom.testdataB\x10TestServiceProtoP\x01ZGgithub.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata\xa2\x02\x03TXX\xaa\x02\bTestdata\xca\x02\bTestdata\xe2\x02\x14Testdata\\GPBMetadata\xea\x02\bTestdatab\x06proto3"
 
 var (
@@ -842,7 +1068,7 @@ func file_testdata_test_service_proto_rawDescGZIP() []byte {
 	return file_testdata_test_service_proto_rawDescData
 }
 
-var file_testdata_test_service_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_testdata_test_service_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_testdata_test_service_proto_goTypes = []any{
 	(*CreateItemRequest)(nil),             // 0: testdata.CreateItemRequest
 	(*ProductDetails)(nil),                // 1: testdata.ProductDetails
@@ -855,39 +1081,51 @@ var file_testdata_test_service_proto_goTypes = []any{
 	(*ProcessWellKnownTypesResponse)(nil), // 8: testdata.ProcessWellKnownTypesResponse
 	(*TestValidationRequest)(nil),         // 9: testdata.TestValidationRequest
 	(*TestValidationResponse)(nil),        // 10: testdata.TestValidationResponse
-	nil,                                   // 11: testdata.CreateItemRequest.LabelsEntry
-	nil,                                   // 12: testdata.Item.LabelsEntry
-	(*timestamppb.Timestamp)(nil),         // 13: google.protobuf.Timestamp
-	(*structpb.Struct)(nil),               // 14: google.protobuf.Struct
-	(*structpb.Value)(nil),                // 15: google.protobuf.Value
-	(*anypb.Any)(nil),                     // 16: google.protobuf.Any
+	(*UploadFileRequest)(nil),             // 11: testdata.UploadFileRequest
+	(*UploadFileResponse)(nil),            // 12: testdata.UploadFileResponse
+	(*GetFileContentRequest)(nil),         // 13: testdata.GetFileContentRequest
+	(*GetFileContentResponse)(nil),        // 14: testdata.GetFileContentResponse
+	nil,                                   // 15: testdata.CreateItemRequest.LabelsEntry
+	nil,                                   // 16: testdata.Item.LabelsEntry
+	(*timestamppb.Timestamp)(nil),         // 17: google.protobuf.Timestamp
+	(*structpb.Struct)(nil),               // 18: google.protobuf.Struct
+	(*structpb.Value)(nil),                // 19: google.protobuf.Value
+	(*anypb.Any)(nil),                     // 20: google.protobuf.Any
+	(*v1.FileInput)(nil),                  // 21: mcp.v1.FileInput
+	(*v1.FileOutput)(nil),                 // 22: mcp.v1.FileOutput
 }
 var file_testdata_test_service_proto_depIdxs = []int32{
-	11, // 0: testdata.CreateItemRequest.labels:type_name -> testdata.CreateItemRequest.LabelsEntry
+	15, // 0: testdata.CreateItemRequest.labels:type_name -> testdata.CreateItemRequest.LabelsEntry
 	1,  // 1: testdata.CreateItemRequest.product:type_name -> testdata.ProductDetails
 	2,  // 2: testdata.CreateItemRequest.service:type_name -> testdata.ServiceDetails
-	13, // 3: testdata.CreateItemResponse.created_at:type_name -> google.protobuf.Timestamp
+	17, // 3: testdata.CreateItemResponse.created_at:type_name -> google.protobuf.Timestamp
 	6,  // 4: testdata.GetItemResponse.item:type_name -> testdata.Item
-	12, // 5: testdata.Item.labels:type_name -> testdata.Item.LabelsEntry
-	13, // 6: testdata.Item.created_at:type_name -> google.protobuf.Timestamp
-	13, // 7: testdata.Item.updated_at:type_name -> google.protobuf.Timestamp
-	14, // 8: testdata.ProcessWellKnownTypesRequest.metadata:type_name -> google.protobuf.Struct
-	15, // 9: testdata.ProcessWellKnownTypesRequest.config:type_name -> google.protobuf.Value
-	16, // 10: testdata.ProcessWellKnownTypesRequest.payload:type_name -> google.protobuf.Any
-	13, // 11: testdata.ProcessWellKnownTypesRequest.timestamp:type_name -> google.protobuf.Timestamp
-	0,  // 12: testdata.TestService.CreateItem:input_type -> testdata.CreateItemRequest
-	4,  // 13: testdata.TestService.GetItem:input_type -> testdata.GetItemRequest
-	7,  // 14: testdata.TestService.ProcessWellKnownTypes:input_type -> testdata.ProcessWellKnownTypesRequest
-	9,  // 15: testdata.TestService.TestValidation:input_type -> testdata.TestValidationRequest
-	3,  // 16: testdata.TestService.CreateItem:output_type -> testdata.CreateItemResponse
-	5,  // 17: testdata.TestService.GetItem:output_type -> testdata.GetItemResponse
-	8,  // 18: testdata.TestService.ProcessWellKnownTypes:output_type -> testdata.ProcessWellKnownTypesResponse
-	10, // 19: testdata.TestService.TestValidation:output_type -> testdata.TestValidationResponse
-	16, // [16:20] is the sub-list for method output_type
-	12, // [12:16] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	16, // 5: testdata.Item.labels:type_name -> testdata.Item.LabelsEntry
+	17, // 6: testdata.Item.created_at:type_name -> google.protobuf.Timestamp
+	17, // 7: testdata.Item.updated_at:type_name -> google.protobuf.Timestamp
+	18, // 8: testdata.ProcessWellKnownTypesRequest.metadata:type_name -> google.protobuf.Struct
+	19, // 9: testdata.ProcessWellKnownTypesRequest.config:type_name -> google.protobuf.Value
+	20, // 10: testdata.ProcessWellKnownTypesRequest.payload:type_name -> google.protobuf.Any
+	17, // 11: testdata.ProcessWellKnownTypesRequest.timestamp:type_name -> google.protobuf.Timestamp
+	21, // 12: testdata.UploadFileRequest.file:type_name -> mcp.v1.FileInput
+	22, // 13: testdata.GetFileContentResponse.file:type_name -> mcp.v1.FileOutput
+	0,  // 14: testdata.TestService.CreateItem:input_type -> testdata.CreateItemRequest
+	4,  // 15: testdata.TestService.GetItem:input_type -> testdata.GetItemRequest
+	7,  // 16: testdata.TestService.ProcessWellKnownTypes:input_type -> testdata.ProcessWellKnownTypesRequest
+	9,  // 17: testdata.TestService.TestValidation:input_type -> testdata.TestValidationRequest
+	11, // 18: testdata.TestService.UploadFile:input_type -> testdata.UploadFileRequest
+	13, // 19: testdata.TestService.GetFileContent:input_type -> testdata.GetFileContentRequest
+	3,  // 20: testdata.TestService.CreateItem:output_type -> testdata.CreateItemResponse
+	5,  // 21: testdata.TestService.GetItem:output_type -> testdata.GetItemResponse
+	8,  // 22: testdata.TestService.ProcessWellKnownTypes:output_type -> testdata.ProcessWellKnownTypesResponse
+	10, // 23: testdata.TestService.TestValidation:output_type -> testdata.TestValidationResponse
+	12, // 24: testdata.TestService.UploadFile:output_type -> testdata.UploadFileResponse
+	14, // 25: testdata.TestService.GetFileContent:output_type -> testdata.GetFileContentResponse
+	20, // [20:26] is the sub-list for method output_type
+	14, // [14:20] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_testdata_test_service_proto_init() }
@@ -905,7 +1143,7 @@ func file_testdata_test_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_testdata_test_service_proto_rawDesc), len(file_testdata_test_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

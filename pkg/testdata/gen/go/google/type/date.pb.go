@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,14 +40,17 @@ const (
 // date is relative to the Gregorian Calendar. This can represent one of the
 // following:
 //
-// * A full date, with non-zero year, month, and day values
-// * A month and day value, with a zero year, such as an anniversary
-// * A year on its own, with zero month and day values
-// * A year and month value, with a zero day, such as a credit card expiration
-// date
+//   - A full date, with non-zero year, month, and day values.
+//   - A month and day, with a zero year (for example, an anniversary).
+//   - A year on its own, with a zero month and a zero day.
+//   - A year and month, with a zero day (for example, a credit card expiration
+//     date).
 //
-// Related types are [google.type.TimeOfDay][google.type.TimeOfDay] and
-// `google.protobuf.Timestamp`.
+// Related types:
+//
+// * [google.type.TimeOfDay][google.type.TimeOfDay]
+// * [google.type.DateTime][google.type.DateTime]
+// * [google.protobuf.Timestamp][google.protobuf.Timestamp]
 type Date struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Year of the date. Must be from 1 to 9999, or 0 to specify a date without
@@ -123,8 +126,8 @@ const file_google_type_date_proto_rawDesc = "" +
 	"\x04Date\x12\x12\n" +
 	"\x04year\x18\x01 \x01(\x05R\x04year\x12\x14\n" +
 	"\x05month\x18\x02 \x01(\x05R\x05month\x12\x10\n" +
-	"\x03day\x18\x03 \x01(\x05R\x03dayB\xa2\x01\n" +
-	"\x0fcom.google.typeB\tDateProtoP\x01Z4google.golang.org/genproto/googleapis/type/date;date\xf8\x01\x01\xa2\x02\x03GTX\xaa\x02\vGoogle.Type\xca\x02\vGoogle\\Type\xe2\x02\x17Google\\Type\\GPBMetadata\xea\x02\fGoogle::Typeb\x06proto3"
+	"\x03day\x18\x03 \x01(\x05R\x03dayB\x9f\x01\n" +
+	"\x0fcom.google.typeB\tDateProtoP\x01Z4google.golang.org/genproto/googleapis/type/date;date\xa2\x02\x03GTX\xaa\x02\vGoogle.Type\xca\x02\vGoogle\\Type\xe2\x02\x17Google\\Type\\GPBMetadata\xea\x02\fGoogle::Typeb\x06proto3"
 
 var (
 	file_google_type_date_proto_rawDescOnce sync.Once

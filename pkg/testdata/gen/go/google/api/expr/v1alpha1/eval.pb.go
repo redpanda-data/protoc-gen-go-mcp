@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ const (
 
 // The state of an evaluation.
 //
-// Can represent an inital, partial, or completed state of evaluation.
+// Can represent an initial, partial, or completed state of evaluation.
 type EvalState struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The unique values referenced in this message.
@@ -185,14 +185,14 @@ type ExprValue_Value struct {
 }
 
 type ExprValue_Error struct {
-	// The set of errors in the critical path of evalution.
+	// The set of errors in the critical path of evaluation.
 	//
 	// Only errors in the critical path are included. For example,
 	// `(<error1> || true) && <error2>` will only result in `<error2>`,
 	// while `<error1> || <error2>` will result in both `<error1>` and
 	// `<error2>`.
 	//
-	// Errors cause by the presence of other errors are not included in the
+	// Errors caused by the presence of other errors are not included in the
 	// set. For example `<error1>.foo`, `foo(<error1>)`, and `<error1> + 1` will
 	// only result in `<error1>`.
 	//
@@ -219,13 +219,13 @@ type ExprValue_Unknown struct {
 	//	foo(<unknown[1]>) -> <unknown[1]>
 	//	<unknown[1]> + <unknown[2]> -> <unknown[1]> or <unknown[2[>
 	//
-	// Unknown takes precidence over Error in cases where a `Value` can short
+	// Unknown takes precedence over Error in cases where a `Value` can short
 	// circuit the result:
 	//
 	//	<error> || <unknown> -> <unknown>
 	//	<error> && <unknown> -> <unknown>
 	//
-	// Errors take precidence in all other cases:
+	// Errors take precedence in all other cases:
 	//
 	//	<unknown> + <error> -> <error>
 	//	foo(<unknown>, <error>) -> <error>
@@ -334,10 +334,10 @@ func (x *UnknownSet) GetExprs() []int64 {
 	return nil
 }
 
-// A single evalution result.
+// A single evaluation result.
 type EvalState_Result struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The id of the expression this result if for.
+	// The id of the expression this result is for.
 	Expr int64 `protobuf:"varint,1,opt,name=expr,proto3" json:"expr,omitempty"`
 	// The index in `values` of the resulting value.
 	Value         int64 `protobuf:"varint,2,opt,name=value,proto3" json:"value,omitempty"`
@@ -409,8 +409,8 @@ const file_google_api_expr_v1alpha1_eval_proto_rawDesc = "" +
 	"\x06errors\x18\x01 \x03(\v2\x12.google.rpc.StatusR\x06errors\"\"\n" +
 	"\n" +
 	"UnknownSet\x12\x14\n" +
-	"\x05exprs\x18\x01 \x03(\x03R\x05exprsB\xed\x01\n" +
-	"\x1ccom.google.api.expr.v1alpha1B\tEvalProtoP\x01Z<google.golang.org/genproto/googleapis/api/expr/v1alpha1;expr\xf8\x01\x01\xa2\x02\x03GAE\xaa\x02\x18Google.Api.Expr.V1alpha1\xca\x02\x18Google\\Api\\Expr\\V1alpha1\xe2\x02$Google\\Api\\Expr\\V1alpha1\\GPBMetadata\xea\x02\x1bGoogle::Api::Expr::V1alpha1b\x06proto3"
+	"\x05exprs\x18\x01 \x03(\x03R\x05exprsB\xea\x01\n" +
+	"\x1ccom.google.api.expr.v1alpha1B\tEvalProtoP\x01Z<google.golang.org/genproto/googleapis/api/expr/v1alpha1;expr\xa2\x02\x03GAE\xaa\x02\x18Google.Api.Expr.V1alpha1\xca\x02\x18Google\\Api\\Expr\\V1alpha1\xe2\x02$Google\\Api\\Expr\\V1alpha1\\GPBMetadata\xea\x02\x1bGoogle::Api::Expr::V1alpha1b\x06proto3"
 
 var (
 	file_google_api_expr_v1alpha1_eval_proto_rawDescOnce sync.Once

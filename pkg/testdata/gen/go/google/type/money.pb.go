@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -113,9 +113,9 @@ const file_google_type_money_proto_rawDesc = "" +
 	"\x05Money\x12#\n" +
 	"\rcurrency_code\x18\x01 \x01(\tR\fcurrencyCode\x12\x14\n" +
 	"\x05units\x18\x02 \x01(\x03R\x05units\x12\x14\n" +
-	"\x05nanos\x18\x03 \x01(\x05R\x05nanosB\xa5\x01\n" +
+	"\x05nanos\x18\x03 \x01(\x05R\x05nanosB\xa2\x01\n" +
 	"\x0fcom.google.typeB\n" +
-	"MoneyProtoP\x01Z6google.golang.org/genproto/googleapis/type/money;money\xf8\x01\x01\xa2\x02\x03GTX\xaa\x02\vGoogle.Type\xca\x02\vGoogle\\Type\xe2\x02\x17Google\\Type\\GPBMetadata\xea\x02\fGoogle::Typeb\x06proto3"
+	"MoneyProtoP\x01Z6google.golang.org/genproto/googleapis/type/money;money\xa2\x02\x03GTX\xaa\x02\vGoogle.Type\xca\x02\vGoogle\\Type\xe2\x02\x17Google\\Type\\GPBMetadata\xea\x02\fGoogle::Typeb\x06proto3"
 
 var (
 	file_google_type_money_proto_rawDescOnce sync.Once

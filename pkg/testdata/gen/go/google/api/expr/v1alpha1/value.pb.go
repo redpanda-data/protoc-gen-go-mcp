@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -409,7 +409,7 @@ type MapValue struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The set of map entries.
 	//
-	// CEL has fewer restrictions on keys, so a protobuf map represenation
+	// CEL has fewer restrictions on keys, so a protobuf map representation
 	// cannot be used.
 	Entries       []*MapValue_Entry `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -547,9 +547,9 @@ const file_google_api_expr_v1alpha1_value_proto_rawDesc = "" +
 	"\aentries\x18\x01 \x03(\v2(.google.api.expr.v1alpha1.MapValue.EntryR\aentries\x1aq\n" +
 	"\x05Entry\x121\n" +
 	"\x03key\x18\x01 \x01(\v2\x1f.google.api.expr.v1alpha1.ValueR\x03key\x125\n" +
-	"\x05value\x18\x02 \x01(\v2\x1f.google.api.expr.v1alpha1.ValueR\x05valueB\xee\x01\n" +
+	"\x05value\x18\x02 \x01(\v2\x1f.google.api.expr.v1alpha1.ValueR\x05valueB\xeb\x01\n" +
 	"\x1ccom.google.api.expr.v1alpha1B\n" +
-	"ValueProtoP\x01Z<google.golang.org/genproto/googleapis/api/expr/v1alpha1;expr\xf8\x01\x01\xa2\x02\x03GAE\xaa\x02\x18Google.Api.Expr.V1alpha1\xca\x02\x18Google\\Api\\Expr\\V1alpha1\xe2\x02$Google\\Api\\Expr\\V1alpha1\\GPBMetadata\xea\x02\x1bGoogle::Api::Expr::V1alpha1b\x06proto3"
+	"ValueProtoP\x01Z<google.golang.org/genproto/googleapis/api/expr/v1alpha1;expr\xa2\x02\x03GAE\xaa\x02\x18Google.Api.Expr.V1alpha1\xca\x02\x18Google\\Api\\Expr\\V1alpha1\xe2\x02$Google\\Api\\Expr\\V1alpha1\\GPBMetadata\xea\x02\x1bGoogle::Api::Expr::V1alpha1b\x06proto3"
 
 var (
 	file_google_api_expr_v1alpha1_value_proto_rawDescOnce sync.Once

@@ -21,6 +21,7 @@ import "google/protobuf/struct.proto";
 import "google/protobuf/any.proto";
 import "google/api/field_behavior.proto";
 import "buf/validate/validate.proto";
+import "mcp/v1/file.proto";
 
 // TestService provides test operations
 service TestService {
@@ -35,6 +36,12 @@ service TestService {
   
   // Test protovalidate constraints
   rpc TestValidation(TestValidationRequest) returns (TestValidationResponse);
+
+  // Upload a file using the well-known FileInput type
+  rpc UploadFile(UploadFileRequest) returns (UploadFileResponse);
+
+  // Get file content using the well-known FileOutput type
+  rpc GetFileContent(GetFileContentRequest) returns (GetFileContentResponse);
 }
 
 message CreateItemRequest {
@@ -138,4 +145,25 @@ message TestValidationRequest {
 message TestValidationResponse {
   bool success = 1;
   string message = 2;
+}
+
+// Messages using the well-known FileInput/FileOutput types.
+message UploadFileRequest {
+  string site_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string folder_id = 2;
+  mcp.v1.FileInput file = 3 [(google.api.field_behavior) = REQUIRED];
+}
+
+message UploadFileResponse {
+  string id = 1;
+  string name = 2;
+  int64 size_bytes = 3;
+}
+
+message GetFileContentRequest {
+  string file_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message GetFileContentResponse {
+  mcp.v1.FileOutput file = 1;
 }

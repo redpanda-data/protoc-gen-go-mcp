@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -52,13 +52,13 @@ const (
 //
 // For instance, in Java this would be:
 //
-//	  com.google.type.PhoneNumber wireProto =
-//	      com.google.type.PhoneNumber.newBuilder().build();
-//	  com.google.i18n.phonenumbers.Phonenumber.PhoneNumber phoneNumber =
-//	      PhoneNumberUtil.getInstance().parse(wireProto.getE164Number(), "ZZ");
-//	  if (!wireProto.getExtension().isEmpty()) {
-//	    phoneNumber.setExtension(wireProto.getExtension());
-//	  }
+//	   com.google.type.PhoneNumber wireProto =
+//	       com.google.type.PhoneNumber.newBuilder().build();
+//	   com.google.i18n.phonenumbers.Phonenumber.PhoneNumber phoneNumber =
+//	       PhoneNumberUtil.getInstance().parse(wireProto.getE164Number(), "ZZ");
+//	   if (!wireProto.getExtension().isEmpty()) {
+//	     phoneNumber.setExtension(wireProto.getExtension());
+//	   }
 //
 //	Reference(s):
 //	 - https://github.com/google/libphonenumber
@@ -157,17 +157,22 @@ type PhoneNumber_E164Number struct {
 	// The phone number, represented as a leading plus sign ('+'), followed by a
 	// phone number that uses a relaxed ITU E.164 format consisting of the
 	// country calling code (1 to 3 digits) and the subscriber number, with no
-	// additional spaces or formatting, e.g.:
+	// additional spaces or formatting. For example:
+	//
 	//   - correct: "+15552220123"
-	//   - incorrect: "+1 (555) 222-01234 x123".
+	//
+	//   - incorrect: "+1 (555) 222-01234 x123"
 	//
 	// The ITU E.164 format limits the latter to 12 digits, but in practice not
 	// all countries respect that, so we relax that restriction here.
 	// National-only numbers are not allowed.
 	//
 	// References:
+	//
 	//   - https://www.itu.int/rec/T-REC-E.164-201011-I
+	//
 	//   - https://en.wikipedia.org/wiki/E.164.
+	//
 	//   - https://en.wikipedia.org/wiki/List_of_country_calling_codes
 	E164Number string `protobuf:"bytes,1,opt,name=e164_number,json=e164Number,proto3,oneof"`
 }
@@ -176,7 +181,7 @@ type PhoneNumber_ShortCode_ struct {
 	// A short code.
 	//
 	// Reference(s):
-	//   - https://en.wikipedia.org/wiki/Short_code
+	//   - https://wikipedia.org/wiki/Short_code
 	ShortCode *PhoneNumber_ShortCode `protobuf:"bytes,2,opt,name=short_code,json=shortCode,proto3,oneof"`
 }
 
@@ -187,12 +192,13 @@ func (*PhoneNumber_ShortCode_) isPhoneNumber_Kind() {}
 // An object representing a short code, which is a phone number that is
 // typically much shorter than regular phone numbers and can be used to
 // address messages in MMS and SMS systems, as well as for abbreviated dialing
-// (e.g. "Text 611 to see how many minutes you have remaining on your plan.").
+// (For example "Text 611 to see how many minutes you have remaining on your
+// plan.").
 //
 // Short codes are restricted to a region and are not internationally
 // dialable, which means the same short code can exist in different regions,
 // with different usage and pricing, even if those regions share the same
-// country calling code (e.g. US and CA).
+// country calling code (For example: US and CA).
 type PhoneNumber_ShortCode struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. The BCP-47 region code of the location where calls to this
@@ -202,7 +208,7 @@ type PhoneNumber_ShortCode struct {
 	//   - http://www.unicode.org/reports/tr35/#unicode_region_subtag
 	RegionCode string `protobuf:"bytes,1,opt,name=region_code,json=regionCode,proto3" json:"region_code,omitempty"`
 	// Required. The short code digits, without a leading plus ('+') or country
-	// calling code, e.g. "611".
+	// calling code. For example "611".
 	Number        string `protobuf:"bytes,2,opt,name=number,proto3" json:"number,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -267,8 +273,8 @@ const file_google_type_phone_number_proto_rawDesc = "" +
 	"\vregion_code\x18\x01 \x01(\tR\n" +
 	"regionCode\x12\x16\n" +
 	"\x06number\x18\x02 \x01(\tR\x06numberB\x06\n" +
-	"\x04kindB\xb9\x01\n" +
-	"\x0fcom.google.typeB\x10PhoneNumberProtoP\x01ZDgoogle.golang.org/genproto/googleapis/type/phone_number;phone_number\xf8\x01\x01\xa2\x02\x03GTX\xaa\x02\vGoogle.Type\xca\x02\vGoogle\\Type\xe2\x02\x17Google\\Type\\GPBMetadata\xea\x02\fGoogle::Typeb\x06proto3"
+	"\x04kindB\xb6\x01\n" +
+	"\x0fcom.google.typeB\x10PhoneNumberProtoP\x01ZDgoogle.golang.org/genproto/googleapis/type/phone_number;phone_number\xa2\x02\x03GTX\xaa\x02\vGoogle.Type\xca\x02\vGoogle\\Type\xe2\x02\x17Google\\Type\\GPBMetadata\xea\x02\fGoogle::Typeb\x06proto3"
 
 var (
 	file_google_type_phone_number_proto_rawDescOnce sync.Once

@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -167,6 +167,63 @@ func (ClientLibraryDestination) EnumDescriptor() ([]byte, []int) {
 	return file_google_api_client_proto_rawDescGZIP(), []int{1}
 }
 
+// The behavior to take when the flow control limit is exceeded.
+type FlowControlLimitExceededBehaviorProto int32
+
+const (
+	// Default behavior, system-defined.
+	FlowControlLimitExceededBehaviorProto_UNSET_BEHAVIOR FlowControlLimitExceededBehaviorProto = 0
+	// Stop operation, raise error.
+	FlowControlLimitExceededBehaviorProto_THROW_EXCEPTION FlowControlLimitExceededBehaviorProto = 1
+	// Pause operation until limit clears.
+	FlowControlLimitExceededBehaviorProto_BLOCK FlowControlLimitExceededBehaviorProto = 2
+	// Continue operation, disregard limit.
+	FlowControlLimitExceededBehaviorProto_IGNORE FlowControlLimitExceededBehaviorProto = 3
+)
+
+// Enum value maps for FlowControlLimitExceededBehaviorProto.
+var (
+	FlowControlLimitExceededBehaviorProto_name = map[int32]string{
+		0: "UNSET_BEHAVIOR",
+		1: "THROW_EXCEPTION",
+		2: "BLOCK",
+		3: "IGNORE",
+	}
+	FlowControlLimitExceededBehaviorProto_value = map[string]int32{
+		"UNSET_BEHAVIOR":  0,
+		"THROW_EXCEPTION": 1,
+		"BLOCK":           2,
+		"IGNORE":          3,
+	}
+)
+
+func (x FlowControlLimitExceededBehaviorProto) Enum() *FlowControlLimitExceededBehaviorProto {
+	p := new(FlowControlLimitExceededBehaviorProto)
+	*p = x
+	return p
+}
+
+func (x FlowControlLimitExceededBehaviorProto) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (FlowControlLimitExceededBehaviorProto) Descriptor() protoreflect.EnumDescriptor {
+	return file_google_api_client_proto_enumTypes[2].Descriptor()
+}
+
+func (FlowControlLimitExceededBehaviorProto) Type() protoreflect.EnumType {
+	return &file_google_api_client_proto_enumTypes[2]
+}
+
+func (x FlowControlLimitExceededBehaviorProto) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use FlowControlLimitExceededBehaviorProto.Descriptor instead.
+func (FlowControlLimitExceededBehaviorProto) EnumDescriptor() ([]byte, []int) {
+	return file_google_api_client_proto_rawDescGZIP(), []int{2}
+}
+
 // Required information for every language.
 type CommonLanguageSettings struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -178,6 +235,8 @@ type CommonLanguageSettings struct {
 	// The destination where API teams want this client library to be published.
 	Destinations []ClientLibraryDestination `protobuf:"varint,2,rep,packed,name=destinations,proto3,enum=google.api.ClientLibraryDestination" json:"destinations,omitempty"`
 	// Configuration for which RPCs should be generated in the GAPIC client.
+	//
+	// Note: This field should not be used in most cases.
 	SelectiveGapicGeneration *SelectiveGapicGeneration `protobuf:"bytes,3,opt,name=selective_gapic_generation,json=selectiveGapicGeneration,proto3" json:"selective_gapic_generation,omitempty"`
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
@@ -535,8 +594,9 @@ type JavaSettings struct {
 	// Example of a YAML configuration::
 	//
 	//	publishing:
-	//	  java_settings:
-	//	    library_package: com.google.cloud.pubsub.v1
+	//	  library_settings:
+	//	    java_settings:
+	//	      library_package: com.google.cloud.pubsub.v1
 	LibraryPackage string `protobuf:"bytes,1,opt,name=library_package,json=libraryPackage,proto3" json:"library_package,omitempty"`
 	// Configure the Java class name to use instead of the service's for its
 	// corresponding generated GAPIC client. Keys are fully-qualified
@@ -660,9 +720,22 @@ func (x *CppSettings) GetCommon() *CommonLanguageSettings {
 type PhpSettings struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Some settings.
-	Common        *CommonLanguageSettings `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Common *CommonLanguageSettings `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
+	// The package name to use in Php. Clobbers the php_namespace option
+	// set in the protobuf. This should be used **only** by APIs
+	// who have already set the language_settings.php.package_name" field
+	// in gapic.yaml. API teams should use the protobuf php_namespace option
+	// where possible.
+	//
+	// Example of a YAML configuration::
+	//
+	//	publishing:
+	//	  library_settings:
+	//	    php_settings:
+	//	      library_package: Google\Cloud\PubSub\V1
+	LibraryPackage string `protobuf:"bytes,2,opt,name=library_package,json=libraryPackage,proto3" json:"library_package,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *PhpSettings) Reset() {
@@ -700,6 +773,13 @@ func (x *PhpSettings) GetCommon() *CommonLanguageSettings {
 		return x.Common
 	}
 	return nil
+}
+
+func (x *PhpSettings) GetLibraryPackage() string {
+	if x != nil {
+		return x.LibraryPackage
+	}
+	return ""
 }
 
 // Settings for Python client libraries.
@@ -964,11 +1044,12 @@ type GoSettings struct {
 	// service names and values are the name to be used for the service client
 	// and call options.
 	//
-	// publishing:
+	// Example:
 	//
-	//	go_settings:
-	//	  renamed_services:
-	//	    Publisher: TopicAdmin
+	//	publishing:
+	//	  go_settings:
+	//	    renamed_services:
+	//	      Publisher: TopicAdmin
 	RenamedServices map[string]string `protobuf:"bytes,2,rep,name=renamed_services,json=renamedServices,proto3" json:"renamed_services,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
@@ -1058,8 +1139,20 @@ type MethodSettings struct {
 	//	    auto_populated_fields:
 	//	    - request_id
 	AutoPopulatedFields []string `protobuf:"bytes,3,rep,name=auto_populated_fields,json=autoPopulatedFields,proto3" json:"auto_populated_fields,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	// Batching configuration for an API method in client libraries.
+	//
+	// Example of a YAML configuration:
+	//
+	//	publishing:
+	//	  method_settings:
+	//	  - selector: google.example.v1.ExampleService.BatchCreateExample
+	//	    batching:
+	//	      element_count_threshold: 1000
+	//	      request_byte_threshold: 100000000
+	//	      delay_threshold_millis: 10
+	Batching      *BatchingConfigProto `protobuf:"bytes,4,opt,name=batching,proto3" json:"batching,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *MethodSettings) Reset() {
@@ -1113,8 +1206,17 @@ func (x *MethodSettings) GetAutoPopulatedFields() []string {
 	return nil
 }
 
+func (x *MethodSettings) GetBatching() *BatchingConfigProto {
+	if x != nil {
+		return x.Batching
+	}
+	return nil
+}
+
 // This message is used to configure the generation of a subset of the RPCs in
 // a service for client libraries.
+//
+// Note: This feature should not be used in most cases.
 type SelectiveGapicGeneration struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// An allowlist of the fully qualified names of RPCs that should be included
@@ -1175,6 +1277,248 @@ func (x *SelectiveGapicGeneration) GetGenerateOmittedAsInternal() bool {
 	return false
 }
 
+// `BatchingConfigProto` defines the batching configuration for an API method.
+type BatchingConfigProto struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The thresholds which trigger a batched request to be sent.
+	Thresholds *BatchingSettingsProto `protobuf:"bytes,1,opt,name=thresholds,proto3" json:"thresholds,omitempty"`
+	// The request and response fields used in batching.
+	BatchDescriptor *BatchingDescriptorProto `protobuf:"bytes,2,opt,name=batch_descriptor,json=batchDescriptor,proto3" json:"batch_descriptor,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *BatchingConfigProto) Reset() {
+	*x = BatchingConfigProto{}
+	mi := &file_google_api_client_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BatchingConfigProto) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BatchingConfigProto) ProtoMessage() {}
+
+func (x *BatchingConfigProto) ProtoReflect() protoreflect.Message {
+	mi := &file_google_api_client_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BatchingConfigProto.ProtoReflect.Descriptor instead.
+func (*BatchingConfigProto) Descriptor() ([]byte, []int) {
+	return file_google_api_client_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *BatchingConfigProto) GetThresholds() *BatchingSettingsProto {
+	if x != nil {
+		return x.Thresholds
+	}
+	return nil
+}
+
+func (x *BatchingConfigProto) GetBatchDescriptor() *BatchingDescriptorProto {
+	if x != nil {
+		return x.BatchDescriptor
+	}
+	return nil
+}
+
+// `BatchingSettingsProto` specifies a set of batching thresholds, each of
+// which acts as a trigger to send a batch of messages as a request. At least
+// one threshold must be positive nonzero.
+type BatchingSettingsProto struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The number of elements of a field collected into a batch which, if
+	// exceeded, causes the batch to be sent.
+	ElementCountThreshold int32 `protobuf:"varint,1,opt,name=element_count_threshold,json=elementCountThreshold,proto3" json:"element_count_threshold,omitempty"`
+	// The aggregated size of the batched field which, if exceeded, causes the
+	// batch to be sent. This size is computed by aggregating the sizes of the
+	// request field to be batched, not of the entire request message.
+	RequestByteThreshold int64 `protobuf:"varint,2,opt,name=request_byte_threshold,json=requestByteThreshold,proto3" json:"request_byte_threshold,omitempty"`
+	// The duration after which a batch should be sent, starting from the addition
+	// of the first message to that batch.
+	DelayThreshold *durationpb.Duration `protobuf:"bytes,3,opt,name=delay_threshold,json=delayThreshold,proto3" json:"delay_threshold,omitempty"`
+	// The maximum number of elements collected in a batch that could be accepted
+	// by server.
+	ElementCountLimit int32 `protobuf:"varint,4,opt,name=element_count_limit,json=elementCountLimit,proto3" json:"element_count_limit,omitempty"`
+	// The maximum size of the request that could be accepted by server.
+	RequestByteLimit int32 `protobuf:"varint,5,opt,name=request_byte_limit,json=requestByteLimit,proto3" json:"request_byte_limit,omitempty"`
+	// The maximum number of elements allowed by flow control.
+	FlowControlElementLimit int32 `protobuf:"varint,6,opt,name=flow_control_element_limit,json=flowControlElementLimit,proto3" json:"flow_control_element_limit,omitempty"`
+	// The maximum size of data allowed by flow control.
+	FlowControlByteLimit int32 `protobuf:"varint,7,opt,name=flow_control_byte_limit,json=flowControlByteLimit,proto3" json:"flow_control_byte_limit,omitempty"`
+	// The behavior to take when the flow control limit is exceeded.
+	FlowControlLimitExceededBehavior FlowControlLimitExceededBehaviorProto `protobuf:"varint,8,opt,name=flow_control_limit_exceeded_behavior,json=flowControlLimitExceededBehavior,proto3,enum=google.api.FlowControlLimitExceededBehaviorProto" json:"flow_control_limit_exceeded_behavior,omitempty"`
+	unknownFields                    protoimpl.UnknownFields
+	sizeCache                        protoimpl.SizeCache
+}
+
+func (x *BatchingSettingsProto) Reset() {
+	*x = BatchingSettingsProto{}
+	mi := &file_google_api_client_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BatchingSettingsProto) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BatchingSettingsProto) ProtoMessage() {}
+
+func (x *BatchingSettingsProto) ProtoReflect() protoreflect.Message {
+	mi := &file_google_api_client_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BatchingSettingsProto.ProtoReflect.Descriptor instead.
+func (*BatchingSettingsProto) Descriptor() ([]byte, []int) {
+	return file_google_api_client_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *BatchingSettingsProto) GetElementCountThreshold() int32 {
+	if x != nil {
+		return x.ElementCountThreshold
+	}
+	return 0
+}
+
+func (x *BatchingSettingsProto) GetRequestByteThreshold() int64 {
+	if x != nil {
+		return x.RequestByteThreshold
+	}
+	return 0
+}
+
+func (x *BatchingSettingsProto) GetDelayThreshold() *durationpb.Duration {
+	if x != nil {
+		return x.DelayThreshold
+	}
+	return nil
+}
+
+func (x *BatchingSettingsProto) GetElementCountLimit() int32 {
+	if x != nil {
+		return x.ElementCountLimit
+	}
+	return 0
+}
+
+func (x *BatchingSettingsProto) GetRequestByteLimit() int32 {
+	if x != nil {
+		return x.RequestByteLimit
+	}
+	return 0
+}
+
+func (x *BatchingSettingsProto) GetFlowControlElementLimit() int32 {
+	if x != nil {
+		return x.FlowControlElementLimit
+	}
+	return 0
+}
+
+func (x *BatchingSettingsProto) GetFlowControlByteLimit() int32 {
+	if x != nil {
+		return x.FlowControlByteLimit
+	}
+	return 0
+}
+
+func (x *BatchingSettingsProto) GetFlowControlLimitExceededBehavior() FlowControlLimitExceededBehaviorProto {
+	if x != nil {
+		return x.FlowControlLimitExceededBehavior
+	}
+	return FlowControlLimitExceededBehaviorProto_UNSET_BEHAVIOR
+}
+
+// `BatchingDescriptorProto` specifies the fields of the request message to be
+// used for batching, and, optionally, the fields of the response message to be
+// used for demultiplexing.
+type BatchingDescriptorProto struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The repeated field in the request message to be aggregated by batching.
+	BatchedField string `protobuf:"bytes,1,opt,name=batched_field,json=batchedField,proto3" json:"batched_field,omitempty"`
+	// A list of the fields in the request message. Two requests will be batched
+	// together only if the values of every field specified in
+	// `request_discriminator_fields` is equal between the two requests.
+	DiscriminatorFields []string `protobuf:"bytes,2,rep,name=discriminator_fields,json=discriminatorFields,proto3" json:"discriminator_fields,omitempty"`
+	// Optional. When present, indicates the field in the response message to be
+	// used to demultiplex the response into multiple response messages, in
+	// correspondence with the multiple request messages originally batched
+	// together.
+	SubresponseField string `protobuf:"bytes,3,opt,name=subresponse_field,json=subresponseField,proto3" json:"subresponse_field,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *BatchingDescriptorProto) Reset() {
+	*x = BatchingDescriptorProto{}
+	mi := &file_google_api_client_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BatchingDescriptorProto) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BatchingDescriptorProto) ProtoMessage() {}
+
+func (x *BatchingDescriptorProto) ProtoReflect() protoreflect.Message {
+	mi := &file_google_api_client_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BatchingDescriptorProto.ProtoReflect.Descriptor instead.
+func (*BatchingDescriptorProto) Descriptor() ([]byte, []int) {
+	return file_google_api_client_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *BatchingDescriptorProto) GetBatchedField() string {
+	if x != nil {
+		return x.BatchedField
+	}
+	return ""
+}
+
+func (x *BatchingDescriptorProto) GetDiscriminatorFields() []string {
+	if x != nil {
+		return x.DiscriminatorFields
+	}
+	return nil
+}
+
+func (x *BatchingDescriptorProto) GetSubresponseField() string {
+	if x != nil {
+		return x.SubresponseField
+	}
+	return ""
+}
+
 // Experimental features to be included during client library generation.
 // These fields will be deprecated once the feature graduates and is enabled
 // by default.
@@ -1201,7 +1545,7 @@ type PythonSettings_ExperimentalFeatures struct {
 
 func (x *PythonSettings_ExperimentalFeatures) Reset() {
 	*x = PythonSettings_ExperimentalFeatures{}
-	mi := &file_google_api_client_proto_msgTypes[14]
+	mi := &file_google_api_client_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1213,7 +1557,7 @@ func (x *PythonSettings_ExperimentalFeatures) String() string {
 func (*PythonSettings_ExperimentalFeatures) ProtoMessage() {}
 
 func (x *PythonSettings_ExperimentalFeatures) ProtoReflect() protoreflect.Message {
-	mi := &file_google_api_client_proto_msgTypes[14]
+	mi := &file_google_api_client_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1276,7 +1620,7 @@ type MethodSettings_LongRunning struct {
 
 func (x *MethodSettings_LongRunning) Reset() {
 	*x = MethodSettings_LongRunning{}
-	mi := &file_google_api_client_proto_msgTypes[18]
+	mi := &file_google_api_client_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1288,7 +1632,7 @@ func (x *MethodSettings_LongRunning) String() string {
 func (*MethodSettings_LongRunning) ProtoMessage() {}
 
 func (x *MethodSettings_LongRunning) ProtoReflect() protoreflect.Message {
-	mi := &file_google_api_client_proto_msgTypes[18]
+	mi := &file_google_api_client_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1509,9 +1853,10 @@ const file_google_api_client_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"I\n" +
 	"\vCppSettings\x12:\n" +
-	"\x06common\x18\x01 \x01(\v2\".google.api.CommonLanguageSettingsR\x06common\"I\n" +
+	"\x06common\x18\x01 \x01(\v2\".google.api.CommonLanguageSettingsR\x06common\"r\n" +
 	"\vPhpSettings\x12:\n" +
-	"\x06common\x18\x01 \x01(\v2\".google.api.CommonLanguageSettingsR\x06common\"\x87\x03\n" +
+	"\x06common\x18\x01 \x01(\v2\".google.api.CommonLanguageSettingsR\x06common\x12'\n" +
+	"\x0flibrary_package\x18\x02 \x01(\tR\x0elibraryPackage\"\x87\x03\n" +
 	"\x0ePythonSettings\x12:\n" +
 	"\x06common\x18\x01 \x01(\v2\".google.api.CommonLanguageSettingsR\x06common\x12d\n" +
 	"\x15experimental_features\x18\x02 \x01(\v2/.google.api.PythonSettings.ExperimentalFeaturesR\x14experimentalFeatures\x1a\xd2\x01\n" +
@@ -1542,11 +1887,12 @@ const file_google_api_client_proto_rawDesc = "" +
 	"\x10renamed_services\x18\x02 \x03(\v2+.google.api.GoSettings.RenamedServicesEntryR\x0frenamedServices\x1aB\n" +
 	"\x14RenamedServicesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xc2\x03\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xff\x03\n" +
 	"\x0eMethodSettings\x12\x1a\n" +
 	"\bselector\x18\x01 \x01(\tR\bselector\x12I\n" +
 	"\flong_running\x18\x02 \x01(\v2&.google.api.MethodSettings.LongRunningR\vlongRunning\x122\n" +
-	"\x15auto_populated_fields\x18\x03 \x03(\tR\x13autoPopulatedFields\x1a\x94\x02\n" +
+	"\x15auto_populated_fields\x18\x03 \x03(\tR\x13autoPopulatedFields\x12;\n" +
+	"\bbatching\x18\x04 \x01(\v2\x1f.google.api.BatchingConfigProtoR\bbatching\x1a\x94\x02\n" +
 	"\vLongRunning\x12G\n" +
 	"\x12initial_poll_delay\x18\x01 \x01(\v2\x19.google.protobuf.DurationR\x10initialPollDelay\x122\n" +
 	"\x15poll_delay_multiplier\x18\x02 \x01(\x02R\x13pollDelayMultiplier\x12?\n" +
@@ -1554,7 +1900,25 @@ const file_google_api_client_proto_rawDesc = "" +
 	"\x12total_poll_timeout\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\x10totalPollTimeout\"u\n" +
 	"\x18SelectiveGapicGeneration\x12\x18\n" +
 	"\amethods\x18\x01 \x03(\tR\amethods\x12?\n" +
-	"\x1cgenerate_omitted_as_internal\x18\x02 \x01(\bR\x19generateOmittedAsInternal*\xa3\x01\n" +
+	"\x1cgenerate_omitted_as_internal\x18\x02 \x01(\bR\x19generateOmittedAsInternal\"\xa8\x01\n" +
+	"\x13BatchingConfigProto\x12A\n" +
+	"\n" +
+	"thresholds\x18\x01 \x01(\v2!.google.api.BatchingSettingsProtoR\n" +
+	"thresholds\x12N\n" +
+	"\x10batch_descriptor\x18\x02 \x01(\v2#.google.api.BatchingDescriptorProtoR\x0fbatchDescriptor\"\x9f\x04\n" +
+	"\x15BatchingSettingsProto\x126\n" +
+	"\x17element_count_threshold\x18\x01 \x01(\x05R\x15elementCountThreshold\x124\n" +
+	"\x16request_byte_threshold\x18\x02 \x01(\x03R\x14requestByteThreshold\x12B\n" +
+	"\x0fdelay_threshold\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\x0edelayThreshold\x12.\n" +
+	"\x13element_count_limit\x18\x04 \x01(\x05R\x11elementCountLimit\x12,\n" +
+	"\x12request_byte_limit\x18\x05 \x01(\x05R\x10requestByteLimit\x12;\n" +
+	"\x1aflow_control_element_limit\x18\x06 \x01(\x05R\x17flowControlElementLimit\x125\n" +
+	"\x17flow_control_byte_limit\x18\a \x01(\x05R\x14flowControlByteLimit\x12\x81\x01\n" +
+	"$flow_control_limit_exceeded_behavior\x18\b \x01(\x0e21.google.api.FlowControlLimitExceededBehaviorProtoR flowControlLimitExceededBehavior\"\x9e\x01\n" +
+	"\x17BatchingDescriptorProto\x12#\n" +
+	"\rbatched_field\x18\x01 \x01(\tR\fbatchedField\x121\n" +
+	"\x14discriminator_fields\x18\x02 \x03(\tR\x13discriminatorFields\x12+\n" +
+	"\x11subresponse_field\x18\x03 \x01(\tR\x10subresponseField*\xa3\x01\n" +
 	"\x19ClientLibraryOrganization\x12+\n" +
 	"'CLIENT_LIBRARY_ORGANIZATION_UNSPECIFIED\x10\x00\x12\t\n" +
 	"\x05CLOUD\x10\x01\x12\a\n" +
@@ -1570,7 +1934,13 @@ const file_google_api_client_proto_rawDesc = "" +
 	"\n" +
 	"\x06GITHUB\x10\n" +
 	"\x12\x13\n" +
-	"\x0fPACKAGE_MANAGER\x10\x14:J\n" +
+	"\x0fPACKAGE_MANAGER\x10\x14*g\n" +
+	"%FlowControlLimitExceededBehaviorProto\x12\x12\n" +
+	"\x0eUNSET_BEHAVIOR\x10\x00\x12\x13\n" +
+	"\x0fTHROW_EXCEPTION\x10\x01\x12\t\n" +
+	"\x05BLOCK\x10\x02\x12\n" +
+	"\n" +
+	"\x06IGNORE\x10\x03:J\n" +
 	"\x10method_signature\x12\x1e.google.protobuf.MethodOptions\x18\x9b\b \x03(\tR\x0fmethodSignature:C\n" +
 	"\fdefault_host\x12\x1f.google.protobuf.ServiceOptions\x18\x99\b \x01(\tR\vdefaultHost:C\n" +
 	"\foauth_scopes\x12\x1f.google.protobuf.ServiceOptions\x18\x9a\b \x01(\tR\voauthScopes:D\n" +
@@ -1592,76 +1962,85 @@ func file_google_api_client_proto_rawDescGZIP() []byte {
 	return file_google_api_client_proto_rawDescData
 }
 
-var file_google_api_client_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_google_api_client_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_google_api_client_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_google_api_client_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
 var file_google_api_client_proto_goTypes = []any{
 	(ClientLibraryOrganization)(0),              // 0: google.api.ClientLibraryOrganization
 	(ClientLibraryDestination)(0),               // 1: google.api.ClientLibraryDestination
-	(*CommonLanguageSettings)(nil),              // 2: google.api.CommonLanguageSettings
-	(*ClientLibrarySettings)(nil),               // 3: google.api.ClientLibrarySettings
-	(*Publishing)(nil),                          // 4: google.api.Publishing
-	(*JavaSettings)(nil),                        // 5: google.api.JavaSettings
-	(*CppSettings)(nil),                         // 6: google.api.CppSettings
-	(*PhpSettings)(nil),                         // 7: google.api.PhpSettings
-	(*PythonSettings)(nil),                      // 8: google.api.PythonSettings
-	(*NodeSettings)(nil),                        // 9: google.api.NodeSettings
-	(*DotnetSettings)(nil),                      // 10: google.api.DotnetSettings
-	(*RubySettings)(nil),                        // 11: google.api.RubySettings
-	(*GoSettings)(nil),                          // 12: google.api.GoSettings
-	(*MethodSettings)(nil),                      // 13: google.api.MethodSettings
-	(*SelectiveGapicGeneration)(nil),            // 14: google.api.SelectiveGapicGeneration
-	nil,                                         // 15: google.api.JavaSettings.ServiceClassNamesEntry
-	(*PythonSettings_ExperimentalFeatures)(nil), // 16: google.api.PythonSettings.ExperimentalFeatures
-	nil,                                 // 17: google.api.DotnetSettings.RenamedServicesEntry
-	nil,                                 // 18: google.api.DotnetSettings.RenamedResourcesEntry
-	nil,                                 // 19: google.api.GoSettings.RenamedServicesEntry
-	(*MethodSettings_LongRunning)(nil),  // 20: google.api.MethodSettings.LongRunning
-	(api.LaunchStage)(0),                // 21: google.api.LaunchStage
-	(*durationpb.Duration)(nil),         // 22: google.protobuf.Duration
-	(*descriptorpb.MethodOptions)(nil),  // 23: google.protobuf.MethodOptions
-	(*descriptorpb.ServiceOptions)(nil), // 24: google.protobuf.ServiceOptions
+	(FlowControlLimitExceededBehaviorProto)(0),  // 2: google.api.FlowControlLimitExceededBehaviorProto
+	(*CommonLanguageSettings)(nil),              // 3: google.api.CommonLanguageSettings
+	(*ClientLibrarySettings)(nil),               // 4: google.api.ClientLibrarySettings
+	(*Publishing)(nil),                          // 5: google.api.Publishing
+	(*JavaSettings)(nil),                        // 6: google.api.JavaSettings
+	(*CppSettings)(nil),                         // 7: google.api.CppSettings
+	(*PhpSettings)(nil),                         // 8: google.api.PhpSettings
+	(*PythonSettings)(nil),                      // 9: google.api.PythonSettings
+	(*NodeSettings)(nil),                        // 10: google.api.NodeSettings
+	(*DotnetSettings)(nil),                      // 11: google.api.DotnetSettings
+	(*RubySettings)(nil),                        // 12: google.api.RubySettings
+	(*GoSettings)(nil),                          // 13: google.api.GoSettings
+	(*MethodSettings)(nil),                      // 14: google.api.MethodSettings
+	(*SelectiveGapicGeneration)(nil),            // 15: google.api.SelectiveGapicGeneration
+	(*BatchingConfigProto)(nil),                 // 16: google.api.BatchingConfigProto
+	(*BatchingSettingsProto)(nil),               // 17: google.api.BatchingSettingsProto
+	(*BatchingDescriptorProto)(nil),             // 18: google.api.BatchingDescriptorProto
+	nil,                                         // 19: google.api.JavaSettings.ServiceClassNamesEntry
+	(*PythonSettings_ExperimentalFeatures)(nil), // 20: google.api.PythonSettings.ExperimentalFeatures
+	nil,                                 // 21: google.api.DotnetSettings.RenamedServicesEntry
+	nil,                                 // 22: google.api.DotnetSettings.RenamedResourcesEntry
+	nil,                                 // 23: google.api.GoSettings.RenamedServicesEntry
+	(*MethodSettings_LongRunning)(nil),  // 24: google.api.MethodSettings.LongRunning
+	(api.LaunchStage)(0),                // 25: google.api.LaunchStage
+	(*durationpb.Duration)(nil),         // 26: google.protobuf.Duration
+	(*descriptorpb.MethodOptions)(nil),  // 27: google.protobuf.MethodOptions
+	(*descriptorpb.ServiceOptions)(nil), // 28: google.protobuf.ServiceOptions
 }
 var file_google_api_client_proto_depIdxs = []int32{
 	1,  // 0: google.api.CommonLanguageSettings.destinations:type_name -> google.api.ClientLibraryDestination
-	14, // 1: google.api.CommonLanguageSettings.selective_gapic_generation:type_name -> google.api.SelectiveGapicGeneration
-	21, // 2: google.api.ClientLibrarySettings.launch_stage:type_name -> google.api.LaunchStage
-	5,  // 3: google.api.ClientLibrarySettings.java_settings:type_name -> google.api.JavaSettings
-	6,  // 4: google.api.ClientLibrarySettings.cpp_settings:type_name -> google.api.CppSettings
-	7,  // 5: google.api.ClientLibrarySettings.php_settings:type_name -> google.api.PhpSettings
-	8,  // 6: google.api.ClientLibrarySettings.python_settings:type_name -> google.api.PythonSettings
-	9,  // 7: google.api.ClientLibrarySettings.node_settings:type_name -> google.api.NodeSettings
-	10, // 8: google.api.ClientLibrarySettings.dotnet_settings:type_name -> google.api.DotnetSettings
-	11, // 9: google.api.ClientLibrarySettings.ruby_settings:type_name -> google.api.RubySettings
-	12, // 10: google.api.ClientLibrarySettings.go_settings:type_name -> google.api.GoSettings
-	13, // 11: google.api.Publishing.method_settings:type_name -> google.api.MethodSettings
+	15, // 1: google.api.CommonLanguageSettings.selective_gapic_generation:type_name -> google.api.SelectiveGapicGeneration
+	25, // 2: google.api.ClientLibrarySettings.launch_stage:type_name -> google.api.LaunchStage
+	6,  // 3: google.api.ClientLibrarySettings.java_settings:type_name -> google.api.JavaSettings
+	7,  // 4: google.api.ClientLibrarySettings.cpp_settings:type_name -> google.api.CppSettings
+	8,  // 5: google.api.ClientLibrarySettings.php_settings:type_name -> google.api.PhpSettings
+	9,  // 6: google.api.ClientLibrarySettings.python_settings:type_name -> google.api.PythonSettings
+	10, // 7: google.api.ClientLibrarySettings.node_settings:type_name -> google.api.NodeSettings
+	11, // 8: google.api.ClientLibrarySettings.dotnet_settings:type_name -> google.api.DotnetSettings
+	12, // 9: google.api.ClientLibrarySettings.ruby_settings:type_name -> google.api.RubySettings
+	13, // 10: google.api.ClientLibrarySettings.go_settings:type_name -> google.api.GoSettings
+	14, // 11: google.api.Publishing.method_settings:type_name -> google.api.MethodSettings
 	0,  // 12: google.api.Publishing.organization:type_name -> google.api.ClientLibraryOrganization
-	3,  // 13: google.api.Publishing.library_settings:type_name -> google.api.ClientLibrarySettings
-	15, // 14: google.api.JavaSettings.service_class_names:type_name -> google.api.JavaSettings.ServiceClassNamesEntry
-	2,  // 15: google.api.JavaSettings.common:type_name -> google.api.CommonLanguageSettings
-	2,  // 16: google.api.CppSettings.common:type_name -> google.api.CommonLanguageSettings
-	2,  // 17: google.api.PhpSettings.common:type_name -> google.api.CommonLanguageSettings
-	2,  // 18: google.api.PythonSettings.common:type_name -> google.api.CommonLanguageSettings
-	16, // 19: google.api.PythonSettings.experimental_features:type_name -> google.api.PythonSettings.ExperimentalFeatures
-	2,  // 20: google.api.NodeSettings.common:type_name -> google.api.CommonLanguageSettings
-	2,  // 21: google.api.DotnetSettings.common:type_name -> google.api.CommonLanguageSettings
-	17, // 22: google.api.DotnetSettings.renamed_services:type_name -> google.api.DotnetSettings.RenamedServicesEntry
-	18, // 23: google.api.DotnetSettings.renamed_resources:type_name -> google.api.DotnetSettings.RenamedResourcesEntry
-	2,  // 24: google.api.RubySettings.common:type_name -> google.api.CommonLanguageSettings
-	2,  // 25: google.api.GoSettings.common:type_name -> google.api.CommonLanguageSettings
-	19, // 26: google.api.GoSettings.renamed_services:type_name -> google.api.GoSettings.RenamedServicesEntry
-	20, // 27: google.api.MethodSettings.long_running:type_name -> google.api.MethodSettings.LongRunning
-	22, // 28: google.api.MethodSettings.LongRunning.initial_poll_delay:type_name -> google.protobuf.Duration
-	22, // 29: google.api.MethodSettings.LongRunning.max_poll_delay:type_name -> google.protobuf.Duration
-	22, // 30: google.api.MethodSettings.LongRunning.total_poll_timeout:type_name -> google.protobuf.Duration
-	23, // 31: google.api.method_signature:extendee -> google.protobuf.MethodOptions
-	24, // 32: google.api.default_host:extendee -> google.protobuf.ServiceOptions
-	24, // 33: google.api.oauth_scopes:extendee -> google.protobuf.ServiceOptions
-	24, // 34: google.api.api_version:extendee -> google.protobuf.ServiceOptions
-	35, // [35:35] is the sub-list for method output_type
-	35, // [35:35] is the sub-list for method input_type
-	35, // [35:35] is the sub-list for extension type_name
-	31, // [31:35] is the sub-list for extension extendee
-	0,  // [0:31] is the sub-list for field type_name
+	4,  // 13: google.api.Publishing.library_settings:type_name -> google.api.ClientLibrarySettings
+	19, // 14: google.api.JavaSettings.service_class_names:type_name -> google.api.JavaSettings.ServiceClassNamesEntry
+	3,  // 15: google.api.JavaSettings.common:type_name -> google.api.CommonLanguageSettings
+	3,  // 16: google.api.CppSettings.common:type_name -> google.api.CommonLanguageSettings
+	3,  // 17: google.api.PhpSettings.common:type_name -> google.api.CommonLanguageSettings
+	3,  // 18: google.api.PythonSettings.common:type_name -> google.api.CommonLanguageSettings
+	20, // 19: google.api.PythonSettings.experimental_features:type_name -> google.api.PythonSettings.ExperimentalFeatures
+	3,  // 20: google.api.NodeSettings.common:type_name -> google.api.CommonLanguageSettings
+	3,  // 21: google.api.DotnetSettings.common:type_name -> google.api.CommonLanguageSettings
+	21, // 22: google.api.DotnetSettings.renamed_services:type_name -> google.api.DotnetSettings.RenamedServicesEntry
+	22, // 23: google.api.DotnetSettings.renamed_resources:type_name -> google.api.DotnetSettings.RenamedResourcesEntry
+	3,  // 24: google.api.RubySettings.common:type_name -> google.api.CommonLanguageSettings
+	3,  // 25: google.api.GoSettings.common:type_name -> google.api.CommonLanguageSettings
+	23, // 26: google.api.GoSettings.renamed_services:type_name -> google.api.GoSettings.RenamedServicesEntry
+	24, // 27: google.api.MethodSettings.long_running:type_name -> google.api.MethodSettings.LongRunning
+	16, // 28: google.api.MethodSettings.batching:type_name -> google.api.BatchingConfigProto
+	17, // 29: google.api.BatchingConfigProto.thresholds:type_name -> google.api.BatchingSettingsProto
+	18, // 30: google.api.BatchingConfigProto.batch_descriptor:type_name -> google.api.BatchingDescriptorProto
+	26, // 31: google.api.BatchingSettingsProto.delay_threshold:type_name -> google.protobuf.Duration
+	2,  // 32: google.api.BatchingSettingsProto.flow_control_limit_exceeded_behavior:type_name -> google.api.FlowControlLimitExceededBehaviorProto
+	26, // 33: google.api.MethodSettings.LongRunning.initial_poll_delay:type_name -> google.protobuf.Duration
+	26, // 34: google.api.MethodSettings.LongRunning.max_poll_delay:type_name -> google.protobuf.Duration
+	26, // 35: google.api.MethodSettings.LongRunning.total_poll_timeout:type_name -> google.protobuf.Duration
+	27, // 36: google.api.method_signature:extendee -> google.protobuf.MethodOptions
+	28, // 37: google.api.default_host:extendee -> google.protobuf.ServiceOptions
+	28, // 38: google.api.oauth_scopes:extendee -> google.protobuf.ServiceOptions
+	28, // 39: google.api.api_version:extendee -> google.protobuf.ServiceOptions
+	40, // [40:40] is the sub-list for method output_type
+	40, // [40:40] is the sub-list for method input_type
+	40, // [40:40] is the sub-list for extension type_name
+	36, // [36:40] is the sub-list for extension extendee
+	0,  // [0:36] is the sub-list for field type_name
 }
 
 func init() { file_google_api_client_proto_init() }
@@ -1674,8 +2053,8 @@ func file_google_api_client_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_google_api_client_proto_rawDesc), len(file_google_api_client_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   19,
+			NumEnums:      3,
+			NumMessages:   22,
 			NumExtensions: 4,
 			NumServices:   0,
 		},

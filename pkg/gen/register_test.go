@@ -305,8 +305,8 @@ func TestRegisterService_ToolList(t *testing.T) {
 	err = json.Unmarshal(resultBytes, &resp)
 	g.Expect(err).ToNot(HaveOccurred())
 
-	// TestService has 4 unary RPCs
-	g.Expect(resp.Result.Tools).To(HaveLen(4))
+	// TestService has 6 unary RPCs
+	g.Expect(resp.Result.Tools).To(HaveLen(6))
 
 	// Verify tool names
 	names := make([]string, 0, len(resp.Result.Tools))
@@ -318,6 +318,8 @@ func TestRegisterService_ToolList(t *testing.T) {
 		"testdata_TestService_GetItem",
 		"testdata_TestService_ProcessWellKnownTypes",
 		"testdata_TestService_TestValidation",
+		"testdata_TestService_UploadFile",
+		"testdata_TestService_GetFileContent",
 	))
 
 	// Verify descriptions

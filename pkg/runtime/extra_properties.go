@@ -18,6 +18,8 @@ type ExtraProperty struct {
 type config struct {
 	ExtraProperties []ExtraProperty
 	NamePrefix      string
+	FileMode        FileMode
+	FileModeSet     bool
 }
 
 // WithNamePrefix prepends prefix + "_" to every tool name at registration
@@ -41,13 +43,17 @@ func NewConfig() *config {
 	return &config{}
 }
 
-// ApplyConfig applies all config options (name prefix, extra properties) to a tool.
+// ApplyConfig applies all config options (name prefix, extra properties,
+// file mode) to a tool.
 func ApplyConfig(tool Tool, config *config) Tool {
 	if config.NamePrefix != "" {
 		tool.Name = config.NamePrefix + "_" + tool.Name
 	}
 	if len(config.ExtraProperties) > 0 {
 		tool = AddExtraPropertiesToTool(tool, config.ExtraProperties)
+	}
+	if config.FileModeSet {
+		tool = rewriteFileSchemas(tool, config.FileMode)
 	}
 	return tool
 }

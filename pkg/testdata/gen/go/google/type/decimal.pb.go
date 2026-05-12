@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,12 +36,10 @@ const (
 )
 
 // A representation of a decimal value, such as 2.5. Clients may convert values
-// into language-native decimal formats, such as Java's [BigDecimal][] or
-// Python's [decimal.Decimal][].
-//
-// [BigDecimal]:
-// https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/math/BigDecimal.html
-// [decimal.Decimal]: https://docs.python.org/3/library/decimal.html
+// into language-native decimal formats, such as Java's
+// [BigDecimal](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/math/BigDecimal.html)
+// or Python's
+// [decimal.Decimal](https://docs.python.org/3/library/decimal.html).
 type Decimal struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The decimal value, as a string.
@@ -49,7 +47,7 @@ type Decimal struct {
 	// The string representation consists of an optional sign, `+` (`U+002B`)
 	// or `-` (`U+002D`), followed by a sequence of zero or more decimal digits
 	// ("the integer"), optionally followed by a fraction, optionally followed
-	// by an exponent.
+	// by an exponent. An empty string **should** be interpreted as `0`.
 	//
 	// The fraction consists of a decimal point followed by zero or more decimal
 	// digits. The string must contain at least one digit in either the integer
@@ -63,12 +61,13 @@ type Decimal struct {
 	//
 	//   - Removing an explicitly-provided `+` sign (`+2.5` -> `2.5`).
 	//   - Replacing a zero-length integer value with `0` (`.5` -> `0.5`).
-	//   - Coercing the exponent character to lower-case (`2.5E8` -> `2.5e8`).
-	//   - Removing an explicitly-provided zero exponent (`2.5e0` -> `2.5`).
+	//   - Coercing the exponent character to upper-case, with explicit sign
+	//     (`2.5e8` -> `2.5E+8`).
+	//   - Removing an explicitly-provided zero exponent (`2.5E0` -> `2.5`).
 	//
 	// Services **may** perform additional normalization based on its own needs
 	// and the internal decimal implementation selected, such as shifting the
-	// decimal point and exponent value together (example: `2.5e-1` <-> `0.25`).
+	// decimal point and exponent value together (example: `2.5E-1` <-> `0.25`).
 	// Additionally, services **may** preserve trailing zeroes in the fraction
 	// to indicate increased precision, but are not required to do so.
 	//
@@ -80,7 +79,7 @@ type Decimal struct {
 	// The ENBF grammar is:
 	//
 	//	DecimalString =
-	//	  [Sign] Significand [Exponent];
+	//	  '' | [Sign] Significand [Exponent];
 	//
 	//	Sign = '+' | '-';
 	//
@@ -152,8 +151,8 @@ const file_google_type_decimal_proto_rawDesc = "" +
 	"\n" +
 	"\x19google/type/decimal.proto\x12\vgoogle.type\"\x1f\n" +
 	"\aDecimal\x12\x14\n" +
-	"\x05value\x18\x01 \x01(\tR\x05valueB\xab\x01\n" +
-	"\x0fcom.google.typeB\fDecimalProtoP\x01Z:google.golang.org/genproto/googleapis/type/decimal;decimal\xf8\x01\x01\xa2\x02\x03GTX\xaa\x02\vGoogle.Type\xca\x02\vGoogle\\Type\xe2\x02\x17Google\\Type\\GPBMetadata\xea\x02\fGoogle::Typeb\x06proto3"
+	"\x05value\x18\x01 \x01(\tR\x05valueB\xa8\x01\n" +
+	"\x0fcom.google.typeB\fDecimalProtoP\x01Z:google.golang.org/genproto/googleapis/type/decimal;decimal\xa2\x02\x03GTX\xaa\x02\vGoogle.Type\xca\x02\vGoogle\\Type\xe2\x02\x17Google\\Type\\GPBMetadata\xea\x02\fGoogle::Typeb\x06proto3"
 
 var (
 	file_google_type_decimal_proto_rawDescOnce sync.Once
