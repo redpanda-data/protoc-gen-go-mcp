@@ -36,6 +36,14 @@ func (s *fullTestServer) TestValidation(_ context.Context, _ *testdata.TestValid
 	return &testdata.TestValidationResponse{Success: true}, nil
 }
 
+func (s *fullTestServer) UploadFile(_ context.Context, _ *testdata.UploadFileRequest) (*testdata.UploadFileResponse, error) {
+	return &testdata.UploadFileResponse{Id: "file-1", Name: "uploaded.txt"}, nil
+}
+
+func (s *fullTestServer) GetFileContent(_ context.Context, _ *testdata.GetFileContentRequest) (*testdata.GetFileContentResponse, error) {
+	return &testdata.GetFileContentResponse{}, nil
+}
+
 // TestGeneratedHandlerE2E tests the full flow: register generated handler -> MCP call -> proto unmarshal -> handler call -> response
 func TestGeneratedHandlerE2E(t *testing.T) {
 	g := NewWithT(t)

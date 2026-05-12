@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// A quaternion, represented by four 64-bit floating point values.
+//
 // A quaternion is defined as the quotient of two directed lines in a
 // three-dimensional space or equivalently as the quotient of two Euclidean
 // vectors (https://en.wikipedia.org/wiki/Quaternion).
@@ -52,7 +54,7 @@ const (
 // where x, y, z, and w are real numbers, and i, j, and k are three imaginary
 // numbers.
 //
-// Our naming choice `(x, y, z, w)` comes from the desire to avoid confusion for
+// The naming choice `(x, y, z, w)` comes from the desire to avoid confusion for
 // those interested in the geometric properties of the quaternion in the 3D
 // Cartesian space. Other texts often use alternative names or subscripts, such
 // as `(a, b, c, d)`, `(1, i, j, k)`, or `(0, 1, 2, 3)`, which are perhaps
@@ -172,8 +174,8 @@ const file_google_type_quaternion_proto_rawDesc = "" +
 	"\x01x\x18\x01 \x01(\x01R\x01x\x12\f\n" +
 	"\x01y\x18\x02 \x01(\x01R\x01y\x12\f\n" +
 	"\x01z\x18\x03 \x01(\x01R\x01z\x12\f\n" +
-	"\x01w\x18\x04 \x01(\x01R\x01wB\xb4\x01\n" +
-	"\x0fcom.google.typeB\x0fQuaternionProtoP\x01Z@google.golang.org/genproto/googleapis/type/quaternion;quaternion\xf8\x01\x01\xa2\x02\x03GTX\xaa\x02\vGoogle.Type\xca\x02\vGoogle\\Type\xe2\x02\x17Google\\Type\\GPBMetadata\xea\x02\fGoogle::Typeb\x06proto3"
+	"\x01w\x18\x04 \x01(\x01R\x01wB\xb1\x01\n" +
+	"\x0fcom.google.typeB\x0fQuaternionProtoP\x01Z@google.golang.org/genproto/googleapis/type/quaternion;quaternion\xa2\x02\x03GTX\xaa\x02\vGoogle.Type\xca\x02\vGoogle\\Type\xe2\x02\x17Google\\Type\\GPBMetadata\xea\x02\fGoogle::Typeb\x06proto3"
 
 var (
 	file_google_type_quaternion_proto_rawDescOnce sync.Once

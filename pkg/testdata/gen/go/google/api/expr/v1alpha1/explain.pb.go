@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -167,8 +167,8 @@ const file_google_api_expr_v1alpha1_explain_proto_rawDesc = "" +
 	"\bExprStep\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vvalue_index\x18\x02 \x01(\x05R\n" +
-	"valueIndex:\x02\x18\x01B\xf0\x01\n" +
-	"\x1ccom.google.api.expr.v1alpha1B\fExplainProtoP\x01Z<google.golang.org/genproto/googleapis/api/expr/v1alpha1;expr\xf8\x01\x01\xa2\x02\x03GAE\xaa\x02\x18Google.Api.Expr.V1alpha1\xca\x02\x18Google\\Api\\Expr\\V1alpha1\xe2\x02$Google\\Api\\Expr\\V1alpha1\\GPBMetadata\xea\x02\x1bGoogle::Api::Expr::V1alpha1b\x06proto3"
+	"valueIndex:\x02\x18\x01B\xed\x01\n" +
+	"\x1ccom.google.api.expr.v1alpha1B\fExplainProtoP\x01Z<google.golang.org/genproto/googleapis/api/expr/v1alpha1;expr\xa2\x02\x03GAE\xaa\x02\x18Google.Api.Expr.V1alpha1\xca\x02\x18Google\\Api\\Expr\\V1alpha1\xe2\x02$Google\\Api\\Expr\\V1alpha1\\GPBMetadata\xea\x02\x1bGoogle::Api::Expr::V1alpha1b\x06proto3"
 
 var (
 	file_google_api_expr_v1alpha1_explain_proto_rawDescOnce sync.Once

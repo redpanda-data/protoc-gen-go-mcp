@@ -8,6 +8,7 @@ import (
 
 	. "github.com/onsi/gomega"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
+	mcpv1 "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/mcp/v1"
 	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -1054,6 +1055,140 @@ func TestSchemaRoundTripAllMessages(t *testing.T) {
 			})
 		})
 	}
+}
+
+func TestFileInputSchema_Standard(t *testing.T) {
+	g := NewWithT(t)
+	md := (&testdata.UploadFileRequest{}).ProtoReflect().Descriptor()
+	schema := MessageSchema(md, SchemaOptions{OpenAICompat: false})
+
+	props := schema["properties"].(map[string]any)
+	g.Expect(props).To(HaveKey("file"))
+
+	fileSchema := props["file"].(map[string]any)
+	g.Expect(fileSchema["type"]).To(Equal("object"))
+	g.Expect(fileSchema[FileSchemaMarkerKey]).To(Equal("input"))
+
+	fileProps := fileSchema["properties"].(map[string]any)
+	g.Expect(fileProps).To(HaveKey("content"))
+	g.Expect(fileProps).To(HaveKey("path"))
+	g.Expect(fileProps).To(HaveKey("s3"))
+	g.Expect(fileProps).To(HaveKey("filename"))
+	g.Expect(fileProps).To(HaveKey("mime_type"))
+
+	contentSchema := fileProps["content"].(map[string]any)
+	g.Expect(contentSchema["contentEncoding"]).To(Equal("base64"))
+
+	s3Schema := fileProps["s3"].(map[string]any)
+	g.Expect(s3Schema["type"]).To(Equal("object"))
+	s3Props := s3Schema["properties"].(map[string]any)
+	g.Expect(s3Props).To(HaveKey("presigned_url"))
+}
+
+func TestFileInputSchema_OpenAI(t *testing.T) {
+	g := NewWithT(t)
+	md := (&testdata.UploadFileRequest{}).ProtoReflect().Descriptor()
+	schema := MessageSchema(md, SchemaOptions{OpenAICompat: true})
+
+	props := schema["properties"].(map[string]any)
+	fileSchema := props["file"].(map[string]any)
+	g.Expect(fileSchema["additionalProperties"]).To(Equal(false))
+
+	fileProps := fileSchema["properties"].(map[string]any)
+	contentType := fileProps["content"].(map[string]any)["type"]
+	g.Expect(contentType).To(Equal([]string{"string", "null"}))
+
+	required := fileSchema["required"].([]string)
+	g.Expect(required).To(ContainElement("content"))
+	g.Expect(required).To(ContainElement("path"))
+	g.Expect(required).To(ContainElement("s3"))
+	g.Expect(required).To(ContainElement("filename"))
+	g.Expect(required).To(ContainElement("mime_type"))
+}
+
+func TestFileOutputSchema_Standard(t *testing.T) {
+	g := NewWithT(t)
+	md := (&testdata.GetFileContentResponse{}).ProtoReflect().Descriptor()
+	schema := MessageSchema(md, SchemaOptions{OpenAICompat: false})
+
+	props := schema["properties"].(map[string]any)
+	g.Expect(props).To(HaveKey("file"))
+
+	fileSchema := props["file"].(map[string]any)
+	g.Expect(fileSchema["type"]).To(Equal("object"))
+	g.Expect(fileSchema[FileSchemaMarkerKey]).To(Equal("output"))
+
+	fileProps := fileSchema["properties"].(map[string]any)
+	g.Expect(fileProps).To(HaveKey("content"))
+	g.Expect(fileProps).To(HaveKey("path"))
+	g.Expect(fileProps).To(HaveKey("s3"))
+	g.Expect(fileProps).To(HaveKey("filename"))
+	g.Expect(fileProps).To(HaveKey("mime_type"))
+	g.Expect(fileProps).To(HaveKey("size_bytes"))
+}
+
+func TestFileOutputSchema_OpenAI(t *testing.T) {
+	g := NewWithT(t)
+	md := (&testdata.GetFileContentResponse{}).ProtoReflect().Descriptor()
+	schema := MessageSchema(md, SchemaOptions{OpenAICompat: true})
+
+	props := schema["properties"].(map[string]any)
+	fileSchema := props["file"].(map[string]any)
+	g.Expect(fileSchema["additionalProperties"]).To(Equal(false))
+
+	fileProps := fileSchema["properties"].(map[string]any)
+	g.Expect(fileProps["path"].(map[string]any)["type"]).To(Equal([]string{"string", "null"}))
+	g.Expect(fileProps["size_bytes"].(map[string]any)["type"]).To(Equal([]string{"string", "null"}))
+	g.Expect(fileProps["s3"].(map[string]any)["type"]).To(Equal([]string{"object", "null"}))
+}
+
+func TestFileInput_FQN_Constants(t *testing.T) {
+	g := NewWithT(t)
+	fi := (&mcpv1.FileInput{}).ProtoReflect().Descriptor()
+	g.Expect(string(fi.FullName())).To(Equal(FileInputFQN))
+
+	fo := (&mcpv1.FileOutput{}).ProtoReflect().Descriptor()
+	g.Expect(string(fo.FullName())).To(Equal(FileOutputFQN))
+}
+
+func TestToolForMethod_FileInput(t *testing.T) {
+	g := NewWithT(t)
+
+	file := (&testdata.UploadFileRequest{}).ProtoReflect().Descriptor().ParentFile()
+	svc := file.Services().ByName("TestService")
+	g.Expect(svc).ToNot(BeNil())
+
+	method := svc.Methods().ByName("UploadFile")
+	g.Expect(method).ToNot(BeNil())
+
+	standard, openAI := ToolForMethod(method, "Upload a file")
+
+	var stdSchema map[string]any
+	g.Expect(json.Unmarshal(standard.RawInputSchema, &stdSchema)).To(Succeed())
+	fileField := stdSchema["properties"].(map[string]any)["file"].(map[string]any)
+	g.Expect(fileField).To(HaveKey(FileSchemaMarkerKey))
+	g.Expect(fileField[FileSchemaMarkerKey]).To(Equal("input"))
+
+	var oaiSchema map[string]any
+	g.Expect(json.Unmarshal(openAI.RawInputSchema, &oaiSchema)).To(Succeed())
+	oaiFile := oaiSchema["properties"].(map[string]any)["file"].(map[string]any)
+	g.Expect(oaiFile["additionalProperties"]).To(Equal(false))
+}
+
+func TestToolForMethod_FileOutput(t *testing.T) {
+	g := NewWithT(t)
+
+	file := (&testdata.GetFileContentRequest{}).ProtoReflect().Descriptor().ParentFile()
+	svc := file.Services().ByName("TestService")
+	method := svc.Methods().ByName("GetFileContent")
+
+	standard, _ := ToolForMethod(method, "Get file content")
+
+	var stdSchema map[string]any
+	g.Expect(json.Unmarshal(standard.RawOutputSchema, &stdSchema)).To(Succeed())
+	fileField := stdSchema["properties"].(map[string]any)["file"].(map[string]any)
+	g.Expect(fileField).To(HaveKey(FileSchemaMarkerKey))
+	g.Expect(fileField[FileSchemaMarkerKey]).To(Equal("output"))
 }
 
 // toOpenAIFormat converts a standard protojson document to OpenAI format.

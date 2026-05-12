@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -505,7 +505,12 @@ type AttributeContext_Request struct {
 	Reason string `protobuf:"bytes,12,opt,name=reason,proto3" json:"reason,omitempty"`
 	// The request authentication. May be absent for unauthenticated requests.
 	// Derived from the HTTP request `Authorization` header or equivalent.
-	Auth          *AttributeContext_Auth `protobuf:"bytes,13,opt,name=auth,proto3" json:"auth,omitempty"`
+	Auth *AttributeContext_Auth `protobuf:"bytes,13,opt,name=auth,proto3" json:"auth,omitempty"`
+	// The values from Origin header from the HTTP request, such as
+	// "https://console.cloud.google.com". Modern browsers can only have one
+	// origin. Special browsers and/or HTTP clients may require multiple
+	// origins.
+	Origin        string `protobuf:"bytes,14,opt,name=origin,proto3" json:"origin,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -622,6 +627,13 @@ func (x *AttributeContext_Request) GetAuth() *AttributeContext_Auth {
 		return x.Auth
 	}
 	return nil
+}
+
+func (x *AttributeContext_Request) GetOrigin() string {
+	if x != nil {
+		return x.Origin
+	}
+	return ""
 }
 
 // This message defines attributes for a typical network response. It
@@ -904,7 +916,7 @@ var File_google_rpc_context_attribute_context_proto protoreflect.FileDescriptor
 
 const file_google_rpc_context_attribute_context_proto_rawDesc = "" +
 	"\n" +
-	"*google/rpc/context/attribute_context.proto\x12\x12google.rpc.context\x1a\x19google/protobuf/any.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x81\x14\n" +
+	"*google/rpc/context/attribute_context.proto\x12\x12google.rpc.context\x1a\x19google/protobuf/any.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x99\x14\n" +
 	"\x10AttributeContext\x12A\n" +
 	"\x06origin\x18\a \x01(\v2).google.rpc.context.AttributeContext.PeerR\x06origin\x12A\n" +
 	"\x06source\x18\x01 \x01(\v2).google.rpc.context.AttributeContext.PeerR\x06source\x12K\n" +
@@ -936,7 +948,7 @@ const file_google_rpc_context_attribute_context_proto_rawDesc = "" +
 	"\taudiences\x18\x02 \x03(\tR\taudiences\x12\x1c\n" +
 	"\tpresenter\x18\x03 \x01(\tR\tpresenter\x12/\n" +
 	"\x06claims\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x06claims\x12#\n" +
-	"\raccess_levels\x18\x05 \x03(\tR\faccessLevels\x1a\xcf\x03\n" +
+	"\raccess_levels\x18\x05 \x03(\tR\faccessLevels\x1a\xe7\x03\n" +
 	"\aRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
 	"\x06method\x18\x02 \x01(\tR\x06method\x12S\n" +
@@ -950,7 +962,8 @@ const file_google_rpc_context_attribute_context_proto_rawDesc = "" +
 	" \x01(\x03R\x04size\x12\x1a\n" +
 	"\bprotocol\x18\v \x01(\tR\bprotocol\x12\x16\n" +
 	"\x06reason\x18\f \x01(\tR\x06reason\x12=\n" +
-	"\x04auth\x18\r \x01(\v2).google.rpc.context.AttributeContext.AuthR\x04auth\x1a:\n" +
+	"\x04auth\x18\r \x01(\v2).google.rpc.context.AttributeContext.AuthR\x04auth\x12\x16\n" +
+	"\x06origin\x18\x0e \x01(\tR\x06origin\x1a:\n" +
 	"\fHeadersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a\xb8\x02\n" +
@@ -985,8 +998,8 @@ const file_google_rpc_context_attribute_context_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a>\n" +
 	"\x10AnnotationsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\xf3\x01\n" +
-	"\x16com.google.rpc.contextB\x15AttributeContextProtoP\x01ZUgoogle.golang.org/genproto/googleapis/rpc/context/attribute_context;attribute_context\xf8\x01\x01\xa2\x02\x03GRC\xaa\x02\x12Google.Rpc.Context\xca\x02\x12Google\\Rpc\\Context\xe2\x02\x1eGoogle\\Rpc\\Context\\GPBMetadata\xea\x02\x14Google::Rpc::Contextb\x06proto3"
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\xf0\x01\n" +
+	"\x16com.google.rpc.contextB\x15AttributeContextProtoP\x01ZUgoogle.golang.org/genproto/googleapis/rpc/context/attribute_context;attribute_context\xa2\x02\x03GRC\xaa\x02\x12Google.Rpc.Context\xca\x02\x12Google\\Rpc\\Context\xe2\x02\x1eGoogle\\Rpc\\Context\\GPBMetadata\xea\x02\x14Google::Rpc::Contextb\x06proto3"
 
 var (
 	file_google_rpc_context_attribute_context_proto_rawDescOnce sync.Once

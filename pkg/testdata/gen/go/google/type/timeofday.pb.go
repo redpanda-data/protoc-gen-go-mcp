@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,15 +41,19 @@ const (
 // `google.protobuf.Timestamp`.
 type TimeOfDay struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Hours of day in 24 hour format. Should be from 0 to 23. An API may choose
-	// to allow the value "24:00:00" for scenarios like business closing time.
+	// Hours of a day in 24 hour format. Must be greater than or equal to 0 and
+	// typically must be less than or equal to 23. An API may choose to allow the
+	// value "24:00:00" for scenarios like business closing time.
 	Hours int32 `protobuf:"varint,1,opt,name=hours,proto3" json:"hours,omitempty"`
-	// Minutes of hour of day. Must be from 0 to 59.
+	// Minutes of an hour. Must be greater than or equal to 0 and less than or
+	// equal to 59.
 	Minutes int32 `protobuf:"varint,2,opt,name=minutes,proto3" json:"minutes,omitempty"`
-	// Seconds of minutes of the time. Must normally be from 0 to 59. An API may
-	// allow the value 60 if it allows leap-seconds.
+	// Seconds of a minute. Must be greater than or equal to 0 and typically must
+	// be less than or equal to 59. An API may allow the value 60 if it allows
+	// leap-seconds.
 	Seconds int32 `protobuf:"varint,3,opt,name=seconds,proto3" json:"seconds,omitempty"`
-	// Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+	// Fractions of seconds, in nanoseconds. Must be greater than or equal to 0
+	// and less than or equal to 999,999,999.
 	Nanos         int32 `protobuf:"varint,4,opt,name=nanos,proto3" json:"nanos,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -122,8 +126,8 @@ const file_google_type_timeofday_proto_rawDesc = "" +
 	"\x05hours\x18\x01 \x01(\x05R\x05hours\x12\x18\n" +
 	"\aminutes\x18\x02 \x01(\x05R\aminutes\x12\x18\n" +
 	"\aseconds\x18\x03 \x01(\x05R\aseconds\x12\x14\n" +
-	"\x05nanos\x18\x04 \x01(\x05R\x05nanosB\xb1\x01\n" +
-	"\x0fcom.google.typeB\x0eTimeofdayProtoP\x01Z>google.golang.org/genproto/googleapis/type/timeofday;timeofday\xf8\x01\x01\xa2\x02\x03GTX\xaa\x02\vGoogle.Type\xca\x02\vGoogle\\Type\xe2\x02\x17Google\\Type\\GPBMetadata\xea\x02\fGoogle::Typeb\x06proto3"
+	"\x05nanos\x18\x04 \x01(\x05R\x05nanosB\xae\x01\n" +
+	"\x0fcom.google.typeB\x0eTimeofdayProtoP\x01Z>google.golang.org/genproto/googleapis/type/timeofday;timeofday\xa2\x02\x03GTX\xaa\x02\vGoogle.Type\xca\x02\vGoogle\\Type\xe2\x02\x17Google\\Type\\GPBMetadata\xea\x02\fGoogle::Typeb\x06proto3"
 
 var (
 	file_google_type_timeofday_proto_rawDescOnce sync.Once

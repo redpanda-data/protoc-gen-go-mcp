@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,9 +37,9 @@ const (
 
 // An object that represents a latitude/longitude pair. This is expressed as a
 // pair of doubles to represent degrees latitude and degrees longitude. Unless
-// specified otherwise, this must conform to the
-// <a href="http://www.unoosa.org/pdf/icg/2012/template/WGS_84.pdf">WGS84
-// standard</a>. Values must be within normalized ranges.
+// specified otherwise, this object must conform to the
+// <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#1984_version">
+// WGS84 standard</a>. Values must be within normalized ranges.
 type LatLng struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The latitude in degrees. It must be in the range [-90.0, +90.0].
@@ -101,8 +101,8 @@ const file_google_type_latlng_proto_rawDesc = "" +
 	"\x18google/type/latlng.proto\x12\vgoogle.type\"B\n" +
 	"\x06LatLng\x12\x1a\n" +
 	"\blatitude\x18\x01 \x01(\x01R\blatitude\x12\x1c\n" +
-	"\tlongitude\x18\x02 \x01(\x01R\tlongitudeB\xa8\x01\n" +
-	"\x0fcom.google.typeB\vLatlngProtoP\x01Z8google.golang.org/genproto/googleapis/type/latlng;latlng\xf8\x01\x01\xa2\x02\x03GTX\xaa\x02\vGoogle.Type\xca\x02\vGoogle\\Type\xe2\x02\x17Google\\Type\\GPBMetadata\xea\x02\fGoogle::Typeb\x06proto3"
+	"\tlongitude\x18\x02 \x01(\x01R\tlongitudeB\xa5\x01\n" +
+	"\x0fcom.google.typeB\vLatlngProtoP\x01Z8google.golang.org/genproto/googleapis/type/latlng;latlng\xa2\x02\x03GTX\xaa\x02\vGoogle.Type\xca\x02\vGoogle\\Type\xe2\x02\x17Google\\Type\\GPBMetadata\xea\x02\fGoogle::Typeb\x06proto3"
 
 var (
 	file_google_type_latlng_proto_rawDescOnce sync.Once

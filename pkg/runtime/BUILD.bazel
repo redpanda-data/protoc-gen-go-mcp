@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "error.go",
         "extra_properties.go",
+        "file_mode.go",
         "fix.go",
         "server.go",
     ],
@@ -25,11 +26,20 @@ go_test(
     name = "runtime_test",
     size = "small",
     srcs = [
+        "error_edge_cases_test.go",
         "error_test.go",
+        "error_wrapped_bug_test.go",
+        "extra_properties_edge_cases_test.go",
         "extra_properties_test.go",
+        "file_mode_test.go",
+        "fix_bug_hunt_test.go",
+        "fix_edge_cases_extra_test.go",
         "fix_edge_cases_test.go",
         "fix_fuzz_test.go",
+        "fix_optional_bug_test.go",
         "fix_test.go",
+        "fix_wkt_bug_test.go",
+        "fix_wkt_wrapper_test.go",
     ],
     embed = [":runtime"],
     deps = [

@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -1039,7 +1039,19 @@ func (x *Decl_IdentDecl) GetDoc() string {
 type Decl_FunctionDecl struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. List of function overloads, must contain at least one overload.
-	Overloads     []*Decl_FunctionDecl_Overload `protobuf:"bytes,1,rep,name=overloads,proto3" json:"overloads,omitempty"`
+	Overloads []*Decl_FunctionDecl_Overload `protobuf:"bytes,1,rep,name=overloads,proto3" json:"overloads,omitempty"`
+	// Documentation string for the function that indicates the general purpose
+	// of the function and its behavior.
+	//
+	// Documentation strings for the function should be general purpose with
+	// specific examples provided in the overload doc string.
+	//
+	// Examples:
+	//
+	//	The 'in' operator tests whether an item exists in a collection.
+	//
+	//	The 'substring' function returns a substring of a target string.
+	Doc           string `protobuf:"bytes,2,opt,name=doc,proto3" json:"doc,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1079,6 +1091,13 @@ func (x *Decl_FunctionDecl) GetOverloads() []*Decl_FunctionDecl_Overload {
 		return x.Overloads
 	}
 	return nil
+}
+
+func (x *Decl_FunctionDecl) GetDoc() string {
+	if x != nil {
+		return x.Doc
+	}
+	return ""
 }
 
 // An overload indicates a function's parameter types and return type, and
@@ -1126,7 +1145,23 @@ type Decl_FunctionDecl_Overload struct {
 	// For methods, the first parameter declaration, `params[0]` is the
 	// expected type of the target receiver.
 	IsInstanceFunction bool `protobuf:"varint,5,opt,name=is_instance_function,json=isInstanceFunction,proto3" json:"is_instance_function,omitempty"`
-	// Documentation string for the overload.
+	// Examples for the overload and its expected return value, separated by
+	// newlines.
+	//
+	// Prefer using CEL literals in examples as they are easily consumed by
+	// humans and simple to validate with machines. The example should contain
+	// an expression with a literal return value in comments inline. If the
+	// expression example is too complex or would need an example for a
+	// variable that cannot be expressed in CEL, document the input and return
+	// in a comment preceding the example.
+	//
+	// Examples:
+	//
+	//	1 in [1, 2, 3] // true
+	//	'key' in {'key1: 1, 'key2': 2} // false
+	//	// Test whether one or more keys exist within a map.
+	//	// returns true if list_of_keys contains 'key2' or 'key3'
+	//	list_of_keys.exists(key, key in {'key3': 1, 'key2': 2})
 	Doc           string `protobuf:"bytes,6,opt,name=doc,proto3" json:"doc,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1268,7 +1303,7 @@ const file_google_api_expr_v1alpha1_checked_proto_rawDesc = "" +
 	"\x03ANY\x10\x01\x12\r\n" +
 	"\tTIMESTAMP\x10\x02\x12\f\n" +
 	"\bDURATION\x10\x03B\v\n" +
-	"\ttype_kind\"\xb3\x05\n" +
+	"\ttype_kind\"\xc5\x05\n" +
 	"\x04Decl\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12@\n" +
 	"\x05ident\x18\x02 \x01(\v2(.google.api.expr.v1alpha1.Decl.IdentDeclH\x00R\x05ident\x12I\n" +
@@ -1276,9 +1311,10 @@ const file_google_api_expr_v1alpha1_checked_proto_rawDesc = "" +
 	"\tIdentDecl\x122\n" +
 	"\x04type\x18\x01 \x01(\v2\x1e.google.api.expr.v1alpha1.TypeR\x04type\x128\n" +
 	"\x05value\x18\x02 \x01(\v2\".google.api.expr.v1alpha1.ConstantR\x05value\x12\x10\n" +
-	"\x03doc\x18\x03 \x01(\tR\x03doc\x1a\xee\x02\n" +
+	"\x03doc\x18\x03 \x01(\tR\x03doc\x1a\x80\x03\n" +
 	"\fFunctionDecl\x12R\n" +
-	"\toverloads\x18\x01 \x03(\v24.google.api.expr.v1alpha1.Decl.FunctionDecl.OverloadR\toverloads\x1a\x89\x02\n" +
+	"\toverloads\x18\x01 \x03(\v24.google.api.expr.v1alpha1.Decl.FunctionDecl.OverloadR\toverloads\x12\x10\n" +
+	"\x03doc\x18\x02 \x01(\tR\x03doc\x1a\x89\x02\n" +
 	"\bOverload\x12\x1f\n" +
 	"\voverload_id\x18\x01 \x01(\tR\n" +
 	"overloadId\x126\n" +
@@ -1294,8 +1330,8 @@ const file_google_api_expr_v1alpha1_checked_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1f\n" +
 	"\voverload_id\x18\x03 \x03(\tR\n" +
 	"overloadId\x128\n" +
-	"\x05value\x18\x04 \x01(\v2\".google.api.expr.v1alpha1.ConstantR\x05valueB\xf0\x01\n" +
-	"\x1ccom.google.api.expr.v1alpha1B\fCheckedProtoP\x01Z<google.golang.org/genproto/googleapis/api/expr/v1alpha1;expr\xf8\x01\x01\xa2\x02\x03GAE\xaa\x02\x18Google.Api.Expr.V1alpha1\xca\x02\x18Google\\Api\\Expr\\V1alpha1\xe2\x02$Google\\Api\\Expr\\V1alpha1\\GPBMetadata\xea\x02\x1bGoogle::Api::Expr::V1alpha1b\x06proto3"
+	"\x05value\x18\x04 \x01(\v2\".google.api.expr.v1alpha1.ConstantR\x05valueB\xed\x01\n" +
+	"\x1ccom.google.api.expr.v1alpha1B\fCheckedProtoP\x01Z<google.golang.org/genproto/googleapis/api/expr/v1alpha1;expr\xa2\x02\x03GAE\xaa\x02\x18Google.Api.Expr.V1alpha1\xca\x02\x18Google\\Api\\Expr\\V1alpha1\xe2\x02$Google\\Api\\Expr\\V1alpha1\\GPBMetadata\xea\x02\x1bGoogle::Api::Expr::V1alpha1b\x06proto3"
 
 var (
 	file_google_api_expr_v1alpha1_checked_proto_rawDescOnce sync.Once

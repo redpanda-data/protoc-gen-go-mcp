@@ -87,3 +87,11 @@ func (t *testServer) TestValidation(ctx context.Context, in *testdata.TestValida
 		Message: "Validation test completed",
 	}, nil
 }
+
+func (t *testServer) UploadFile(ctx context.Context, in *testdata.UploadFileRequest) (*testdata.UploadFileResponse, error) {
+	return &testdata.UploadFileResponse{Id: "file-1", Name: "uploaded.txt"}, nil
+}
+
+func (t *testServer) GetFileContent(ctx context.Context, in *testdata.GetFileContentRequest) (*testdata.GetFileContentResponse, error) {
+	return &testdata.GetFileContentResponse{}, nil
+}

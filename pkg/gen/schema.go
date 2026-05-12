@@ -315,6 +315,10 @@ func messageFieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions, see
 			return map[string]any{"type": []string{"string", "null"}}
 		}
 		return map[string]any{"type": []string{"string", "null"}, "format": "byte"}
+	case "mcp.v1.FileInput":
+		return fileInputSchema(opts)
+	case "mcp.v1.FileOutput":
+		return fileOutputSchema(opts)
 	default:
 		return messageSchema(fd.Message(), opts, seen)
 	}
@@ -567,6 +571,119 @@ func ToolForMethod(method protoreflect.MethodDescriptor, comment string) (standa
 		RawOutputSchema: openAIOut,
 	}
 	return
+}
+
+// FileInputFQN is the fully-qualified protobuf name for the well-known
+// FileInput type. Generators and runtime helpers key off this value.
+const FileInputFQN = "mcp.v1.FileInput"
+
+// FileOutputFQN is the fully-qualified protobuf name for the well-known
+// FileOutput type. Generators and runtime helpers key off this value.
+const FileOutputFQN = "mcp.v1.FileOutput"
+
+// FileSchemaMarkerKey is the JSON Schema extension keyword embedded in
+// schemas for FileInput/FileOutput. The runtime uses this marker to
+// locate file-typed properties and rewrite them based on FileMode.
+const FileSchemaMarkerKey = "x-mcp-file-mode"
+
+// s3ReferenceSchema returns the JSON schema for the S3Reference message.
+func s3ReferenceSchema() map[string]any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"presigned_url": map[string]any{
+				"type":        "string",
+				"description": "S3 presigned URL.",
+			},
+		},
+		"required": []string{"presigned_url"},
+	}
+}
+
+func fileInputSchema(opts SchemaOptions) map[string]any {
+	props := map[string]any{
+		"content": map[string]any{
+			"type":            "string",
+			"contentEncoding": "base64",
+			"description":     "Inline file content, base64-encoded.",
+		},
+		"path": map[string]any{
+			"type":        "string",
+			"description": "Path to the file on the shared filesystem.",
+		},
+		"s3": s3ReferenceSchema(),
+		"filename": map[string]any{
+			"type":        "string",
+			"description": "Original filename.",
+		},
+		"mime_type": map[string]any{
+			"type":        "string",
+			"description": "MIME type hint.",
+		},
+	}
+	required := []string{"filename"}
+	if opts.OpenAICompat {
+		required = []string{"content", "path", "s3", "filename", "mime_type"}
+	}
+	schema := map[string]any{
+		"type":              "object",
+		FileSchemaMarkerKey: "input",
+		"properties":        props,
+		"required":          required,
+	}
+	if opts.OpenAICompat {
+		schema["additionalProperties"] = false
+		props["content"].(map[string]any)["type"] = []string{"string", "null"}
+		props["path"].(map[string]any)["type"] = []string{"string", "null"}
+		props["s3"].(map[string]any)["type"] = []string{"object", "null"}
+		props["mime_type"].(map[string]any)["type"] = []string{"string", "null"}
+	}
+	return schema
+}
+
+func fileOutputSchema(opts SchemaOptions) map[string]any {
+	props := map[string]any{
+		"content": map[string]any{
+			"type":            "string",
+			"contentEncoding": "base64",
+			"description":     "Inline file content, base64-encoded.",
+		},
+		"path": map[string]any{
+			"type":        "string",
+			"description": "Path where the framework wrote the file.",
+		},
+		"s3": s3ReferenceSchema(),
+		"filename": map[string]any{
+			"type":        "string",
+			"description": "Filename.",
+		},
+		"mime_type": map[string]any{
+			"type":        "string",
+			"description": "MIME type.",
+		},
+		"size_bytes": map[string]any{
+			"type":        "string",
+			"description": "File size in bytes.",
+		},
+	}
+	required := []string{"filename"}
+	if opts.OpenAICompat {
+		required = []string{"content", "path", "s3", "filename", "mime_type", "size_bytes"}
+	}
+	schema := map[string]any{
+		"type":              "object",
+		FileSchemaMarkerKey: "output",
+		"properties":        props,
+		"required":          required,
+	}
+	if opts.OpenAICompat {
+		schema["additionalProperties"] = false
+		props["content"].(map[string]any)["type"] = []string{"string", "null"}
+		props["path"].(map[string]any)["type"] = []string{"string", "null"}
+		props["s3"].(map[string]any)["type"] = []string{"object", "null"}
+		props["size_bytes"].(map[string]any)["type"] = []string{"string", "null"}
+	}
+	return schema
 }
 
 // marshalTopLevelSchema generates and marshals a JSON schema for a top-level

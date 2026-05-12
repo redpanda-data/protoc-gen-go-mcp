@@ -71,3 +71,11 @@ func (t *testServer) ProcessWellKnownTypes(_ context.Context, _ *testdata.Proces
 func (t *testServer) TestValidation(_ context.Context, _ *testdata.TestValidationRequest) (*testdata.TestValidationResponse, error) {
 	return &testdata.TestValidationResponse{Success: true, Message: "Validation test completed"}, nil
 }
+
+func (t *testServer) UploadFile(_ context.Context, _ *testdata.UploadFileRequest) (*testdata.UploadFileResponse, error) {
+	return &testdata.UploadFileResponse{Id: "file-1", Name: "uploaded.txt"}, nil
+}
+
+func (t *testServer) GetFileContent(_ context.Context, _ *testdata.GetFileContentRequest) (*testdata.GetFileContentResponse, error) {
+	return &testdata.GetFileContentResponse{}, nil
+}

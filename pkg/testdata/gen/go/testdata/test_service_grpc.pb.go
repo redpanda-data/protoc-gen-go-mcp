@@ -37,6 +37,8 @@ const (
 	TestService_GetItem_FullMethodName               = "/testdata.TestService/GetItem"
 	TestService_ProcessWellKnownTypes_FullMethodName = "/testdata.TestService/ProcessWellKnownTypes"
 	TestService_TestValidation_FullMethodName        = "/testdata.TestService/TestValidation"
+	TestService_UploadFile_FullMethodName            = "/testdata.TestService/UploadFile"
+	TestService_GetFileContent_FullMethodName        = "/testdata.TestService/GetFileContent"
 )
 
 // TestServiceClient is the client API for TestService service.
@@ -53,6 +55,10 @@ type TestServiceClient interface {
 	ProcessWellKnownTypes(ctx context.Context, in *ProcessWellKnownTypesRequest, opts ...grpc.CallOption) (*ProcessWellKnownTypesResponse, error)
 	// Test protovalidate constraints
 	TestValidation(ctx context.Context, in *TestValidationRequest, opts ...grpc.CallOption) (*TestValidationResponse, error)
+	// Upload a file using the well-known FileInput type
+	UploadFile(ctx context.Context, in *UploadFileRequest, opts ...grpc.CallOption) (*UploadFileResponse, error)
+	// Get file content using the well-known FileOutput type
+	GetFileContent(ctx context.Context, in *GetFileContentRequest, opts ...grpc.CallOption) (*GetFileContentResponse, error)
 }
 
 type testServiceClient struct {
@@ -103,6 +109,26 @@ func (c *testServiceClient) TestValidation(ctx context.Context, in *TestValidati
 	return out, nil
 }
 
+func (c *testServiceClient) UploadFile(ctx context.Context, in *UploadFileRequest, opts ...grpc.CallOption) (*UploadFileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UploadFileResponse)
+	err := c.cc.Invoke(ctx, TestService_UploadFile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *testServiceClient) GetFileContent(ctx context.Context, in *GetFileContentRequest, opts ...grpc.CallOption) (*GetFileContentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetFileContentResponse)
+	err := c.cc.Invoke(ctx, TestService_GetFileContent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TestServiceServer is the server API for TestService service.
 // All implementations must embed UnimplementedTestServiceServer
 // for forward compatibility.
@@ -117,6 +143,10 @@ type TestServiceServer interface {
 	ProcessWellKnownTypes(context.Context, *ProcessWellKnownTypesRequest) (*ProcessWellKnownTypesResponse, error)
 	// Test protovalidate constraints
 	TestValidation(context.Context, *TestValidationRequest) (*TestValidationResponse, error)
+	// Upload a file using the well-known FileInput type
+	UploadFile(context.Context, *UploadFileRequest) (*UploadFileResponse, error)
+	// Get file content using the well-known FileOutput type
+	GetFileContent(context.Context, *GetFileContentRequest) (*GetFileContentResponse, error)
 	mustEmbedUnimplementedTestServiceServer()
 }
 
@@ -138,6 +168,12 @@ func (UnimplementedTestServiceServer) ProcessWellKnownTypes(context.Context, *Pr
 }
 func (UnimplementedTestServiceServer) TestValidation(context.Context, *TestValidationRequest) (*TestValidationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TestValidation not implemented")
+}
+func (UnimplementedTestServiceServer) UploadFile(context.Context, *UploadFileRequest) (*UploadFileResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UploadFile not implemented")
+}
+func (UnimplementedTestServiceServer) GetFileContent(context.Context, *GetFileContentRequest) (*GetFileContentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFileContent not implemented")
 }
 func (UnimplementedTestServiceServer) mustEmbedUnimplementedTestServiceServer() {}
 func (UnimplementedTestServiceServer) testEmbeddedByValue()                     {}
@@ -232,6 +268,42 @@ func _TestService_TestValidation_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TestService_UploadFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UploadFileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TestServiceServer).UploadFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TestService_UploadFile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TestServiceServer).UploadFile(ctx, req.(*UploadFileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TestService_GetFileContent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFileContentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TestServiceServer).GetFileContent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TestService_GetFileContent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TestServiceServer).GetFileContent(ctx, req.(*GetFileContentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TestService_ServiceDesc is the grpc.ServiceDesc for TestService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -254,6 +326,14 @@ var TestService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TestValidation",
 			Handler:    _TestService_TestValidation_Handler,
+		},
+		{
+			MethodName: "UploadFile",
+			Handler:    _TestService_UploadFile_Handler,
+		},
+		{
+			MethodName: "GetFileContent",
+			Handler:    _TestService_GetFileContent_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
