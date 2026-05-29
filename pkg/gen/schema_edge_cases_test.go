@@ -1,6 +1,7 @@
 package gen
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -9,12 +10,26 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
+// roundTripSchema marshals schema to JSON and back so that all internal orderedMap
+// values become plain map[string]any, enabling direct type assertions in tests.
+func roundTripSchema(schema map[string]any) map[string]any {
+	b, err := json.Marshal(schema)
+	if err != nil {
+		panic(err)
+	}
+	var out map[string]any
+	if err := json.Unmarshal(b, &out); err != nil {
+		panic(err)
+	}
+	return out
+}
+
 func TestMangleHeadIfTooLong_EdgeCases(t *testing.T) {
 	tests := []struct {
-		name     string
-		input    string
-		maxLen   int
-		checkFn  func(g Gomega, result string)
+		name    string
+		input   string
+		maxLen  int
+		checkFn func(g Gomega, result string)
 	}{
 		{
 			name:   "negative maxLen returns empty",
@@ -226,29 +241,11 @@ func TestMessageSchema_EmptyRequiredList(t *testing.T) {
 	md := (&testdata.GetItemRequest{}).ProtoReflect().Descriptor()
 
 	t.Run("standard_no_required", func(t *testing.T) {
-		schema := MessageSchema(md, SchemaOptions{OpenAICompat: false})
+		schema := MessageSchema(md, SchemaOptions{})
 		required := schema["required"].([]string)
 		// No fields are required in standard mode (no REQUIRED annotation)
 		g.Expect(required).To(BeEmpty())
 	})
-
-	t.Run("openai_all_required", func(t *testing.T) {
-		schema := MessageSchema(md, SchemaOptions{OpenAICompat: true})
-		required := schema["required"].([]string)
-		// In OpenAI mode, all fields are required
-		g.Expect(required).To(ContainElement("id"))
-	})
-}
-
-func TestMessageSchema_OpenAI_TopLevelType(t *testing.T) {
-	g := NewWithT(t)
-
-	md := (&testdata.GetItemRequest{}).ProtoReflect().Descriptor()
-	schema := MessageSchema(md, SchemaOptions{OpenAICompat: true})
-
-	// MessageSchema now produces plain "object" (not nullable) for all messages.
-	// Nullable types are only applied to oneof fields, not to message schemas themselves.
-	g.Expect(schema["type"]).To(Equal("object"))
 }
 
 func TestFieldSchema_RepeatedEnum(t *testing.T) {
@@ -258,7 +255,7 @@ func TestFieldSchema_RepeatedEnum(t *testing.T) {
 	fd := md.Fields().ByName("priorities")
 
 	t.Run("standard", func(t *testing.T) {
-		schema := FieldSchema(fd, SchemaOptions{OpenAICompat: false})
+		schema := FieldSchema(fd, SchemaOptions{})
 		g.Expect(schema["type"]).To(Equal("array"))
 		items := schema["items"].(map[string]any)
 		g.Expect(items["type"]).To(Equal("string"))
@@ -266,37 +263,6 @@ func TestFieldSchema_RepeatedEnum(t *testing.T) {
 			"PRIORITY_UNSPECIFIED", "PRIORITY_LOW", "PRIORITY_MEDIUM", "PRIORITY_HIGH", "PRIORITY_CRITICAL",
 		))
 	})
-
-	t.Run("openai", func(t *testing.T) {
-		schema := FieldSchema(fd, SchemaOptions{OpenAICompat: true})
-		g.Expect(schema["type"]).To(Equal("array"))
-		items := schema["items"].(map[string]any)
-		g.Expect(items["enum"]).To(HaveLen(5))
-	})
-}
-
-func TestFieldSchema_MapValueMessage_OpenAI(t *testing.T) {
-	g := NewWithT(t)
-
-	md := (&testdata.MapVariantsRequest{}).ProtoReflect().Descriptor()
-	fd := md.Fields().ByName("string_to_message")
-	schema := FieldSchema(fd, SchemaOptions{OpenAICompat: true})
-
-	// OpenAI mode: map becomes array of KV pairs
-	g.Expect(schema["type"]).To(Equal("array"))
-	items := schema["items"].(map[string]any)
-	g.Expect(items["additionalProperties"]).To(Equal(false))
-
-	props := items["properties"].(map[string]any)
-	valueSchema := props["value"].(map[string]any)
-	// The value should be a nested object schema for InnerMessage
-	g.Expect(valueSchema["type"]).To(Equal("object"))
-	g.Expect(valueSchema["additionalProperties"]).To(Equal(false))
-	innerProps := valueSchema["properties"].(map[string]any)
-	g.Expect(innerProps).To(HaveKey("id"))
-	g.Expect(innerProps).To(HaveKey("tags"))
-	g.Expect(innerProps).To(HaveKey("metadata"))
-	g.Expect(innerProps).To(HaveKey("dynamic_config"))
 }
 
 func TestFieldSchema_RepeatedMessage_HasArrayOfObjectSchemas(t *testing.T) {
@@ -306,19 +272,11 @@ func TestFieldSchema_RepeatedMessage_HasArrayOfObjectSchemas(t *testing.T) {
 
 	t.Run("repeated_middles_standard", func(t *testing.T) {
 		fd := md.Fields().ByName("middles")
-		schema := FieldSchema(fd, SchemaOptions{OpenAICompat: false})
+		schema := FieldSchema(fd, SchemaOptions{})
 		g.Expect(schema["type"]).To(Equal("array"))
 		items := schema["items"].(map[string]any)
 		g.Expect(items["type"]).To(Equal("object"))
 		g.Expect(items["properties"]).ToNot(BeNil())
-	})
-
-	t.Run("repeated_middles_openai", func(t *testing.T) {
-		fd := md.Fields().ByName("middles")
-		schema := FieldSchema(fd, SchemaOptions{OpenAICompat: true})
-		g.Expect(schema["type"]).To(Equal("array"))
-		items := schema["items"].(map[string]any)
-		g.Expect(items["additionalProperties"]).To(Equal(false))
 	})
 }
 
@@ -329,97 +287,43 @@ func TestFieldSchema_ConstraintsMergedIntoSchema(t *testing.T) {
 	md := (&testdata.NumericValidationRequest{}).ProtoReflect().Descriptor()
 
 	fd := md.Fields().ByName("age")
-	schema := FieldSchema(fd, SchemaOptions{OpenAICompat: false})
+	schema := FieldSchema(fd, SchemaOptions{})
 	g.Expect(schema["type"]).To(Equal("integer"))
 	g.Expect(schema["minimum"]).To(Equal(0))
 	g.Expect(schema["maximum"]).To(Equal(150))
 
 	fd = md.Fields().ByName("temperature")
-	schema = FieldSchema(fd, SchemaOptions{OpenAICompat: false})
+	schema = FieldSchema(fd, SchemaOptions{})
 	g.Expect(schema["type"]).To(Equal("number"))
 	g.Expect(schema["exclusiveMinimum"]).To(BeNumerically("~", -273.15))
 	g.Expect(schema["exclusiveMaximum"]).To(BeNumerically("~", 1000000.0))
 }
 
-func TestFieldSchema_BytesOpenAI_NoFormat(t *testing.T) {
-	g := NewWithT(t)
-
-	md := (&testdata.AllScalarTypesRequest{}).ProtoReflect().Descriptor()
-	fd := md.Fields().ByName("bytes_field")
-
-	schema := FieldSchema(fd, SchemaOptions{OpenAICompat: true})
-	g.Expect(schema["type"]).To(Equal("string"))
-	g.Expect(schema["contentEncoding"]).To(Equal("base64"))
-	// OpenAI rejects format: "byte"
-	g.Expect(schema).ToNot(HaveKey("format"))
-}
-
-func TestFieldSchema_OneofFieldsOpenAI_NullableType(t *testing.T) {
+// TestMessageSchema_NoUnionKeywords asserts that no top-level anyOf/oneOf/allOf
+// keywords appear in generated schemas — oneofs are rendered as discriminated
+// wrapper objects instead.
+func TestMessageSchema_NoUnionKeywords(t *testing.T) {
 	g := NewWithT(t)
 
 	md := (&testdata.MultipleOneofsRequest{}).ProtoReflect().Descriptor()
-	schema := MessageSchema(md, SchemaOptions{OpenAICompat: true})
+	// roundTripSchema converts internal orderedMap values to plain map[string]any.
+	schema := roundTripSchema(MessageSchema(md, SchemaOptions{}))
 
+	g.Expect(schema).ToNot(HaveKey("anyOf"))
+	g.Expect(schema).ToNot(HaveKey("oneOf"))
+	g.Expect(schema).ToNot(HaveKey("allOf"))
+
+	// The two oneof groups should appear as discriminated wrapper objects
+	// under properties keyed by the oneof name.
 	props := schema["properties"].(map[string]any)
+	g.Expect(props).To(HaveKey("source"))
+	g.Expect(props).To(HaveKey("output_format"))
 
-	// Oneof string field should be nullable
-	urlSchema := props["url"].(map[string]any)
-	g.Expect(urlSchema["type"]).To(Equal([]string{"string", "null"}))
+	sourceWrapper := props["source"].(map[string]any)
+	g.Expect(sourceWrapper["type"]).To(Equal("object"))
+	sourceProps := sourceWrapper["properties"].(map[string]any)
+	g.Expect(sourceProps).To(HaveKey("which"))
 
-	// Oneof bytes field should be nullable
-	rawSchema := props["raw_data"].(map[string]any)
-	g.Expect(rawSchema["type"]).To(Equal([]string{"string", "null"}))
-
-	// Oneof bool field should be nullable
-	jsonSchema := props["as_json"].(map[string]any)
-	g.Expect(jsonSchema["type"]).To(Equal([]string{"boolean", "null"}))
-
-	// Each oneof field should have the oneof description
-	g.Expect(urlSchema["description"]).To(ContainSubstring("source"))
-	g.Expect(jsonSchema["description"]).To(ContainSubstring("output_format"))
-}
-
-func TestMessageSchema_Standard_HasAnyOfForOneofs(t *testing.T) {
-	g := NewWithT(t)
-
-	md := (&testdata.MultipleOneofsRequest{}).ProtoReflect().Descriptor()
-	schema := MessageSchema(md, SchemaOptions{OpenAICompat: false})
-
-	anyOf := schema["anyOf"].([]map[string]any)
-	g.Expect(anyOf).To(HaveLen(2))
-
-	// Each anyOf entry should have a oneOf with the group's alternatives
-	for _, entry := range anyOf {
-		g.Expect(entry).To(HaveKey("oneOf"))
-		g.Expect(entry).To(HaveKey("$comment"))
-		oneOf := entry["oneOf"].([]map[string]any)
-		g.Expect(len(oneOf)).To(BeNumerically(">=", 2))
-	}
-}
-
-func TestMessageSchema_NestedMapValues_OpenAI(t *testing.T) {
-	g := NewWithT(t)
-
-	// MiddleMessage.named_items is map<string, InnerMessage>
-	// InnerMessage.tags is map<string, string>
-	// In OpenAI mode, both should be arrays of KV pairs
-	md := (&testdata.MiddleMessage{}).ProtoReflect().Descriptor()
-	schema := MessageSchema(md, SchemaOptions{OpenAICompat: true})
-
-	props := schema["properties"].(map[string]any)
-
-	// named_items: map -> array of KV pairs
-	namedItems := props["named_items"].(map[string]any)
-	g.Expect(namedItems["type"]).To(Equal("array"))
-
-	// The value in the KV pair should be InnerMessage schema
-	items := namedItems["items"].(map[string]any)
-	kvProps := items["properties"].(map[string]any)
-	valueSchema := kvProps["value"].(map[string]any)
-	innerProps := valueSchema["properties"].(map[string]any)
-
-	// InnerMessage.tags should also be array of KV pairs
-	tagsSchema := innerProps["tags"].(map[string]any)
-	g.Expect(tagsSchema["type"]).To(Equal("array"))
-	g.Expect(tagsSchema["description"]).To(Equal("List of key value pairs"))
+	// Regular non-oneof field is still in properties.
+	g.Expect(props).To(HaveKey("name"))
 }

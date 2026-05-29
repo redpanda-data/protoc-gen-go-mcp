@@ -24,6 +24,7 @@ go_test(
         "generator_test.go",
         "golden_test.go",
         "handler_e2e_test.go",
+        "handler_rtt_test.go",
     ],
     data = [
         "//pkg/testdata/gen:descriptors",
@@ -32,10 +33,14 @@ go_test(
     embed = [":generator"],
     gotags = ["bazel"],
     deps = [
+        "//pkg/gen",
         "//pkg/runtime",
+        "//pkg/runtime/gosdk",
         "//pkg/runtime/mark3labs",
         "//pkg/testdata/gen/go/testdata",
         "//pkg/testdata/gen/go/testdata/testdatamcp",
+        "@com_github_mark3labs_mcp_go//server",
+        "@com_github_modelcontextprotocol_go_sdk//mcp",
         "@com_github_onsi_gomega//:gomega",
         "@com_github_santhosh_tekuri_jsonschema_v5//:jsonschema",
         "@org_golang_google_protobuf//compiler/protogen",

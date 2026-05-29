@@ -49,6 +49,11 @@ service EdgeCaseService {
 
   // RecursiveTree tests self-referencing message schemas
   rpc RecursiveTree(RecursiveTreeRequest) returns (RecursiveTreeResponse);
+
+  // OneofRecursive tests a recursive message nested inside a oneof, on both
+  // the request (decode) and response (encode) sides. It exercises the oneof
+  // discriminated-wrapper transform combined with recursion-depth placeholders.
+  rpc OneofRecursive(OneofRecursiveRequest) returns (OneofRecursiveResponse);
 }
 
 // Deeply nested message: Inner has a map and a WKT
@@ -230,6 +235,36 @@ message RecursiveTreeRequest {
 
 message RecursiveTreeResponse {
   bool success = 1;
+}
+
+// Recursive message nested inside a oneof, on both request and response.
+message OneofRecursiveRequest {
+  oneof node {
+    TreeNode tree = 1;
+    string leaf = 2;
+  }
+}
+
+message OneofRecursiveResponse {
+  oneof result {
+    TreeNode tree = 1;
+    bool ok = 2;
+  }
+}
+
+// RequiredOneofRequest carries a oneof marked (buf.validate.oneof).required,
+// so its wrapper must land in the parent's "required" set. The plain oneof in
+// the same message must not.
+message RequiredOneofRequest {
+  oneof choice {
+    option (buf.validate.oneof).required = true;
+    string a = 1;
+    string b = 2;
+  }
+  oneof optional_choice {
+    string c = 3;
+    string d = 4;
+  }
 }
 
 message NumericValidationResponse {

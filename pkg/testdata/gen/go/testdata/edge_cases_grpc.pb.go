@@ -41,6 +41,7 @@ const (
 	EdgeCaseService_MultipleOneofs_FullMethodName    = "/testdata.EdgeCaseService/MultipleOneofs"
 	EdgeCaseService_NumericValidation_FullMethodName = "/testdata.EdgeCaseService/NumericValidation"
 	EdgeCaseService_RecursiveTree_FullMethodName     = "/testdata.EdgeCaseService/RecursiveTree"
+	EdgeCaseService_OneofRecursive_FullMethodName    = "/testdata.EdgeCaseService/OneofRecursive"
 )
 
 // EdgeCaseServiceClient is the client API for EdgeCaseService service.
@@ -65,6 +66,10 @@ type EdgeCaseServiceClient interface {
 	NumericValidation(ctx context.Context, in *NumericValidationRequest, opts ...grpc.CallOption) (*NumericValidationResponse, error)
 	// RecursiveTree tests self-referencing message schemas
 	RecursiveTree(ctx context.Context, in *RecursiveTreeRequest, opts ...grpc.CallOption) (*RecursiveTreeResponse, error)
+	// OneofRecursive tests a recursive message nested inside a oneof, on both
+	// the request (decode) and response (encode) sides. It exercises the oneof
+	// discriminated-wrapper transform combined with recursion-depth placeholders.
+	OneofRecursive(ctx context.Context, in *OneofRecursiveRequest, opts ...grpc.CallOption) (*OneofRecursiveResponse, error)
 }
 
 type edgeCaseServiceClient struct {
@@ -155,6 +160,16 @@ func (c *edgeCaseServiceClient) RecursiveTree(ctx context.Context, in *Recursive
 	return out, nil
 }
 
+func (c *edgeCaseServiceClient) OneofRecursive(ctx context.Context, in *OneofRecursiveRequest, opts ...grpc.CallOption) (*OneofRecursiveResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(OneofRecursiveResponse)
+	err := c.cc.Invoke(ctx, EdgeCaseService_OneofRecursive_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EdgeCaseServiceServer is the server API for EdgeCaseService service.
 // All implementations must embed UnimplementedEdgeCaseServiceServer
 // for forward compatibility.
@@ -177,6 +192,10 @@ type EdgeCaseServiceServer interface {
 	NumericValidation(context.Context, *NumericValidationRequest) (*NumericValidationResponse, error)
 	// RecursiveTree tests self-referencing message schemas
 	RecursiveTree(context.Context, *RecursiveTreeRequest) (*RecursiveTreeResponse, error)
+	// OneofRecursive tests a recursive message nested inside a oneof, on both
+	// the request (decode) and response (encode) sides. It exercises the oneof
+	// discriminated-wrapper transform combined with recursion-depth placeholders.
+	OneofRecursive(context.Context, *OneofRecursiveRequest) (*OneofRecursiveResponse, error)
 	mustEmbedUnimplementedEdgeCaseServiceServer()
 }
 
@@ -210,6 +229,9 @@ func (UnimplementedEdgeCaseServiceServer) NumericValidation(context.Context, *Nu
 }
 func (UnimplementedEdgeCaseServiceServer) RecursiveTree(context.Context, *RecursiveTreeRequest) (*RecursiveTreeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RecursiveTree not implemented")
+}
+func (UnimplementedEdgeCaseServiceServer) OneofRecursive(context.Context, *OneofRecursiveRequest) (*OneofRecursiveResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method OneofRecursive not implemented")
 }
 func (UnimplementedEdgeCaseServiceServer) mustEmbedUnimplementedEdgeCaseServiceServer() {}
 func (UnimplementedEdgeCaseServiceServer) testEmbeddedByValue()                         {}
@@ -376,6 +398,24 @@ func _EdgeCaseService_RecursiveTree_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EdgeCaseService_OneofRecursive_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OneofRecursiveRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EdgeCaseServiceServer).OneofRecursive(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EdgeCaseService_OneofRecursive_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EdgeCaseServiceServer).OneofRecursive(ctx, req.(*OneofRecursiveRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EdgeCaseService_ServiceDesc is the grpc.ServiceDesc for EdgeCaseService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -414,6 +454,10 @@ var EdgeCaseService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RecursiveTree",
 			Handler:    _EdgeCaseService_RecursiveTree_Handler,
+		},
+		{
+			MethodName: "OneofRecursive",
+			Handler:    _EdgeCaseService_OneofRecursive_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

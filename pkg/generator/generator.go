@@ -36,8 +36,7 @@ type FileGenerator struct {
 	f   *protogen.File
 	gen *protogen.Plugin
 
-	gf           *protogen.GeneratedFile
-	openAICompat bool
+	gf *protogen.GeneratedFile
 }
 
 func NewFileGenerator(f *protogen.File, gen *protogen.Plugin) *FileGenerator {
@@ -64,9 +63,6 @@ import (
 var (
 {{- range $key, $val := .Tools }}
   {{$key}}Tool = {{ printf "%#v" $val }}
-{{- end }}
-{{- range $key, $val := .ToolsOpenAI }}
-  {{$key}}ToolOpenAI = {{ printf "%#v" $val }}
 {{- end }}
 )
 
@@ -103,54 +99,11 @@ func Register{{$key}}Handler(s runtime.MCPServer, srv {{$key}}Server, opts ...ru
       }
     }
 
-    marshaled, err := json.Marshal(message)
-    if err != nil {
-      return nil, err
+    // Rewrite oneof discriminated wrappers and recursion placeholders into the
+    // protojson-native shape. Errors are model-readable for self-correction.
+    if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+      return runtime.NewToolResultError(err.Error()), nil
     }
-
-    if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-      return nil, err
-    }
-
-    resp, err := srv.{{$tool_name}}(ctx, &req)
-    if err != nil {
-      return runtime.HandleError(err)
-    }
-
-    marshaled, err = (protojson.MarshalOptions{UseProtoNames: true, EmitDefaultValues: true}).Marshal(resp)
-    if err != nil {
-      return nil, err
-    }
-
-    return runtime.NewToolResultJSON(marshaled), nil
-  })
-  {{- end }}
-}
-
-// Register{{$key}}HandlerOpenAI registers OpenAI-compatible MCP handlers for {{$key}}
-func Register{{$key}}HandlerOpenAI(s runtime.MCPServer, srv {{$key}}Server, opts ...runtime.Option) {
-  config := runtime.NewConfig()
-  for _, opt := range opts {
-    opt(config)
-  }
-
-  {{- range $tool_name, $tool_val := $val }}
-  {{$tool_name}}ToolOpenAI := {{$key}}_{{$tool_name}}ToolOpenAI
-  {{$tool_name}}ToolOpenAI = runtime.ApplyConfig({{$tool_name}}ToolOpenAI, config)
-
-  s.AddTool({{$tool_name}}ToolOpenAI, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-    var req {{$tool_val.RequestType}}
-
-    message := request.Arguments
-
-    // Extract extra properties if configured
-    for _, prop := range config.ExtraProperties {
-      if propVal, ok := message[prop.Name]; ok {
-        ctx = context.WithValue(ctx, prop.ContextKey, propVal)
-      }
-    }
-
-    runtime.FixOpenAI(req.ProtoReflect().Descriptor(), message)
 
     marshaled, err := json.Marshal(message)
     if err != nil {
@@ -166,26 +119,14 @@ func Register{{$key}}HandlerOpenAI(s runtime.MCPServer, srv {{$key}}Server, opts
       return runtime.HandleError(err)
     }
 
-    marshaled, err = (protojson.MarshalOptions{UseProtoNames: true, EmitDefaultValues: true}).Marshal(resp)
+    structured, err := runtime.EncodeMessage(resp)
     if err != nil {
       return nil, err
     }
 
-    return runtime.NewToolResultJSON(marshaled), nil
+    return runtime.NewToolResultJSON(structured), nil
   })
   {{- end }}
-}
-
-// Register{{$key}}HandlerWithProvider registers handlers for the specified LLM provider
-func Register{{$key}}HandlerWithProvider(s runtime.MCPServer, srv {{$key}}Server, provider runtime.LLMProvider, opts ...runtime.Option) {
-  switch provider {
-  case runtime.LLMProviderOpenAI:
-    Register{{$key}}HandlerOpenAI(s, srv, opts...)
-  case runtime.LLMProviderStandard:
-    fallthrough
-  default:
-    Register{{$key}}Handler(s, srv, opts...)
-  }
 }
 {{- end }}
 
@@ -232,6 +173,10 @@ func ForwardToConnect{{$key}}Client(s runtime.MCPServer, client Connect{{$key}}C
       }
     }
 
+    if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+      return runtime.NewToolResultError(err.Error()), nil
+    }
+
     marshaled, err := json.Marshal(message)
     if err != nil {
       return nil, err
@@ -246,11 +191,11 @@ func ForwardToConnect{{$key}}Client(s runtime.MCPServer, client Connect{{$key}}C
       return runtime.HandleError(err)
     }
 
-    marshaled, err = (protojson.MarshalOptions{UseProtoNames: true, EmitDefaultValues: true}).Marshal(resp.Msg)
+    structured, err := runtime.EncodeMessage(resp.Msg)
     if err != nil {
       return nil, err
     }
-    return runtime.NewToolResultJSON(marshaled), nil
+    return runtime.NewToolResultJSON(structured), nil
   })
   {{- end }}
 }
@@ -280,6 +225,10 @@ func ForwardTo{{$key}}Client(s runtime.MCPServer, client {{$key}}Client, opts ..
       }
     }
 
+    if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+      return runtime.NewToolResultError(err.Error()), nil
+    }
+
     marshaled, err := json.Marshal(message)
     if err != nil {
       return nil, err
@@ -294,11 +243,11 @@ func ForwardTo{{$key}}Client(s runtime.MCPServer, client {{$key}}Client, opts ..
       return runtime.HandleError(err)
     }
 
-    marshaled, err = (protojson.MarshalOptions{UseProtoNames: true, EmitDefaultValues: true}).Marshal(resp)
+    structured, err := runtime.EncodeMessage(resp)
     if err != nil {
       return nil, err
     }
-    return runtime.NewToolResultJSON(marshaled), nil
+    return runtime.NewToolResultJSON(structured), nil
   })
   {{- end }}
 }
@@ -312,15 +261,13 @@ type TplParams struct {
 	SourcePath  string
 	GoPackage   string
 	Tools       map[string]runtime.Tool
-	ToolsOpenAI map[string]runtime.Tool
 	Services    map[string]map[string]Tool
 }
 
 type Tool struct {
-	RequestType   string
-	ResponseType  string
-	MCPTool       runtime.Tool
-	MCPToolOpenAI runtime.Tool
+	RequestType  string
+	ResponseType string
+	MCPTool      runtime.Tool
 }
 
 // Delegate to gen package - kept for backward compatibility with tests in this package.
@@ -333,12 +280,12 @@ var (
 
 // messageSchema delegates to the gen package.
 func (g *FileGenerator) messageSchema(md protoreflect.MessageDescriptor) map[string]any {
-	return gen.MessageSchema(md, gen.SchemaOptions{OpenAICompat: g.openAICompat})
+	return gen.MessageSchema(md, gen.SchemaOptions{})
 }
 
 // getType delegates to the gen package.
 func (g *FileGenerator) getType(fd protoreflect.FieldDescriptor) map[string]any {
-	return gen.FieldSchema(fd, gen.SchemaOptions{OpenAICompat: g.openAICompat})
+	return gen.FieldSchema(fd, gen.SchemaOptions{})
 }
 
 func (g *FileGenerator) Generate(packageSuffix string) {
@@ -382,7 +329,6 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 
 	services := map[string]map[string]Tool{}
 	tools := map[string]runtime.Tool{}
-	toolsOpenAI := map[string]runtime.Tool{}
 
 	for _, svc := range g.f.Services {
 		s := map[string]Tool{}
@@ -392,16 +338,14 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 			}
 
 			comment := string(meth.Comments.Leading)
-			toolStandard, toolOpenAI := gen.ToolForMethod(meth.Desc, comment)
+			tool := gen.ToolForMethod(meth.Desc, comment)
 
 			s[meth.GoName] = Tool{
-				RequestType:   g.gf.QualifiedGoIdent(meth.Input.GoIdent),
-				ResponseType:  g.gf.QualifiedGoIdent(meth.Output.GoIdent),
-				MCPTool:       toolStandard,
-				MCPToolOpenAI: toolOpenAI,
+				RequestType:  g.gf.QualifiedGoIdent(meth.Input.GoIdent),
+				ResponseType: g.gf.QualifiedGoIdent(meth.Output.GoIdent),
+				MCPTool:      tool,
 			}
-			tools[svc.GoName+"_"+meth.GoName] = toolStandard
-			toolsOpenAI[svc.GoName+"_"+meth.GoName] = toolOpenAI
+			tools[svc.GoName+"_"+meth.GoName] = tool
 		}
 		services[string(svc.Desc.Name())] = s
 	}
@@ -412,7 +356,6 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 		GoPackage:   string(g.f.GoPackageName),
 		Services:    services,
 		Tools:       tools,
-		ToolsOpenAI: toolsOpenAI,
 	}
 	err = tpl.Execute(g.gf, params)
 	if err != nil {

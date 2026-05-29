@@ -7,3 +7,9 @@ test --test_summary=short
 
 # Some tests need $HOME (e.g. for config files)
 test --test_env=HOME
+
+# Enable the external_llm build tag so the live-provider conformance tests are
+# compiled and run under bazel. They self-skip unless the provider API keys are
+# present in the environment (see the keyed CI step). A plain `go test ./...`
+# without -tags external_llm skips them entirely.
+build --@rules_go//go/config:tags=external_llm

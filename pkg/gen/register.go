@@ -45,9 +45,6 @@ func DynamicNewMessage(md protoreflect.MessageDescriptor) proto.Message {
 
 // RegisterServiceOptions controls how a service is registered as MCP tools.
 type RegisterServiceOptions struct {
-	// Provider selects the schema mode (standard or OpenAI-compatible).
-	Provider runtime.LLMProvider
-
 	// NamePrefix prepends prefix + "_" to every tool name.
 	NamePrefix string
 
@@ -74,8 +71,7 @@ func RegisterService(s runtime.MCPServer, sd protoreflect.ServiceDescriptor, han
 	if opts.NewMessage == nil {
 		opts.NewMessage = DynamicNewMessage
 	}
-	openAI := opts.Provider == runtime.LLMProviderOpenAI
-	schemaOpts := SchemaOptions{OpenAICompat: openAI}
+	schemaOpts := SchemaOptions{}
 
 	for i := 0; i < sd.Methods().Len(); i++ {
 		method := sd.Methods().Get(i)
@@ -127,9 +123,10 @@ func RegisterService(s runtime.MCPServer, sd protoreflect.ServiceDescriptor, han
 				}
 			}
 
-			// Apply OpenAI fix if needed
-			if openAI {
-				runtime.FixOpenAI(md.Input(), message)
+			// Rewrite oneof discriminated wrappers and recursion placeholders
+			// into the protojson-native shape. Errors are model-readable.
+			if err := runtime.DecodeArguments(md.Input(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
 			}
 
 			// Marshal to JSON, then unmarshal into proto
@@ -152,13 +149,12 @@ func RegisterService(s runtime.MCPServer, sd protoreflect.ServiceDescriptor, han
 				return runtime.HandleError(err)
 			}
 
-			// Marshal response
-			marshaled, err = (protojson.MarshalOptions{UseProtoNames: true, EmitDefaultValues: true}).Marshal(resp)
+			structured, err := runtime.EncodeMessage(resp)
 			if err != nil {
 				return nil, err
 			}
 
-			return runtime.NewToolResultJSON(marshaled), nil
+			return runtime.NewToolResultJSON(structured), nil
 		})
 	}
 }

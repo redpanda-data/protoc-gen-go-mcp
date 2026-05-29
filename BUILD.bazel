@@ -6,6 +6,10 @@ load("@rules_go//go:def.bzl", "nogo")
 # gazelle:exclude pkg/testdata/gen/go/google
 # gazelle:exclude pkg/testdata/gen/go/buf
 # gazelle:exclude pkg/testdata/proto
+# external_llm gates the live-provider conformance tests; declare it so gazelle
+# emits their go_test target. The tag is enabled for bazel test in .bazelrc, and
+# the tests still self-skip unless the provider API keys are present.
+# gazelle:build_tags external_llm
 gazelle(name = "gazelle")
 
 nogo(

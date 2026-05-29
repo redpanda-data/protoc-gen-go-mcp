@@ -33,13 +33,6 @@ import (
 
 // SchemaOptions controls JSON schema generation behavior.
 type SchemaOptions struct {
-	// OpenAICompat enables OpenAI-compatible schema generation:
-	// - additionalProperties: false on all objects
-	// - all fields required
-	// - maps become arrays of key-value pairs
-	// - well-known types (Struct, Value, ListValue) become JSON strings
-	OpenAICompat bool
-
 	// MaxRecursionDepth controls how many times a recursive message type
 	// can be expanded before being replaced with a JSON-string placeholder.
 	// Zero uses the default (3). OpenAI documents a 5-level nesting limit
@@ -47,6 +40,13 @@ type SchemaOptions struct {
 	// manageable while still giving LLMs useful field-level detail.
 	MaxRecursionDepth int
 }
+
+// DiscriminatorKey is the property name of the oneof discriminator emitted in
+// the nested wrapper object. It carries the protojson name of the field that is
+// set within the oneof. A oneof member field literally named this is rejected
+// at generation time (see messageSchema). It mirrors runtime.DiscriminatorKey
+// so schema generation and the runtime transform stay in lockstep.
+const DiscriminatorKey = runtime.DiscriminatorKey
 
 // MessageSchema generates a JSON schema for a protobuf message descriptor.
 // This is the main entry point for schema generation and can be used both
@@ -56,7 +56,9 @@ func MessageSchema(md protoreflect.MessageDescriptor, opts SchemaOptions) map[st
 }
 
 // defaultMaxRecursionDepth is used when SchemaOptions.MaxRecursionDepth is 0.
-const defaultMaxRecursionDepth = 3
+// It mirrors runtime.DefaultMaxRecursionDepth so the encode-side stringification
+// boundary matches the schema's placeholder boundary.
+const defaultMaxRecursionDepth = runtime.DefaultMaxRecursionDepth
 
 // messageSchema is the internal recursive implementation with depth-limited
 // expansion. The seen map tracks how many times each message type has been
@@ -71,8 +73,8 @@ func messageSchema(md protoreflect.MessageDescriptor, opts SchemaOptions, seen m
 		maxDepth = defaultMaxRecursionDepth
 	}
 	if seen[md.FullName()] >= maxDepth {
-		// Depth limit reached: emit a string placeholder. The caller (FixOpenAI)
-		// parses it back to a JSON object at runtime.
+		// Depth limit reached: emit a string placeholder. The runtime transform
+		// parses it back to a JSON object before handing it to protojson.
 		return map[string]any{
 			"type":        "string",
 			"description": fmt.Sprintf("JSON-encoded %s. Provide a JSON object as a string.", md.Name()),
@@ -83,85 +85,134 @@ func messageSchema(md protoreflect.MessageDescriptor, opts SchemaOptions, seen m
 
 	required := []string{}
 	normalFields := map[string]any{}
-	oneOf := map[string][]map[string]any{}
+	// oneofMembers collects member field schemas per oneof, in declaration order.
+	oneofMembers := map[string]*orderedMap{}
 
 	for i := 0; i < md.Fields().Len(); i++ {
 		nestedFd := md.Fields().Get(i)
 		name := string(nestedFd.Name())
 
 		if oneof := nestedFd.ContainingOneof(); oneof != nil && !oneof.IsSynthetic() {
-			if !opts.OpenAICompat {
-				if _, ok := oneOf[string(oneof.Name())]; !ok {
-					oneOf[string(oneof.Name())] = []map[string]any{}
-				}
-				oneOf[string(oneof.Name())] = append(oneOf[string(oneof.Name())], map[string]any{
-					"properties": map[string]any{
-						name: fieldSchema(nestedFd, opts, seen),
-					},
-					"required": []string{name},
-				})
-			} else {
-				schema := fieldSchema(nestedFd, opts, seen)
-				// Make oneof fields nullable. Handle both string and []string
-				// type values (WKTs like Timestamp already return []string).
-				switch v := schema["type"].(type) {
-				case string:
-					schema["type"] = []string{v, "null"}
-				case []string:
-					// Already has type list (e.g., ["string", "null"] from WKTs).
-					// Ensure "null" is present.
-					hasNull := false
-					for _, s := range v {
-						if s == "null" {
-							hasNull = true
-							break
-						}
-					}
-					if !hasNull {
-						schema["type"] = append(v, "null")
-					}
-				}
-				normalFields[name] = schema
-				schema["description"] = fmt.Sprintf("Note: This field is part of the '%s' oneof group. Only one field in this group can be set at a time. Setting multiple fields in the group WILL result in an error. Protobuf oneOf semantics apply.", oneof.Name())
-				required = append(required, name)
+			// A member literally named "which" would collide with the
+			// discriminator key. Fail loudly rather than silently rename.
+			if name == DiscriminatorKey {
+				panic(fmt.Sprintf(
+					"protoc-gen-go-mcp: oneof %q in message %q has a member field named %q, which collides with the discriminator key; rename the field",
+					oneof.Name(), md.FullName(), DiscriminatorKey,
+				))
 			}
-		} else {
-			normalFields[name] = fieldSchema(nestedFd, opts, seen)
-			if IsFieldRequired(nestedFd) || opts.OpenAICompat {
-				required = append(required, name)
+			members, ok := oneofMembers[string(oneof.Name())]
+			if !ok {
+				members = newOrderedMap()
+				oneofMembers[string(oneof.Name())] = members
 			}
+			memberSchema := fieldSchema(nestedFd, opts, seen)
+			memberSchema["description"] = fmt.Sprintf("The value when %s=%q.", DiscriminatorKey, name)
+			members.set(name, memberSchema)
+			continue
+		}
+
+		normalFields[name] = fieldSchema(nestedFd, opts, seen)
+		if IsFieldRequired(nestedFd) {
+			required = append(required, name)
 		}
 	}
 
-	// Build anyOf deterministically by iterating over the message's oneofs
-	// in declaration order (not over the map which is non-deterministic).
-	var anyOf []map[string]any
+	// Emit one discriminated wrapper object per oneof, in declaration order.
+	// A oneof renders as a nested object keyed by the oneof name; providers
+	// reject a top-level union (anyOf/oneOf) as a tool input_schema.
 	for i := 0; i < md.Oneofs().Len(); i++ {
 		oo := md.Oneofs().Get(i)
 		if oo.IsSynthetic() {
 			continue
 		}
-		if entries, ok := oneOf[string(oo.Name())]; ok {
-			anyOf = append(anyOf, map[string]any{
-				"oneOf":    entries,
-				"$comment": "In this schema, there is a oneOf group for every protobuf oneOf block in the message.",
-			})
+		members, ok := oneofMembers[string(oo.Name())]
+		if !ok {
+			continue
+		}
+		name := string(oo.Name())
+
+		// "which" must be the first property the model reads, so the wrapper's
+		// "properties" is an ordered map with the discriminator first.
+		props := newOrderedMap()
+		props.set(DiscriminatorKey, map[string]any{
+			"type":        "string",
+			"enum":        members.keys,
+			"description": fmt.Sprintf("Which field of the %q oneof is set.", name),
+		})
+		for _, k := range members.keys {
+			props.set(k, members.vals[k])
+		}
+
+		normalFields[name] = map[string]any{
+			"type": "object",
+			"description": fmt.Sprintf(
+				"Exactly one of the %q group. Set %q to the chosen field name, then set only that field.",
+				name, DiscriminatorKey,
+			),
+			"properties": props,
+			"required":   []string{DiscriminatorKey},
+		}
+		if oneofRequired(oo) {
+			required = append(required, name)
 		}
 	}
 
-	result := map[string]any{
+	return map[string]any{
 		"type":       "object",
 		"properties": normalFields,
 		"required":   required,
 	}
-	if anyOf != nil {
-		result["anyOf"] = anyOf
-	}
-	if opts.OpenAICompat {
-		result["additionalProperties"] = false
-	}
+}
 
-	return result
+// oneofRequired reports whether a oneof carries (buf.validate.oneof).required.
+func oneofRequired(oo protoreflect.OneofDescriptor) bool {
+	opts := oo.Options()
+	if opts == nil || !proto.HasExtension(opts, validate.E_Oneof) {
+		return false
+	}
+	rules, _ := proto.GetExtension(opts, validate.E_Oneof).(*validate.OneofRules)
+	return rules.GetRequired()
+}
+
+// orderedMap is a JSON object that marshals its entries in insertion order.
+// It backs oneof wrapper "properties" so the "which" discriminator is always
+// serialized first for the model to read top-to-bottom.
+type orderedMap struct {
+	keys []string
+	vals map[string]any
+}
+
+func newOrderedMap() *orderedMap { return &orderedMap{vals: map[string]any{}} }
+
+func (o *orderedMap) set(k string, v any) {
+	if _, ok := o.vals[k]; !ok {
+		o.keys = append(o.keys, k)
+	}
+	o.vals[k] = v
+}
+
+func (o *orderedMap) MarshalJSON() ([]byte, error) {
+	var b strings.Builder
+	b.WriteByte('{')
+	for i, k := range o.keys {
+		if i > 0 {
+			b.WriteByte(',')
+		}
+		key, err := json.Marshal(k)
+		if err != nil {
+			return nil, err
+		}
+		b.Write(key)
+		b.WriteByte(':')
+		val, err := json.Marshal(o.vals[k])
+		if err != nil {
+			return nil, err
+		}
+		b.Write(val)
+	}
+	b.WriteByte('}')
+	return []byte(b.String()), nil
 }
 
 // FieldSchema generates a JSON schema for a single protobuf field descriptor.
@@ -183,7 +234,7 @@ func fieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions, seen map[p
 	case protoreflect.EnumKind:
 		schema = enumFieldSchema(fd)
 	default:
-		schema = scalarFieldSchema(fd, opts)
+		schema = scalarFieldSchema(fd)
 	}
 
 	constraints := ExtractValidateConstraints(fd)
@@ -213,22 +264,6 @@ func mapFieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions, seen ma
 		keyConstraints["pattern"] = "^-?(0|[1-9]\\d*)$"
 	}
 
-	if opts.OpenAICompat {
-		return map[string]any{
-			"type":        "array",
-			"description": "List of key value pairs",
-			"items": map[string]any{
-				"type": "object",
-				"properties": map[string]any{
-					"key":   keyConstraints,
-					"value": fieldSchema(fd.MapValue(), opts, seen),
-				},
-				"required":             []string{"key", "value"},
-				"additionalProperties": false,
-			},
-		}
-	}
-
 	return map[string]any{
 		"type":                 "object",
 		"propertyNames":        keyConstraints,
@@ -244,55 +279,23 @@ func messageFieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions, see
 	case "google.protobuf.Duration":
 		return map[string]any{"type": []string{"string", "null"}, "pattern": `^-?[0-9]+(\.[0-9]+)?s$`}
 	case "google.protobuf.Struct":
-		if opts.OpenAICompat {
-			return map[string]any{
-				"type":        "string",
-				"description": "string representation of any JSON object. represents a google.protobuf.Struct, a dynamic JSON object.",
-			}
-		}
 		return map[string]any{
 			"type":                 "object",
 			"additionalProperties": true,
 		}
 	case "google.protobuf.Value":
-		if opts.OpenAICompat {
-			return map[string]any{
-				"type":        "string",
-				"description": "string representation of any JSON value. represents a google.protobuf.Value, a dynamic JSON value (string, number, boolean, array, object).",
-			}
-		}
 		return map[string]any{
 			"description": "represents a google.protobuf.Value, a dynamic JSON value (string, number, boolean, array, object).",
 		}
 	case "google.protobuf.ListValue":
-		if opts.OpenAICompat {
-			return map[string]any{
-				"type":        "string",
-				"description": "string representation of a JSON array. represents a google.protobuf.ListValue, a JSON array of values.",
-			}
-		}
 		return map[string]any{
 			"type":        "array",
 			"description": "represents a google.protobuf.ListValue, a JSON array of values.",
 			"items":       map[string]any{},
 		}
 	case "google.protobuf.FieldMask":
-		if opts.OpenAICompat {
-			return map[string]any{"type": []string{"string", "null"}}
-		}
 		return map[string]any{"type": "string"}
 	case "google.protobuf.Any":
-		if opts.OpenAICompat {
-			return map[string]any{
-				"type": "object",
-				"properties": map[string]any{
-					"@type": map[string]any{"type": "string"},
-					"value": map[string]any{},
-				},
-				"required":             []string{"@type", "value"},
-				"additionalProperties": false,
-			}
-		}
 		return map[string]any{
 			"type": []string{"object", "null"},
 			"properties": map[string]any{
@@ -311,9 +314,6 @@ func messageFieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions, see
 	case "google.protobuf.BoolValue":
 		return map[string]any{"type": []string{"boolean", "null"}}
 	case "google.protobuf.BytesValue":
-		if opts.OpenAICompat {
-			return map[string]any{"type": []string{"string", "null"}}
-		}
 		return map[string]any{"type": []string{"string", "null"}, "format": "byte"}
 	default:
 		return messageSchema(fd.Message(), opts, seen)
@@ -331,15 +331,13 @@ func enumFieldSchema(fd protoreflect.FieldDescriptor) map[string]any {
 	}
 }
 
-func scalarFieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions) map[string]any {
+func scalarFieldSchema(fd protoreflect.FieldDescriptor) map[string]any {
 	schema := map[string]any{
 		"type": KindToType(fd.Kind()),
 	}
 	if fd.Kind() == protoreflect.BytesKind {
 		schema["contentEncoding"] = "base64"
-		if !opts.OpenAICompat {
-			schema["format"] = "byte"
-		}
+		schema["format"] = "byte"
 	}
 	return schema
 }
@@ -543,30 +541,18 @@ func MangleHeadIfTooLong(name string, maxLen int) string {
 	return hashPrefix + "_" + tail
 }
 
-// ToolForMethod generates standard and OpenAI-compatible MCP tools
-// for a given RPC method descriptor.
-func ToolForMethod(method protoreflect.MethodDescriptor, comment string) (standard, openAI runtime.Tool) {
+// ToolForMethod generates the MCP tool definition for a given RPC method
+// descriptor (input and output JSON schemas plus name and description).
+func ToolForMethod(method protoreflect.MethodDescriptor, comment string) runtime.Tool {
 	toolName := MangleHeadIfTooLong(strings.ReplaceAll(string(method.FullName()), ".", "_"), 64)
 	description := CleanComment(comment)
 
-	standardIn := marshalTopLevelSchema(method.Input(), SchemaOptions{OpenAICompat: false})
-	standardOut := marshalTopLevelSchema(method.Output(), SchemaOptions{OpenAICompat: false})
-	openAIIn := marshalTopLevelSchema(method.Input(), SchemaOptions{OpenAICompat: true})
-	openAIOut := marshalTopLevelSchema(method.Output(), SchemaOptions{OpenAICompat: true})
-
-	standard = runtime.Tool{
+	return runtime.Tool{
 		Name:            toolName,
 		Description:     description,
-		RawInputSchema:  standardIn,
-		RawOutputSchema: standardOut,
+		RawInputSchema:  marshalTopLevelSchema(method.Input(), SchemaOptions{}),
+		RawOutputSchema: marshalTopLevelSchema(method.Output(), SchemaOptions{}),
 	}
-	openAI = runtime.Tool{
-		Name:            toolName,
-		Description:     description,
-		RawInputSchema:  openAIIn,
-		RawOutputSchema: openAIOut,
-	}
-	return
 }
 
 // marshalTopLevelSchema generates and marshals a JSON schema for a top-level

@@ -26,7 +26,6 @@ import (
 
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/gen"
-	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime/mark3labs"
 	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -48,7 +47,6 @@ func main() {
 	// Register all RPCs as MCP tools dynamically.
 	// No NewMessage needed - defaults to dynamicpb for zero-config operation.
 	gen.RegisterService(s, sd, handler, gen.RegisterServiceOptions{
-		Provider: runtime.LLMProviderStandard,
 		// NewMessage is nil - uses dynamicpb automatically.
 		// For concrete types, provide your own:
 		//   NewMessage: func(md protoreflect.MessageDescriptor) proto.Message { ... },

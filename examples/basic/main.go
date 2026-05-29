@@ -17,10 +17,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime/mark3labs"
 	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdataconnect"
@@ -42,32 +40,14 @@ var (
 func main() {
 	// Create MCP server using mark3labs adapter
 	raw, s := mark3labs.NewServer(
-		"Example auto-generated gRPC-MCP with runtime LLM provider selection",
+		"Example auto-generated gRPC-MCP server",
 		"1.0.0",
 	)
 
 	srv := testServer{}
 
-	// Get LLM provider from environment variable, default to standard
-	providerStr := os.Getenv("LLM_PROVIDER")
-	var provider runtime.LLMProvider
-	switch providerStr {
-	case "openai":
-		provider = runtime.LLMProviderOpenAI
-		fmt.Printf("Using OpenAI-compatible MCP handlers\n")
-	case "standard":
-		fallthrough
-	default:
-		provider = runtime.LLMProviderStandard
-		fmt.Printf("Using standard MCP handlers\n")
-	}
-
-	// Register handlers for the selected provider
-	testdatamcp.RegisterTestServiceHandlerWithProvider(s, &srv, provider)
-
-	// Alternative: Register specific handlers directly
-	// testdatamcp.RegisterTestServiceHandler(s, &srv)        // Standard
-	// testdatamcp.RegisterTestServiceHandlerOpenAI(s, &srv)  // OpenAI
+	// Register the generated MCP handlers.
+	testdatamcp.RegisterTestServiceHandler(s, &srv)
 
 	testdatamcp.ForwardToConnectTestServiceClient(s, connectClient)
 	testdatamcp.ForwardToTestServiceClient(s, grpcClient)
