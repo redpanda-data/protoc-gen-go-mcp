@@ -70,6 +70,16 @@ func decodeMessage(md protoreflect.MessageDescriptor, obj map[string]any) error 
 	//    parsing recursion-depth string placeholders back to objects.
 	for i := 0; i < md.Fields().Len(); i++ {
 		fd := md.Fields().Get(i)
+		// Dynamic well-known types (Struct/Value/ListValue) cannot be expressed in
+		// the strict tool-schema subset OpenAI and Anthropic accept, so a client
+		// may downgrade them to a JSON-encoded string. Parse that string back to
+		// native JSON here so protojson sees the shape it expects. A model that
+		// sent native JSON (e.g. Gemini, whose schema is not downgraded) is left
+		// untouched. Covers scalar, repeated and map-valued fields.
+		if isDynamicWKTField(fd) {
+			liftStringifiedWKT(fd, obj)
+			continue
+		}
 		if fd.Kind() != protoreflect.MessageKind && fd.Kind() != protoreflect.GroupKind {
 			continue
 		}
@@ -447,6 +457,88 @@ func resolveFieldName(fd protoreflect.FieldDescriptor, obj map[string]any) strin
 		return jsonName
 	}
 	return ""
+}
+
+// isDynamicWKTField reports whether fd carries a dynamic well-known type
+// (Struct/Value/ListValue) as its value — directly, as a repeated element, or as
+// a map value. These are the types a client may downgrade to a JSON-string.
+func isDynamicWKTField(fd protoreflect.FieldDescriptor) bool {
+	if fd.IsMap() {
+		mv := fd.MapValue()
+		return mv.Kind() == protoreflect.MessageKind && isDynamicWKT(mv.Message())
+	}
+	return fd.Kind() == protoreflect.MessageKind && isDynamicWKT(fd.Message())
+}
+
+// isDynamicWKT reports whether md is a protobuf well-known type that renders as
+// open-ended/dynamic JSON (no fixed type). A strict-schema client collapses
+// these to a JSON-encoded string, which DecodeArguments parses back. Any is
+// excluded: it keeps a typed wrapper shape and is not stringified wholesale.
+func isDynamicWKT(md protoreflect.MessageDescriptor) bool {
+	switch string(md.FullName()) {
+	case "google.protobuf.Struct",
+		"google.protobuf.Value",
+		"google.protobuf.ListValue":
+		return true
+	default:
+		return false
+	}
+}
+
+// liftStringifiedWKT parses any JSON-string values of a dynamic-WKT field back to
+// native JSON in place, across scalar, repeated and map shapes. A value that is
+// not a string, or not parseable as JSON, is left untouched: protojson then sees
+// the native JSON (Gemini path) or reports the error itself.
+func liftStringifiedWKT(fd protoreflect.FieldDescriptor, obj map[string]any) {
+	name := resolveFieldName(fd, obj)
+	if name == "" {
+		return
+	}
+	switch {
+	case fd.IsMap():
+		m, ok := obj[name].(map[string]any)
+		if !ok {
+			return
+		}
+		for k, v := range m {
+			if parsed, ok := parseJSONString(v); ok {
+				m[k] = parsed
+			}
+		}
+	case fd.IsList():
+		arr, ok := obj[name].([]any)
+		if !ok {
+			return
+		}
+		for idx, v := range arr {
+			if parsed, ok := parseJSONString(v); ok {
+				arr[idx] = parsed
+			}
+		}
+	default:
+		if parsed, ok := parseJSONString(obj[name]); ok {
+			obj[name] = parsed
+		}
+	}
+}
+
+// parseJSONString returns the JSON value encoded in v when v is a string holding
+// valid JSON, and (v, false) otherwise. A value the client downgraded to a
+// string is, by construction, valid JSON ("\"x\"", "42", "{...}"), so it is
+// lifted; a google.protobuf.Value that natively holds a non-JSON string (e.g.
+// "hello") fails to parse and is left as the string it is. The one ambiguous
+// case — a native Value holding a string that happens to be valid JSON, such as
+// "42" — is resolved in favor of the (far more common) downgraded reading.
+func parseJSONString(v any) (any, bool) {
+	s, ok := v.(string)
+	if !ok {
+		return v, false
+	}
+	var out any
+	if err := json.Unmarshal([]byte(s), &out); err != nil {
+		return v, false
+	}
+	return out, true
 }
 
 // isWellKnown reports whether md is a protobuf well-known type that the schema

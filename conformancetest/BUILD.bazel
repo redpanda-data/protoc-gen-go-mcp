@@ -2,8 +2,12 @@ load("@rules_go//go:def.bzl", "go_test")
 
 go_test(
     name = "conformancetest_test",
-    srcs = ["aisdk_conformance_test.go"],
+    srcs = [
+        "aisdk_conformance_test.go",
+        "offline_schema_test.go",
+    ],
     deps = [
+        "//pkg/gen",
         "//pkg/runtime",
         "//pkg/testdata/gen/go/testdata",
         "//pkg/testdata/gen/go/testdata/testdatamcp",
@@ -11,7 +15,9 @@ go_test(
         "@com_github_redpanda_data_ai_sdk_go//providers/anthropic",
         "@com_github_redpanda_data_ai_sdk_go//providers/google",
         "@com_github_redpanda_data_ai_sdk_go//providers/openai",
+        "@com_github_santhosh_tekuri_jsonschema_v5//:jsonschema",
         "@org_golang_google_protobuf//encoding/protojson",
         "@org_golang_google_protobuf//proto",
+        "@org_golang_google_protobuf//reflect/protoreflect",
     ],
 )

@@ -91,7 +91,7 @@ func providersUnderTest() []provider {
 				if err != nil {
 					t.Fatalf("google provider: %v", err)
 				}
-				m, err := p.NewModel("gemini-2.5-flash")
+				m, err := p.NewModel("gemini-3.5-flash")
 				if err != nil {
 					t.Fatalf("google model: %v", err)
 				}
@@ -219,6 +219,34 @@ func TestConformance_RecursiveOneof(t *testing.T) {
 		decodeInto(t, args, &req)
 		if req.GetNode() == nil {
 			t.Fatalf("node oneof not set: %+v", &req)
+		}
+	})
+}
+
+// TestConformance_WellKnownTypes exercises dynamic well-known types
+// (google.protobuf.Struct and google.protobuf.Value). OpenAI and Anthropic both
+// reject the open-ended native schema, so the ai-sdk-go adapters downgrade those
+// nodes to a JSON-encoded string; the runtime decode then parses them back. This
+// proves that round-trip works on every provider, including the Gemini path
+// where the schema is not downgraded.
+func TestConformance_WellKnownTypes(t *testing.T) {
+	runOnAllProviders(t, func(t *testing.T, m llm.Model) {
+		args := callTool(t, m, testdatamcp.TestService_ProcessWellKnownTypesTool,
+			"Process a record. Set metadata to a JSON object with exactly these keys: "+
+				`environment="production" and replicas=3. Set config to the string "verbose". `+
+				"Set timestamp to 2026-01-02T03:04:05Z.")
+		var req testdata.ProcessWellKnownTypesRequest
+		decodeInto(t, args, &req)
+
+		md := req.GetMetadata()
+		if md == nil || md.GetFields() == nil {
+			t.Fatalf("metadata Struct not decoded (stringified WKT lift failed?): %+v", &req)
+		}
+		if _, ok := md.GetFields()["environment"]; !ok {
+			t.Fatalf("metadata missing 'environment' key; got %v", md.GetFields())
+		}
+		if req.GetConfig() == nil {
+			t.Fatalf("config Value not decoded: %+v", &req)
 		}
 	})
 }

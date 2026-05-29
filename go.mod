@@ -9,7 +9,7 @@ require (
 	github.com/mark3labs/mcp-go v0.37.0
 	github.com/modelcontextprotocol/go-sdk v1.4.1
 	github.com/onsi/gomega v1.37.0
-	github.com/redpanda-data/ai-sdk-go v0.0.0-20260520124326-bc6ed8ff0213
+	github.com/redpanda-data/ai-sdk-go v0.0.0-20260529144815-a0f89f6c7d94
 	github.com/redpanda-data/common-go/api v0.0.0-20250801174835-9eea07f1ea06
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	golang.org/x/tools v0.44.0

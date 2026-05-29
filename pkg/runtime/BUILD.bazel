@@ -26,12 +26,14 @@ go_test(
     name = "runtime_test",
     size = "small",
     srcs = [
+        "decode_fuzz_test.go",
         "error_edge_cases_test.go",
         "error_test.go",
         "error_wrapped_bug_test.go",
         "extra_properties_edge_cases_test.go",
         "extra_properties_test.go",
         "transform_test.go",
+        "transform_wkt_test.go",
     ],
     embed = [":runtime"],
     deps = [
@@ -44,7 +46,9 @@ go_test(
         "@org_golang_google_grpc//status",
         "@org_golang_google_protobuf//encoding/protojson",
         "@org_golang_google_protobuf//proto",
+        "@org_golang_google_protobuf//reflect/protoreflect",
         "@org_golang_google_protobuf//testing/protocmp",
+        "@org_golang_google_protobuf//types/known/structpb",
         "@org_golang_google_protobuf//types/known/wrapperspb",
     ],
 )
