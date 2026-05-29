@@ -47,7 +47,6 @@ func TestExtraPropBug_NameCollisionWithProtoField(t *testing.T) {
 
 	server := mcpserver.NewMCPServer("test", "1.0")
 	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 		ExtraProperties: []runtime.ExtraProperty{
 			{
@@ -120,7 +119,6 @@ func TestExtraPropBug_ExtraPropsNotStrippedBeforeUnmarshal(t *testing.T) {
 
 	server := mcpserver.NewMCPServer("test", "1.0")
 	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 		ExtraProperties: []runtime.ExtraProperty{
 			{

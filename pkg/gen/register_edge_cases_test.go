@@ -27,7 +27,6 @@ func TestRegisterService_HandlerReturnsError(t *testing.T) {
 
 	server := mcpserver.NewMCPServer("test", "1.0")
 	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 	})
 
@@ -65,15 +64,14 @@ func TestRegisterService_CommentProvider(t *testing.T) {
 	}
 
 	comments := map[string]string{
-		"CreateItem":           "Create a new item in the store",
-		"GetItem":              "Retrieve an item by its identifier",
+		"CreateItem":            "Create a new item in the store",
+		"GetItem":               "Retrieve an item by its identifier",
 		"ProcessWellKnownTypes": "Process messages with well-known types",
-		"TestValidation":       "Validate input with protovalidate",
+		"TestValidation":        "Validate input with protovalidate",
 	}
 
 	server := mcpserver.NewMCPServer("test", "1.0")
 	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 		CommentProvider: func(method protoreflect.MethodDescriptor) string {
 			return comments[string(method.Name())]
@@ -135,7 +133,6 @@ func TestRegisterService_NilCommentProvider(t *testing.T) {
 
 	server := mcpserver.NewMCPServer("test", "1.0")
 	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 		// CommentProvider is nil - should result in empty descriptions
 	})
@@ -192,7 +189,6 @@ func TestRegisterService_ExtraPropertyNotInArgs(t *testing.T) {
 
 	server := mcpserver.NewMCPServer("test", "1.0")
 	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 		ExtraProperties: []runtime.ExtraProperty{
 			{
@@ -220,113 +216,6 @@ func TestRegisterService_ExtraPropertyNotInArgs(t *testing.T) {
 	g.Expect(capturedToken).To(BeNil())
 }
 
-func TestRegisterService_OpenAI_SchemaHasAdditionalPropertiesFalse(t *testing.T) {
-	g := NewWithT(t)
-
-	file := (&testdata.CreateItemRequest{}).ProtoReflect().Descriptor().ParentFile()
-	sd := file.Services().ByName("TestService")
-
-	handler := func(ctx context.Context, method protoreflect.MethodDescriptor, req proto.Message) (proto.Message, error) {
-		return newTestMessage(method.Output()), nil
-	}
-
-	server := mcpserver.NewMCPServer("test", "1.0")
-	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderOpenAI,
-		NewMessage: newTestMessage,
-	})
-
-	ctx := context.Background()
-	_ = server.HandleMessage(ctx, json.RawMessage(`{
-		"jsonrpc": "2.0",
-		"id": 0,
-		"method": "initialize",
-		"params": {
-			"protocolVersion": "2024-11-05",
-			"clientInfo": {"name": "test", "version": "1.0"},
-			"capabilities": {}
-		}
-	}`))
-
-	result := server.HandleMessage(ctx, json.RawMessage(`{
-		"jsonrpc": "2.0",
-		"id": 1,
-		"method": "tools/list"
-	}`))
-
-	resultBytes, err := json.Marshal(result)
-	g.Expect(err).ToNot(HaveOccurred())
-
-	var resp struct {
-		Result struct {
-			Tools []struct {
-				Name        string          `json:"name"`
-				InputSchema json.RawMessage `json:"inputSchema"`
-			} `json:"tools"`
-		} `json:"result"`
-	}
-	err = json.Unmarshal(resultBytes, &resp)
-	g.Expect(err).ToNot(HaveOccurred())
-
-	for _, tool := range resp.Result.Tools {
-		var schema map[string]any
-		err = json.Unmarshal(tool.InputSchema, &schema)
-		g.Expect(err).ToNot(HaveOccurred(), "tool %s", tool.Name)
-
-		// Top-level type must be plain "object" (not ["object","null"])
-		g.Expect(schema["type"]).To(Equal("object"), "tool %s", tool.Name)
-		g.Expect(schema["additionalProperties"]).To(Equal(false), "tool %s", tool.Name)
-	}
-}
-
-func TestRegisterService_OpenAI_FixAppliedToMapArgs(t *testing.T) {
-	g := NewWithT(t)
-
-	file := (&testdata.CreateItemRequest{}).ProtoReflect().Descriptor().ParentFile()
-	sd := file.Services().ByName("TestService")
-
-	var capturedReq *testdata.CreateItemRequest
-
-	handler := func(ctx context.Context, method protoreflect.MethodDescriptor, req proto.Message) (proto.Message, error) {
-		if string(method.Name()) == "CreateItem" {
-			capturedReq = req.(*testdata.CreateItemRequest)
-		}
-		return newTestMessage(method.Output()), nil
-	}
-
-	server := mcpserver.NewMCPServer("test", "1.0")
-	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderOpenAI,
-		NewMessage: newTestMessage,
-	})
-
-	ctx := context.Background()
-	// Send map as array of KV pairs (OpenAI format) + well-known type data
-	_ = server.HandleMessage(ctx, json.RawMessage(`{
-		"jsonrpc": "2.0",
-		"id": 1,
-		"method": "tools/call",
-		"params": {
-			"name": "testdata_TestService_CreateItem",
-			"arguments": {
-				"name": "TestWidget",
-				"labels": [
-					{"key": "env", "value": "staging"},
-					{"key": "team", "value": "platform"}
-				],
-				"tags": ["go", "grpc"]
-			}
-		}
-	}`))
-
-	g.Expect(capturedReq).ToNot(BeNil())
-	g.Expect(capturedReq.Name).To(Equal("TestWidget"))
-	g.Expect(capturedReq.Labels).To(HaveLen(2))
-	g.Expect(capturedReq.Labels["env"]).To(Equal("staging"))
-	g.Expect(capturedReq.Labels["team"]).To(Equal("platform"))
-	g.Expect(capturedReq.Tags).To(ConsistOf("go", "grpc"))
-}
-
 func TestRegisterService_EdgeCaseService_AllMethods(t *testing.T) {
 	g := NewWithT(t)
 
@@ -342,9 +231,7 @@ func TestRegisterService_EdgeCaseService_AllMethods(t *testing.T) {
 	}
 
 	server := mcpserver.NewMCPServer("test", "1.0")
-	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
-		Provider: runtime.LLMProviderStandard,
-	})
+	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{})
 
 	ctx := context.Background()
 	_ = server.HandleMessage(ctx, json.RawMessage(`{
@@ -377,8 +264,8 @@ func TestRegisterService_EdgeCaseService_AllMethods(t *testing.T) {
 	err = json.Unmarshal(resultBytes, &resp)
 	g.Expect(err).ToNot(HaveOccurred())
 
-	// EdgeCaseService has 8 unary RPCs
-	g.Expect(resp.Result.Tools).To(HaveLen(8))
+	// EdgeCaseService has 9 unary RPCs
+	g.Expect(resp.Result.Tools).To(HaveLen(9))
 
 	expectedTools := []string{
 		"testdata_EdgeCaseService_DeepNesting",
@@ -389,6 +276,7 @@ func TestRegisterService_EdgeCaseService_AllMethods(t *testing.T) {
 		"testdata_EdgeCaseService_MultipleOneofs",
 		"testdata_EdgeCaseService_NumericValidation",
 		"testdata_EdgeCaseService_RecursiveTree",
+		"testdata_EdgeCaseService_OneofRecursive",
 	}
 	toolNames := make([]string, 0)
 	for _, tool := range resp.Result.Tools {
@@ -412,7 +300,6 @@ func TestRegisterService_DiscardUnknownFields(t *testing.T) {
 
 	server := mcpserver.NewMCPServer("test", "1.0")
 	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 	})
 
@@ -451,7 +338,6 @@ func TestRegisterService_MultipleExtraProperties(t *testing.T) {
 
 	server := mcpserver.NewMCPServer("test", "1.0")
 	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 		ExtraProperties: []runtime.ExtraProperty{
 			{Name: "auth_token", Description: "Auth token", Required: true, ContextKey: tokenKey{}},
@@ -495,7 +381,6 @@ func TestRegisterService_ToolCallReturnsResponse(t *testing.T) {
 
 	server := mcpserver.NewMCPServer("test", "1.0")
 	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 	})
 
@@ -549,30 +434,21 @@ func TestToolForMethod_EdgeCaseService(t *testing.T) {
 		method := svc.Methods().Get(i)
 		t.Run(string(method.Name()), func(t *testing.T) {
 			g := NewWithT(t)
-			standard, openAI := ToolForMethod(method, "Test "+string(method.Name()))
+			tool := ToolForMethod(method, "Test "+string(method.Name()))
 
-			g.Expect(len(standard.Name)).To(BeNumerically("<=", 64))
-			g.Expect(standard.Name).To(Equal(openAI.Name))
-			g.Expect(standard.Description).To(HavePrefix("Test "))
+			g.Expect(len(tool.Name)).To(BeNumerically("<=", 64))
+			g.Expect(tool.Description).To(HavePrefix("Test "))
 
-			// Both schemas should be valid JSON
-			var stdSchema, oaiSchema map[string]any
-			g.Expect(json.Unmarshal(standard.RawInputSchema, &stdSchema)).To(Succeed())
-			g.Expect(json.Unmarshal(openAI.RawInputSchema, &oaiSchema)).To(Succeed())
-
-			// OpenAI schema: top-level "object", additionalProperties: false
-			g.Expect(oaiSchema["type"]).To(Equal("object"))
-			g.Expect(oaiSchema["additionalProperties"]).To(Equal(false))
-
-			// Standard schema: "object", no additionalProperties
-			g.Expect(stdSchema["type"]).To(Equal("object"))
-			g.Expect(stdSchema).ToNot(HaveKey("additionalProperties"))
-
-			// Validate using the raw schema (not JSON round-tripped) since
-			// validateOpenAISchema expects []string for required, not []interface{}
-			oaiRawSchema := MessageSchema(method.Input(), SchemaOptions{OpenAICompat: true})
-			oaiRawSchema["type"] = "object"
-			validateOpenAISchema(t, oaiRawSchema, string(method.Name()))
+			// Input and output schemas are valid JSON with a plain object root
+			// and carry no top-level union keyword.
+			for _, raw := range []json.RawMessage{tool.RawInputSchema, tool.RawOutputSchema} {
+				var schema map[string]any
+				g.Expect(json.Unmarshal(raw, &schema)).To(Succeed())
+				g.Expect(schema["type"]).To(Equal("object"))
+				g.Expect(schema).ToNot(HaveKey("anyOf"))
+				g.Expect(schema).ToNot(HaveKey("oneOf"))
+				g.Expect(schema).ToNot(HaveKey("allOf"))
+			}
 		})
 	}
 }
@@ -594,7 +470,6 @@ func TestRegisterService_EmptyArguments(t *testing.T) {
 
 	server := mcpserver.NewMCPServer("test", "1.0")
 	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 	})
 
@@ -625,7 +500,6 @@ func TestRegisterService_ExtraPropertiesInSchema(t *testing.T) {
 
 	server := mcpserver.NewMCPServer("test", "1.0")
 	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 		ExtraProperties: []runtime.ExtraProperty{
 			{Name: "session_id", Description: "Session identifier", Required: true, ContextKey: "session"},

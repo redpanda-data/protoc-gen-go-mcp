@@ -161,11 +161,11 @@ func TestRecursiveMutual_StackOverflow(t *testing.T) {
 	}
 }
 
-// TestRecursiveOpenAICompat tests recursion in OpenAI mode. The placeholder
-// must be a string (consistent with Struct/Value handling), not a bare object.
-func TestRecursiveOpenAICompat_StackOverflow(t *testing.T) {
+// TestRecursiveLinkedList tests recursion depth cutoff for a linked-list message.
+// The placeholder must be a string after maxDepth expansions.
+func TestRecursiveLinkedList_StackOverflow(t *testing.T) {
 	md := buildLinkedListMessage(t)
-	schema := MessageSchema(md, SchemaOptions{OpenAICompat: true})
+	schema := MessageSchema(md, SchemaOptions{})
 	if schema == nil {
 		t.Fatal("expected non-nil schema")
 	}
@@ -189,7 +189,12 @@ func TestRecursiveOpenAICompat_StackOverflow(t *testing.T) {
 	}
 }
 
-func sp(s string) *string                                                                      { return &s }
-func i32p(i int32) *int32                                                                      { return &i }
-func ftp(t descriptorpb.FieldDescriptorProto_Type) *descriptorpb.FieldDescriptorProto_Type     { return &t }
-func flp(l descriptorpb.FieldDescriptorProto_Label) *descriptorpb.FieldDescriptorProto_Label   { return &l }
+func sp(s string) *string { return &s }
+
+func i32p(i int32) *int32 { return &i }
+
+func ftp(t descriptorpb.FieldDescriptorProto_Type) *descriptorpb.FieldDescriptorProto_Type { return &t }
+
+func flp(l descriptorpb.FieldDescriptorProto_Label) *descriptorpb.FieldDescriptorProto_Label {
+	return &l
+}

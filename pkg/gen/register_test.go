@@ -73,7 +73,6 @@ func TestRegisterService_OutputSchemaAndStructuredContent(t *testing.T) {
 
 	rec := &recordingServer{}
 	RegisterService(rec, sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 	})
 
@@ -140,7 +139,6 @@ func TestRegisterService_Standard(t *testing.T) {
 
 	raw, adapter := mark3labs.NewServer("test", "1.0")
 	RegisterService(adapter, sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 	})
 
@@ -185,7 +183,6 @@ func TestRegisterService_OpenAI(t *testing.T) {
 
 	raw, adapter := mark3labs.NewServer("test", "1.0")
 	RegisterService(adapter, sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderOpenAI,
 		NewMessage: newTestMessage,
 	})
 
@@ -222,7 +219,6 @@ func TestRegisterService_WithExtraProperties(t *testing.T) {
 
 	raw, adapter := mark3labs.NewServer("test", "1.0")
 	RegisterService(adapter, sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 		ExtraProperties: []runtime.ExtraProperty{
 			{
@@ -259,7 +255,6 @@ func TestRegisterService_ToolList(t *testing.T) {
 
 	raw, adapter := mark3labs.NewServer("test", "1.0")
 	RegisterService(adapter, sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 		CommentProvider: func(method protoreflect.MethodDescriptor) string {
 			return "Description for " + string(method.Name())
@@ -349,7 +344,6 @@ func TestRegisterService_ZeroConfigDynamicPB(t *testing.T) {
 	// Zero-config: no NewMessage provided, should default to DynamicNewMessage
 	raw, adapter := mark3labs.NewServer("test", "1.0")
 	RegisterService(adapter, sd, handler, RegisterServiceOptions{
-		Provider: runtime.LLMProviderStandard,
 		// NewMessage intentionally omitted - should default to dynamicpb
 	})
 

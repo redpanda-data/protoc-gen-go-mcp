@@ -36,7 +36,6 @@ func TestRegister_PanicOnNilNewMessage(t *testing.T) {
 
 	server := mcpserver.NewMCPServer("test", "1.0")
 	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: nilNewMessage,
 	})
 
@@ -89,7 +88,6 @@ func TestRegister_PanicOnNilArguments_WithExtraProperties(t *testing.T) {
 
 	server := mcpserver.NewMCPServer("test", "1.0")
 	RegisterService(mark3labs.Wrap(server), sd, handler, RegisterServiceOptions{
-		Provider:   runtime.LLMProviderStandard,
 		NewMessage: newTestMessage,
 		ExtraProperties: []runtime.ExtraProperty{
 			{

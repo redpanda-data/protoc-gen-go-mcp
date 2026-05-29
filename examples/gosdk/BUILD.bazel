@@ -6,7 +6,6 @@ go_library(
     importpath = "github.com/redpanda-data/protoc-gen-go-mcp/examples/gosdk",
     visibility = ["//visibility:private"],
     deps = [
-        "//pkg/runtime",
         "//pkg/runtime/gosdk",
         "//pkg/testdata/gen/go/testdata",
         "//pkg/testdata/gen/go/testdata/testdatamcp",

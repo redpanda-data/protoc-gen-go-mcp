@@ -24,7 +24,6 @@ import (
 	"fmt"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime/gosdk"
 	testdata "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdatamcp"
@@ -42,7 +41,7 @@ func main() {
 	srv := testServer{}
 
 	// Register handlers - same generated code, different MCP library.
-	testdatamcp.RegisterTestServiceHandlerWithProvider(s, &srv, runtime.LLMProviderStandard)
+	testdatamcp.RegisterTestServiceHandler(s, &srv)
 
 	fmt.Println("Serving over stdio with modelcontextprotocol/go-sdk")
 
