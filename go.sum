@@ -76,8 +76,8 @@ github.com/openai/openai-go/v3 v3.29.0 h1:dZNJ0w7DxwpgppzKQjSKfLebW27KrtGqgSy4ip
 github.com/openai/openai-go/v3 v3.29.0/go.mod h1:cdufnVK14cWcT9qA1rRtrXx4FTRsgbDPW7Ia7SS5cZo=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/redpanda-data/ai-sdk-go v0.0.0-20260529144815-a0f89f6c7d94 h1:J8sNDQOvf0ENdQb5z/MmXp5/stVCz4QWbhWtyzOpRlE=
-github.com/redpanda-data/ai-sdk-go v0.0.0-20260529144815-a0f89f6c7d94/go.mod h1:6b23rKmNiLW/nke2CCTZV8+95C5SJe/fceRRaQ84nQE=
+github.com/redpanda-data/ai-sdk-go v0.0.0-20260529154443-413292e00db5 h1:0CKzGdVFadgVEX/oLVJ/ihpZLqgn14G3GqYJMaUIJbY=
+github.com/redpanda-data/ai-sdk-go v0.0.0-20260529154443-413292e00db5/go.mod h1:6b23rKmNiLW/nke2CCTZV8+95C5SJe/fceRRaQ84nQE=
 github.com/redpanda-data/common-go/api v0.0.0-20250801174835-9eea07f1ea06 h1:9Ecc+Cg1EyqSTIQ6wQKoKk8BqDlBQmR74bJui4qIqsM=
 github.com/redpanda-data/common-go/api v0.0.0-20250801174835-9eea07f1ea06/go.mod h1:klAmWfc8Q3hEZk8geFTMu6f2sk3VUKRS7cv/LvB05ig=
 github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0tI/otEQ=
