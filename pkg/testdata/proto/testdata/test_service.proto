@@ -21,20 +21,29 @@ import "google/protobuf/struct.proto";
 import "google/protobuf/any.proto";
 import "google/api/field_behavior.proto";
 import "buf/validate/validate.proto";
+import "lixin/common/mcp/v1/mcp.proto";
 
 // TestService provides test operations
 service TestService {
   // CreateItem creates a new item
-  rpc CreateItem(CreateItemRequest) returns (CreateItemResponse);
-  
+  rpc CreateItem(CreateItemRequest) returns (CreateItemResponse) {
+    option (lixin.common.mcp.v1.method_include) = true;
+  }
+
   // GetItem retrieves an item by ID
-  rpc GetItem(GetItemRequest) returns (GetItemResponse);
-  
+  rpc GetItem(GetItemRequest) returns (GetItemResponse) {
+    option (lixin.common.mcp.v1.method_include) = true;
+  }
+
   // Test well-known types handling
-  rpc ProcessWellKnownTypes(ProcessWellKnownTypesRequest) returns (ProcessWellKnownTypesResponse);
-  
+  rpc ProcessWellKnownTypes(ProcessWellKnownTypesRequest) returns (ProcessWellKnownTypesResponse) {
+    option (lixin.common.mcp.v1.method_include) = true;
+  }
+
   // Test protovalidate constraints
-  rpc TestValidation(TestValidationRequest) returns (TestValidationResponse);
+  rpc TestValidation(TestValidationRequest) returns (TestValidationResponse) {
+    option (lixin.common.mcp.v1.method_include) = true;
+  }
 }
 
 message CreateItemRequest {

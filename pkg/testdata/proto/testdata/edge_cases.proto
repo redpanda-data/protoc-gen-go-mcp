@@ -23,37 +23,56 @@ import "google/protobuf/duration.proto";
 import "google/protobuf/wrappers.proto";
 import "google/api/field_behavior.proto";
 import "buf/validate/validate.proto";
+import "lixin/common/mcp/v1/mcp.proto";
 
 // EdgeCaseService exercises every tricky code path in the generator
 service EdgeCaseService {
   // DeepNesting tests deeply nested messages with maps and WKTs
-  rpc DeepNesting(DeepNestingRequest) returns (DeepNestingResponse);
+  rpc DeepNesting(DeepNestingRequest) returns (DeepNestingResponse) {
+    option (lixin.common.mcp.v1.method_include) = true;
+  }
 
   // AllScalarTypes tests all protobuf scalar types
-  rpc AllScalarTypes(AllScalarTypesRequest) returns (AllScalarTypesResponse);
+  rpc AllScalarTypes(AllScalarTypesRequest) returns (AllScalarTypesResponse) {
+    option (lixin.common.mcp.v1.method_include) = true;
+  }
 
   // RepeatedMessages tests repeated message fields with inner maps/WKTs
-  rpc RepeatedMessages(RepeatedMessagesRequest) returns (RepeatedMessagesResponse);
+  rpc RepeatedMessages(RepeatedMessagesRequest) returns (RepeatedMessagesResponse) {
+    option (lixin.common.mcp.v1.method_include) = true;
+  }
 
   // MapVariants tests all map key/value type combinations
-  rpc MapVariants(MapVariantsRequest) returns (MapVariantsResponse);
+  rpc MapVariants(MapVariantsRequest) returns (MapVariantsResponse) {
+    option (lixin.common.mcp.v1.method_include) = true;
+  }
 
   // EnumFields tests enum handling
-  rpc EnumFields(EnumFieldsRequest) returns (EnumFieldsResponse);
+  rpc EnumFields(EnumFieldsRequest) returns (EnumFieldsResponse) {
+    option (lixin.common.mcp.v1.method_include) = true;
+  }
 
   // MultipleOneofs tests multiple oneof groups in a single message
-  rpc MultipleOneofs(MultipleOneofsRequest) returns (MultipleOneofsResponse);
+  rpc MultipleOneofs(MultipleOneofsRequest) returns (MultipleOneofsResponse) {
+    option (lixin.common.mcp.v1.method_include) = true;
+  }
 
   // NumericValidation tests all numeric validation constraint types
-  rpc NumericValidation(NumericValidationRequest) returns (NumericValidationResponse);
+  rpc NumericValidation(NumericValidationRequest) returns (NumericValidationResponse) {
+    option (lixin.common.mcp.v1.method_include) = true;
+  }
 
   // RecursiveTree tests self-referencing message schemas
-  rpc RecursiveTree(RecursiveTreeRequest) returns (RecursiveTreeResponse);
+  rpc RecursiveTree(RecursiveTreeRequest) returns (RecursiveTreeResponse) {
+    option (lixin.common.mcp.v1.method_include) = true;
+  }
 
   // OneofRecursive tests a recursive message nested inside a oneof, on both
   // the request (decode) and response (encode) sides. It exercises the oneof
   // discriminated-wrapper transform combined with recursion-depth placeholders.
-  rpc OneofRecursive(OneofRecursiveRequest) returns (OneofRecursiveResponse);
+  rpc OneofRecursive(OneofRecursiveRequest) returns (OneofRecursiveResponse) {
+    option (lixin.common.mcp.v1.method_include) = true;
+  }
 }
 
 // Deeply nested message: Inner has a map and a WKT

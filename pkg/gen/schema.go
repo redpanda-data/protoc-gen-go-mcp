@@ -26,6 +26,7 @@ import (
 
 	"buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
+	mcpv1 "go.lixinio.com/apis/lixin/common/mcp/v1"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -107,7 +108,9 @@ func messageSchema(md protoreflect.MessageDescriptor, opts SchemaOptions, seen m
 				oneofMembers[string(oneof.Name())] = members
 			}
 			memberSchema := fieldSchema(nestedFd, opts, seen)
-			memberSchema["description"] = fmt.Sprintf("The value when %s=%q.", DiscriminatorKey, name)
+			if _, ok := fieldDesc(nestedFd); !ok {
+				memberSchema["description"] = fmt.Sprintf("The value when %s=%q.", DiscriminatorKey, name)
+			}
 			members.set(name, memberSchema)
 			continue
 		}
@@ -222,11 +225,13 @@ func FieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions) map[string
 
 // fieldSchema is the internal implementation that threads the seen set for cycle detection.
 func fieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions, seen map[protoreflect.FullName]int) map[string]any {
-	if fd.IsMap() {
-		return mapFieldSchema(fd, opts, seen)
-	}
-
 	var schema map[string]any
+
+	if fd.IsMap() {
+		schema = mapFieldSchema(fd, opts, seen)
+		applyFieldDescription(fd, schema)
+		return schema
+	}
 
 	switch fd.Kind() {
 	case protoreflect.MessageKind:
@@ -243,12 +248,28 @@ func fieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions, seen map[p
 	}
 
 	if fd.IsList() {
-		return map[string]any{
+		schema = map[string]any{
 			"type":  "array",
 			"items": schema,
 		}
 	}
+	applyFieldDescription(fd, schema)
 	return schema
+}
+
+func fieldDesc(fd protoreflect.FieldDescriptor) (string, bool) {
+	opts := fd.Options()
+	if opts == nil || !proto.HasExtension(opts, mcpv1.E_FieldDesc) {
+		return "", false
+	}
+	desc, ok := proto.GetExtension(opts, mcpv1.E_FieldDesc).(string)
+	return desc, ok
+}
+
+func applyFieldDescription(fd protoreflect.FieldDescriptor, schema map[string]any) {
+	if desc, ok := fieldDesc(fd); ok {
+		schema["description"] = CleanComment(desc)
+	}
 }
 
 func mapFieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions, seen map[protoreflect.FullName]int) map[string]any {
@@ -546,25 +567,33 @@ func MangleHeadIfTooLong(name string, maxLen int) string {
 func ToolForMethod(method protoreflect.MethodDescriptor, comment string) runtime.Tool {
 	toolName := MangleHeadIfTooLong(strings.ReplaceAll(string(method.FullName()), ".", "_"), 64)
 	description := CleanComment(comment)
+	inputSchema := topLevelSchemaMap(method.Input(), SchemaOptions{})
+	outputSchema := topLevelSchemaMap(method.Output(), SchemaOptions{})
+	applyMethodType(method, inputSchema, outputSchema)
 
 	return runtime.Tool{
 		Name:            toolName,
 		Description:     description,
-		RawInputSchema:  marshalTopLevelSchema(method.Input(), SchemaOptions{}),
-		RawOutputSchema: marshalTopLevelSchema(method.Output(), SchemaOptions{}),
+		RawInputSchema:  marshalSchemaMap(inputSchema),
+		RawOutputSchema: marshalSchemaMap(outputSchema),
 	}
 }
 
-// marshalTopLevelSchema generates and marshals a JSON schema for a top-level
-// message (RPC input or output). It forces the top-level "type" to plain
-// "object" so the schema satisfies MCP's requirement even when the underlying
-// MessageSchema would emit a nullable type.
-func marshalTopLevelSchema(md protoreflect.MessageDescriptor, opts SchemaOptions) json.RawMessage {
+func topLevelSchemaMap(md protoreflect.MessageDescriptor, opts SchemaOptions) map[string]any {
 	schema := MessageSchema(md, opts)
 	schema["type"] = "object"
+	return schema
+}
+
+func marshalSchemaMap(schema map[string]any) json.RawMessage {
 	marshaled, err := json.Marshal(schema)
 	if err != nil {
 		panic(err)
 	}
 	return json.RawMessage(marshaled)
+}
+
+// marshalTopLevelSchema keeps backward compatibility for existing callers.
+func marshalTopLevelSchema(md protoreflect.MessageDescriptor, opts SchemaOptions) json.RawMessage {
+	return marshalSchemaMap(topLevelSchemaMap(md, opts))
 }

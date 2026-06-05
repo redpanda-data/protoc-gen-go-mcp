@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package lixin.common.mcp.v1;
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.MethodOptions {
+  bool method_include = 90480;
+}

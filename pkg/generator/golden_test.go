@@ -21,6 +21,8 @@ import (
 
 	. "github.com/onsi/gomega"
 
+	mcpv1 "go.lixinio.com/apis/lixin/common/mcp/v1"
+
 	// Blank-import proto packages so their file descriptors (with correct
 	// go_package from buf managed mode) are registered in GlobalFiles.
 	_ "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata"
@@ -88,6 +90,10 @@ func TestGoldenGeneration(t *testing.T) {
 	}
 	g.Expect(filesToGenerate).ToNot(BeEmpty())
 
+	for _, path := range filesToGenerate {
+		patchGoldenMethodInclude(filesByPath[path])
+	}
+
 	// Topological sort: dependencies before dependents.
 	sorted := topoSort(filesByPath)
 
@@ -118,6 +124,25 @@ func TestGoldenGeneration(t *testing.T) {
 		g.Expect(err).ToNot(HaveOccurred(), "reading golden file for %s", rf.GetName())
 		g.Expect(rf.GetContent()).To(Equal(string(expected)),
 			"generated output differs from checked-in %s\nRun: just generate", rf.GetName())
+	}
+}
+
+// patchGoldenMethodInclude marks every RPC in golden fixtures as MCP-included.
+// Checked-in Go descriptors may lag proto source until buf generate is re-run.
+func patchGoldenMethodInclude(fdp *descriptorpb.FileDescriptorProto) {
+	if fdp == nil {
+		return
+	}
+	for _, svc := range fdp.Service {
+		for _, meth := range svc.Method {
+			if meth.GetClientStreaming() || meth.GetServerStreaming() {
+				continue
+			}
+			if meth.Options == nil {
+				meth.Options = &descriptorpb.MethodOptions{}
+			}
+			proto.SetExtension(meth.Options, mcpv1.E_MethodInclude, true)
+		}
 	}
 }
 

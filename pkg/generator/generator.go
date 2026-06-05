@@ -23,7 +23,9 @@ import (
 
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/gen"
 	"github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
+	mcpv1 "go.lixinio.com/apis/lixin/common/mcp/v1"
 	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/pluginpb"
 )
@@ -293,6 +295,9 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 	if len(g.f.Services) == 0 {
 		return
 	}
+	if !g.hasIncludedMethods() {
+		return
+	}
 	goImportPath := file.GoImportPath
 	if packageSuffix != "" {
 		if !token.IsIdentifier(packageSuffix) {
@@ -336,9 +341,11 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 			if meth.Desc.IsStreamingClient() || meth.Desc.IsStreamingServer() {
 				continue
 			}
+			if !methodIncludeEnabled(meth.Desc.Options()) {
+				continue
+			}
 
-			comment := string(meth.Comments.Leading)
-			tool := gen.ToolForMethod(meth.Desc, comment)
+			tool := gen.ToolForMethod(meth.Desc, methodDescription(meth.Desc.Options(), string(meth.Comments.Leading)))
 
 			s[meth.GoName] = Tool{
 				RequestType:  g.gf.QualifiedGoIdent(meth.Input.GoIdent),
@@ -346,6 +353,9 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 				MCPTool:      tool,
 			}
 			tools[svc.GoName+"_"+meth.GoName] = tool
+		}
+		if len(s) == 0 {
+			continue
 		}
 		services[string(svc.Desc.Name())] = s
 	}
@@ -361,4 +371,40 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 	if err != nil {
 		g.gen.Error(err)
 	}
+}
+
+func (g *FileGenerator) hasIncludedMethods() bool {
+	for _, svc := range g.f.Services {
+		for _, meth := range svc.Methods {
+			if meth.Desc.IsStreamingClient() || meth.Desc.IsStreamingServer() {
+				continue
+			}
+			if methodIncludeEnabled(meth.Desc.Options()) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func methodIncludeEnabled(opts proto.Message) bool {
+	if opts == nil {
+		return false
+	}
+	if !proto.HasExtension(opts, mcpv1.E_MethodInclude) {
+		return false
+	}
+	v, ok := proto.GetExtension(opts, mcpv1.E_MethodInclude).(bool)
+	return ok && v
+}
+
+func methodDescription(opts proto.Message, comment string) string {
+	if opts == nil || !proto.HasExtension(opts, mcpv1.E_MethodDesc) {
+		return comment
+	}
+	desc, ok := proto.GetExtension(opts, mcpv1.E_MethodDesc).(string)
+	if !ok {
+		return comment
+	}
+	return desc
 }
