@@ -7,12 +7,11 @@
 package mcpv1
 
 import (
-	reflect "reflect"
-	unsafe "unsafe"
-
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	descriptorpb "google.golang.org/protobuf/types/descriptorpb"
+	reflect "reflect"
+	unsafe "unsafe"
 )
 
 const (
@@ -46,12 +45,14 @@ var (
 	//	  option (mcp.v1.tool_name) = "get_equity_research_report";
 	//	}
 	//
-	// The value must match ^[a-zA-Z_][a-zA-Z0-9_-]{0,63}$ — the
-	// intersection of every LLM provider's function-name rules (Gemini
-	// requires a leading letter or underscore; OpenAI restricts the
-	// charset to alphanumerics, underscores and dashes; 64 is the
-	// strictest length limit). protoc-gen-go-mcp fails code generation
-	// on an invalid or duplicate value.
+	// The value must match ^[a-z_][a-z0-9_-]{0,63}$ — lowercase
+	// snake/kebab case within every LLM provider's function-name rules
+	// (Gemini requires a leading letter or underscore; OpenAI restricts
+	// the charset; 64 is the strictest length limit). Lowercase is
+	// enforced so a configured name can never resemble a derived
+	// "<Service>Service_<Method>" name and is therefore passed through
+	// untouched by downstream de-mangling heuristics. protoc-gen-go-mcp
+	// fails code generation on an invalid or duplicate value.
 	//
 	// optional string tool_name = 58800;
 	E_ToolName = &file_mcp_v1_annotations_proto_extTypes[0]
@@ -67,7 +68,6 @@ const file_mcp_v1_annotations_proto_rawDesc = "" +
 var file_mcp_v1_annotations_proto_goTypes = []any{
 	(*descriptorpb.MethodOptions)(nil), // 0: google.protobuf.MethodOptions
 }
-
 var file_mcp_v1_annotations_proto_depIdxs = []int32{
 	0, // 0: mcp.v1.tool_name:extendee -> google.protobuf.MethodOptions
 	1, // [1:1] is the sub-list for method output_type
