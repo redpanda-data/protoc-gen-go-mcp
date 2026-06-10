@@ -18,11 +18,13 @@ extend google.protobuf.MethodOptions {
   //     option (mcp.v1.tool_name) = "get_equity_research_report";
   //   }
   //
-  // The value must match ^[a-zA-Z_][a-zA-Z0-9_-]{0,63}$ — the
-  // intersection of every LLM provider's function-name rules (Gemini
-  // requires a leading letter or underscore; OpenAI restricts the
-  // charset to alphanumerics, underscores and dashes; 64 is the
-  // strictest length limit). protoc-gen-go-mcp fails code generation
-  // on an invalid or duplicate value.
+  // The value must match ^[a-z_][a-z0-9_-]{0,63}$ — lowercase
+  // snake/kebab case within every LLM provider's function-name rules
+  // (Gemini requires a leading letter or underscore; OpenAI restricts
+  // the charset; 64 is the strictest length limit). Lowercase is
+  // enforced so a configured name can never resemble a derived
+  // "<Service>Service_<Method>" name and is therefore passed through
+  // untouched by downstream de-mangling heuristics. protoc-gen-go-mcp
+  // fails code generation on an invalid or duplicate value.
   string tool_name = 58800;
 }

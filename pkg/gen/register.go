@@ -90,15 +90,19 @@ func RegisterService(s runtime.MCPServer, sd protoreflect.ServiceDescriptor, han
 		// Resolve the tool name: the (mcp.v1.tool_name) option when set
 		// and valid, else the derived form. A configured name that
 		// collides with one already registered for this service falls
-		// back to the derived form — derived names are unique by
-		// construction (proto full names are), so nothing is silently
-		// dropped.
+		// back to the derived form, and if a configured name on an
+		// earlier method squatted on THIS method's derived name, a
+		// numeric suffix de-collides — AddTool is never called twice
+		// with the same name and nothing is silently dropped.
 		toolName := ToolNameForMethod(method)
 		if seenNames[toolName] {
 			toolName = MangleHeadIfTooLong(
 				strings.ReplaceAll(string(method.FullName()), ".", "_"),
 				64,
 			)
+			for base, i := toolName, 2; seenNames[toolName]; i++ {
+				toolName = MangleHeadIfTooLong(fmt.Sprintf("%s_%d", base, i), 64)
+			}
 		}
 		seenNames[toolName] = true
 

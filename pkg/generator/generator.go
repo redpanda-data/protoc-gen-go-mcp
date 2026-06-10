@@ -359,7 +359,7 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 			// A configured (mcp.v1.tool_name) must be valid on every
 			// LLM provider; fail generation instead of emitting a name
 			// a provider will reject at request time.
-			if cfg := gen.ConfiguredToolName(meth.Desc); cfg != "" {
+			if cfg, ok := gen.ConfiguredToolName(meth.Desc); ok {
 				if err := gen.ValidateToolName(cfg); err != nil {
 					g.gen.Error(fmt.Errorf("%s: (mcp.v1.tool_name): %w", meth.Desc.FullName(), err))
 					return
