@@ -72,6 +72,7 @@ func RegisterService(s runtime.MCPServer, sd protoreflect.ServiceDescriptor, han
 		opts.NewMessage = DynamicNewMessage
 	}
 	schemaOpts := SchemaOptions{}
+	seenNames := map[string]bool{}
 
 	for i := 0; i < sd.Methods().Len(); i++ {
 		method := sd.Methods().Get(i)
@@ -86,11 +87,20 @@ func RegisterService(s runtime.MCPServer, sd protoreflect.ServiceDescriptor, han
 			comment = opts.CommentProvider(method)
 		}
 
-		// Generate tool schema
-		toolName := MangleHeadIfTooLong(
-			strings.ReplaceAll(string(method.FullName()), ".", "_"),
-			64,
-		)
+		// Resolve the tool name: the (mcp.v1.tool_name) option when set
+		// and valid, else the derived form. A configured name that
+		// collides with one already registered for this service falls
+		// back to the derived form — derived names are unique by
+		// construction (proto full names are), so nothing is silently
+		// dropped.
+		toolName := ToolNameForMethod(method)
+		if seenNames[toolName] {
+			toolName = MangleHeadIfTooLong(
+				strings.ReplaceAll(string(method.FullName()), ".", "_"),
+				64,
+			)
+		}
+		seenNames[toolName] = true
 
 		tool := runtime.Tool{
 			Name:            toolName,

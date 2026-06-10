@@ -31,11 +31,14 @@ func main() {
 	protogen.Options{
 		ParamFunc: flagSet.Set,
 	}.Run(func(gen *protogen.Plugin) error {
+		// One registry per run: duplicate tool names are caught across
+		// files, not just within one.
+		toolNames := generator.ToolNameRegistry{}
 		for _, f := range gen.Files {
 			if !f.Generate {
 				continue
 			}
-			generator.NewFileGenerator(f, gen).Generate(*packageSuffix)
+			generator.NewFileGenerator(f, gen).WithToolNames(toolNames).Generate(*packageSuffix)
 		}
 		return nil
 	})

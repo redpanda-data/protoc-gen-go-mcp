@@ -37,6 +37,23 @@ type FileGenerator struct {
 	gen *protogen.Plugin
 
 	gf *protogen.GeneratedFile
+
+	// toolNames tracks tool names across the plugin run (shared between
+	// FileGenerator instances) so duplicates fail code generation.
+	// Derived names are unique by construction — proto full names are —
+	// so a duplicate can only come from the (mcp.v1.tool_name) option.
+	toolNames ToolNameRegistry
+}
+
+// ToolNameRegistry maps a tool name to the proto method that claimed
+// it. Share one registry across all FileGenerators of a plugin run via
+// WithToolNames to catch cross-file duplicates.
+type ToolNameRegistry map[string]string
+
+// WithToolNames attaches a run-scoped tool name registry.
+func (g *FileGenerator) WithToolNames(reg ToolNameRegistry) *FileGenerator {
+	g.toolNames = reg
+	return g
 }
 
 func NewFileGenerator(f *protogen.File, gen *protogen.Plugin) *FileGenerator {
@@ -338,7 +355,27 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 			}
 
 			comment := string(meth.Comments.Leading)
+
+			// A configured (mcp.v1.tool_name) must be valid on every
+			// LLM provider; fail generation instead of emitting a name
+			// a provider will reject at request time.
+			if cfg := gen.ConfiguredToolName(meth.Desc); cfg != "" {
+				if err := gen.ValidateToolName(cfg); err != nil {
+					g.gen.Error(fmt.Errorf("%s: (mcp.v1.tool_name): %w", meth.Desc.FullName(), err))
+					return
+				}
+			}
+
 			tool := gen.ToolForMethod(meth.Desc, comment)
+
+			if g.toolNames == nil {
+				g.toolNames = ToolNameRegistry{}
+			}
+			if prev, dup := g.toolNames[tool.Name]; dup {
+				g.gen.Error(fmt.Errorf("duplicate tool name %q: claimed by both %s and %s", tool.Name, prev, meth.Desc.FullName()))
+				return
+			}
+			g.toolNames[tool.Name] = string(meth.Desc.FullName())
 
 			s[meth.GoName] = Tool{
 				RequestType:  g.gf.QualifiedGoIdent(meth.Input.GoIdent),

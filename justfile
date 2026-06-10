@@ -39,6 +39,7 @@ update-build: gazelle
 
 # Generate proto code (outside Bazel)
 generate:
+    cd proto && buf generate
     cd pkg/testdata && buf generate buf.build/googleapis/googleapis
     cd pkg/testdata && buf generate --include-imports --exclude-path buf/validate
     rm -rf pkg/testdata/gen/go/buf/

@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package mcp.v1;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "github.com/redpanda-data/protoc-gen-go-mcp/pkg/mcpv1;mcpv1";
+
+extend google.protobuf.MethodOptions {
+  // tool_name overrides the derived MCP tool name for this method.
+  //
+  // By default the tool name is the method's full proto name with dots
+  // replaced by underscores, hash-truncated to 64 characters when too
+  // long. Set this option to publish the method under a stable,
+  // human-chosen name instead, e.g.:
+  //
+  //   rpc GetEquityResearchReport(...) returns (...) {
+  //     option (mcp.v1.tool_name) = "get_equity_research_report";
+  //   }
+  //
+  // The value must match ^[a-zA-Z_][a-zA-Z0-9_-]{0,63}$ — the
+  // intersection of every LLM provider's function-name rules (Gemini
+  // requires a leading letter or underscore; OpenAI restricts the
+  // charset to alphanumerics, underscores and dashes; 64 is the
+  // strictest length limit). protoc-gen-go-mcp fails code generation
+  // on an invalid or duplicate value.
+  string tool_name = 58800;
+}
