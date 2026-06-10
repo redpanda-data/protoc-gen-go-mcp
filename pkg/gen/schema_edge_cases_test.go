@@ -327,3 +327,57 @@ func TestMessageSchema_NoUnionKeywords(t *testing.T) {
 	// Regular non-oneof field is still in properties.
 	g.Expect(props).To(HaveKey("name"))
 }
+
+// Mangled names must be valid tool names on every provider. Gemini is
+// the strictest: the name must start with a letter or an underscore —
+// a base-36 hash prefix that starts with a digit broke Gemini-backed
+// agents outright (live failure: morningstar-securities
+// GetEquityResearchReport, 2026-06-10).
+func TestMangleHeadIfTooLong_GeminiSafeLeadingChar(t *testing.T) {
+	g := NewWithT(t)
+
+	// The exact name from the live failure: its hash starts with '5'.
+	const morningstar = "redpanda_mcps_morningstar_securities_v1_MorningstarSecuritiesService_GetEquityResearchReport"
+	got := MangleHeadIfTooLong(morningstar, 64)
+	g.Expect(got).To(HaveLen(64))
+	g.Expect(got).To(HaveSuffix("_MorningstarSecuritiesService_GetEquityResearchReport"))
+	first := got[0]
+	g.Expect(first >= 'a' && first <= 'z').To(BeTrue(),
+		"mangled name %q must start with a letter (Gemini requirement)", got)
+
+	// Deterministic across calls, and the exact expected rename:
+	// the old form was "5rl6rmshvl__..." — '5' maps to 'l'.
+	g.Expect(got).To(Equal("lrl6rmshvl__MorningstarSecuritiesService_GetEquityResearchReport"))
+
+	// The github_read hash also led with a digit ('6' -> 'm'), so its
+	// mangled name changes too — historically
+	// "64ghux5adn_github_read_v1_GitHubReadService_GetAuthenticatedUser".
+	const github = "redpanda_mcps_github_read_v1_GitHubReadService_GetAuthenticatedUser"
+	g.Expect(MangleHeadIfTooLong(github, 64)).To(Equal(
+		"m4ghux5adn_github_read_v1_GitHubReadService_GetAuthenticatedUser",
+	))
+}
+
+// Every mangled name, for any input, must satisfy the strictest
+// provider naming rule (Gemini): ^[a-zA-Z_][a-zA-Z0-9_.:-]*$.
+func TestMangleHeadIfTooLong_AlwaysProviderSafe(t *testing.T) {
+	g := NewWithT(t)
+	inputs := []string{
+		strings.Repeat("x", 100),
+		"0" + strings.Repeat("y", 100),
+		"redpanda_mcps_morningstar_securities_v1_MorningstarSecuritiesService_GetEquityResearchReport",
+		"redpanda_mcps_github_read_v1_GitHubReadService_GetAuthenticatedUser",
+		"a.b.c.d.e.f.g.h.i.j.k.l.m.n.o.p.q.r.s.t.u.v.w.x.y.z.a.b.c.d.e.f.g.h",
+	}
+	for _, in := range inputs {
+		for _, maxLen := range []int{1, 5, 10, 11, 20, 64} {
+			got := MangleHeadIfTooLong(in, maxLen)
+			if len(got) == 0 {
+				continue
+			}
+			first := got[0]
+			g.Expect((first >= 'a' && first <= 'z') || (first >= 'A' && first <= 'Z') || first == '_').To(BeTrue(),
+				"MangleHeadIfTooLong(%q, %d) = %q starts with %q", in, maxLen, got, string(first))
+		}
+	}
+}

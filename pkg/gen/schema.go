@@ -530,6 +530,16 @@ func MangleHeadIfTooLong(name string, maxLen int) string {
 	if len(hashPrefix) > 10 {
 		hashPrefix = hashPrefix[:10]
 	}
+	// Providers disagree on the leading character of a tool name: Gemini
+	// requires a letter or underscore, while OpenAI and Anthropic also
+	// accept digits. A base-36 hash can start with a digit, and a mangled
+	// name leads with the hash -- Gemini then rejects the entire request
+	// with "Invalid function name". Map a leading digit onto 'g'..'p' so
+	// the name is valid on every provider; hashes that already start with
+	// a letter are unchanged, keeping existing tool names stable.
+	if c := hashPrefix[0]; c >= '0' && c <= '9' {
+		hashPrefix = string('g'+(c-'0')) + hashPrefix[1:]
+	}
 	if maxLen <= len(hashPrefix) {
 		return hashPrefix[:maxLen]
 	}
@@ -544,7 +554,7 @@ func MangleHeadIfTooLong(name string, maxLen int) string {
 // ToolForMethod generates the MCP tool definition for a given RPC method
 // descriptor (input and output JSON schemas plus name and description).
 func ToolForMethod(method protoreflect.MethodDescriptor, comment string) runtime.Tool {
-	toolName := MangleHeadIfTooLong(strings.ReplaceAll(string(method.FullName()), ".", "_"), 64)
+	toolName := ToolNameForMethod(method)
 	description := CleanComment(comment)
 
 	return runtime.Tool{
