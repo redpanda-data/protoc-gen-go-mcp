@@ -9,6 +9,12 @@ managed:
       module: buf.build/googleapis/googleapis
     - file_option: go_package
       module: buf.build/bufbuild/protovalidate
+    # The vendored annotations proto must keep its real go_package
+    # (pkg/mcpv1) so generated testdata code never registers a second
+    # copy of mcp/v1/annotations.proto; its Go output is deleted after
+    # generation (see justfile).
+    - file_option: go_package
+      path: mcp/v1/annotations.proto
 inputs:
   - directory: proto
 plugins:

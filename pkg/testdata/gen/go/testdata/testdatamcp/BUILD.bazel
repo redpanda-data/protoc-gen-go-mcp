@@ -11,6 +11,7 @@ go_library(
     srcs = [
         "edge_cases.pb.mcp.go",
         "test_service.pb.mcp.go",
+        "tool_naming.pb.mcp.go",
     ],
     importpath = "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdatamcp",
     visibility = ["//visibility:public"],

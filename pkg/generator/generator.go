@@ -37,23 +37,6 @@ type FileGenerator struct {
 	gen *protogen.Plugin
 
 	gf *protogen.GeneratedFile
-
-	// toolNames tracks tool names across the plugin run (shared between
-	// FileGenerator instances) so duplicates fail code generation.
-	// Derived names are unique by construction — proto full names are —
-	// so a duplicate can only come from the (mcp.v1.tool_name) option.
-	toolNames ToolNameRegistry
-}
-
-// ToolNameRegistry maps a tool name to the proto method that claimed
-// it. Share one registry across all FileGenerators of a plugin run via
-// WithToolNames to catch cross-file duplicates.
-type ToolNameRegistry map[string]string
-
-// WithToolNames attaches a run-scoped tool name registry.
-func (g *FileGenerator) WithToolNames(reg ToolNameRegistry) *FileGenerator {
-	g.toolNames = reg
-	return g
 }
 
 func NewFileGenerator(f *protogen.File, gen *protogen.Plugin) *FileGenerator {
@@ -349,6 +332,14 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 
 	for _, svc := range g.f.Services {
 		s := map[string]Tool{}
+		// Duplicate tool names are checked per service: one service is
+		// one Register<Service>Handler call, i.e. one MCP server's tool
+		// set. Wider scopes are not statically decidable — two different
+		// services may legitimately both name a tool "get_dashboard",
+		// they just can't be registered on the same server. Derived
+		// names are unique by construction (proto full names are), so a
+		// duplicate can only come from the (mcp.v1.tool_name) option.
+		seenToolNames := map[string]string{}
 		for _, meth := range svc.Methods {
 			if meth.Desc.IsStreamingClient() || meth.Desc.IsStreamingServer() {
 				continue
@@ -368,14 +359,11 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 
 			tool := gen.ToolForMethod(meth.Desc, comment)
 
-			if g.toolNames == nil {
-				g.toolNames = ToolNameRegistry{}
-			}
-			if prev, dup := g.toolNames[tool.Name]; dup {
-				g.gen.Error(fmt.Errorf("duplicate tool name %q: claimed by both %s and %s", tool.Name, prev, meth.Desc.FullName()))
+			if prev, dup := seenToolNames[tool.Name]; dup {
+				g.gen.Error(fmt.Errorf("duplicate tool name %q in service %s: claimed by both %s and %s", tool.Name, svc.Desc.FullName(), prev, meth.Desc.FullName()))
 				return
 			}
-			g.toolNames[tool.Name] = string(meth.Desc.FullName())
+			seenToolNames[tool.Name] = string(meth.Desc.FullName())
 
 			s[meth.GoName] = Tool{
 				RequestType:  g.gf.QualifiedGoIdent(meth.Input.GoIdent),

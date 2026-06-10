@@ -43,6 +43,7 @@ generate:
     cd pkg/testdata && buf generate buf.build/googleapis/googleapis
     cd pkg/testdata && buf generate --include-imports --exclude-path buf/validate
     rm -rf pkg/testdata/gen/go/buf/
+    rm -rf pkg/testdata/gen/go/mcp/
     cd pkg/testdata && buf build -o gen/descriptors.binpb --exclude-path buf/validate
     go run mvdan.cc/gofumpt@latest -l -w pkg/testdata/
 

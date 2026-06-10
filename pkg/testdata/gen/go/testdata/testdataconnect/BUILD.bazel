@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "edge_cases.connect.go",
         "test_service.connect.go",
+        "tool_naming.connect.go",
     ],
     importpath = "github.com/redpanda-data/protoc-gen-go-mcp/pkg/testdata/gen/go/testdata/testdataconnect",
     visibility = ["//visibility:public"],

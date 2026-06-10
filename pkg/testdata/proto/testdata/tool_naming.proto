@@ -1,0 +1,45 @@
+// Copyright 2025 Redpanda Data, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package testdata;
+
+import "mcp/v1/annotations.proto";
+
+message ToolNamingRequest {
+  string id = 1;
+}
+
+message ToolNamingResponse {
+  string result = 1;
+}
+
+// ToolNamingService pins the three tool-naming behaviors in golden
+// output: a configured (mcp.v1.tool_name), a plain derived name, and a
+// derived name long enough to be hash-truncated with a provider-safe
+// leading character.
+service ToolNamingService {
+  // Configured: emitted exactly as authored, no service prefix.
+  rpc GetDashboard(ToolNamingRequest) returns (ToolNamingResponse) {
+    option (mcp.v1.tool_name) = "get_dashboard";
+  }
+
+  // Derived: full proto path with underscores, unchanged behavior.
+  rpc GetWidget(ToolNamingRequest) returns (ToolNamingResponse) {}
+
+  // Derived + mangled: exceeds 64 chars, so the emitted name is the
+  // hash-truncated form whose first character is always a letter.
+  rpc GetEquityResearchReportForInstitutionalAndRetailClients(ToolNamingRequest) returns (ToolNamingResponse) {}
+}

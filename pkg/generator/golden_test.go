@@ -39,6 +39,10 @@ import (
 var goldenProtoFiles = []string{
 	"testdata/test_service.proto",
 	"testdata/edge_cases.proto",
+	// Pins the three tool-naming behaviors: configured
+	// (mcp.v1.tool_name) emitted verbatim, derived names unchanged,
+	// and >64-char names hash-truncated with a letter-leading prefix.
+	"testdata/tool_naming.proto",
 }
 
 // TestGoldenGeneration re-runs the code generator in-process and compares

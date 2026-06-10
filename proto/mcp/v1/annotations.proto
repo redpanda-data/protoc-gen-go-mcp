@@ -25,6 +25,8 @@ extend google.protobuf.MethodOptions {
   // enforced so a configured name can never resemble a derived
   // "<Service>Service_<Method>" name and is therefore passed through
   // untouched by downstream de-mangling heuristics. protoc-gen-go-mcp
-  // fails code generation on an invalid or duplicate value.
+  // fails code generation on an invalid value, or on a duplicate name
+  // within the same service (one service is one MCP server
+  // registration; different services may reuse a name).
   string tool_name = 58800;
 }

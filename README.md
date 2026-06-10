@@ -176,7 +176,7 @@ rpc GetEquityResearchReport(GetEquityResearchReportRequest) returns (GetEquityRe
 }
 ```
 
-The value must match `^[a-z_][a-z0-9_-]{0,63}$` — lowercase snake/kebab case within every provider's function-name rules; lowercase guarantees configured names pass untouched through consumers' de-mangling heuristics (they key on the UpperCamel `Service_` segment of derived names). Code generation fails on an invalid value and on duplicate tool names across the generation run. The dynamic registration path (`gen.RegisterService`) applies the same option; an invalid or colliding configured name there falls back to the derived name so a tool is never silently dropped.
+The value must match `^[a-z_][a-z0-9_-]{0,63}$` — lowercase snake/kebab case within every provider's function-name rules; lowercase guarantees configured names pass untouched through consumers' de-mangling heuristics (they key on the UpperCamel `Service_` segment of derived names). Code generation fails on an invalid value and on duplicate tool names within a service (one service is one MCP server registration — different services may legitimately reuse a name). The dynamic registration path (`gen.RegisterService`) applies the same option; an invalid or colliding configured name there falls back to the derived name so a tool is never silently dropped.
 
 ## Migrating from mark3labs-only (pre-v0.2)
 

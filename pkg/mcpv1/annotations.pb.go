@@ -7,11 +7,12 @@
 package mcpv1
 
 import (
+	reflect "reflect"
+	unsafe "unsafe"
+
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	descriptorpb "google.golang.org/protobuf/types/descriptorpb"
-	reflect "reflect"
-	unsafe "unsafe"
 )
 
 const (
@@ -52,7 +53,9 @@ var (
 	// enforced so a configured name can never resemble a derived
 	// "<Service>Service_<Method>" name and is therefore passed through
 	// untouched by downstream de-mangling heuristics. protoc-gen-go-mcp
-	// fails code generation on an invalid or duplicate value.
+	// fails code generation on an invalid value, or on a duplicate name
+	// within the same service (one service is one MCP server
+	// registration; different services may reuse a name).
 	//
 	// optional string tool_name = 58800;
 	E_ToolName = &file_mcp_v1_annotations_proto_extTypes[0]
@@ -68,6 +71,7 @@ const file_mcp_v1_annotations_proto_rawDesc = "" +
 var file_mcp_v1_annotations_proto_goTypes = []any{
 	(*descriptorpb.MethodOptions)(nil), // 0: google.protobuf.MethodOptions
 }
+
 var file_mcp_v1_annotations_proto_depIdxs = []int32{
 	0, // 0: mcp.v1.tool_name:extendee -> google.protobuf.MethodOptions
 	1, // [1:1] is the sub-list for method output_type

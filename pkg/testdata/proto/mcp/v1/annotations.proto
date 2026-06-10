@@ -1,0 +1,35 @@
+// Vendored copy of proto/mcp/v1/annotations.proto for the testdata buf
+// module (buf modules cannot depend on local sibling directories).
+// Keep in sync with the source of truth at proto/mcp/v1/annotations.proto.
+syntax = "proto3";
+
+package mcp.v1;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "github.com/redpanda-data/protoc-gen-go-mcp/pkg/mcpv1;mcpv1";
+
+extend google.protobuf.MethodOptions {
+  // tool_name overrides the derived MCP tool name for this method.
+  //
+  // By default the tool name is the method's full proto name with dots
+  // replaced by underscores, hash-truncated to 64 characters when too
+  // long. Set this option to publish the method under a stable,
+  // human-chosen name instead, e.g.:
+  //
+  //   rpc GetEquityResearchReport(...) returns (...) {
+  //     option (mcp.v1.tool_name) = "get_equity_research_report";
+  //   }
+  //
+  // The value must match ^[a-z_][a-z0-9_-]{0,63}$ — lowercase
+  // snake/kebab case within every LLM provider's function-name rules
+  // (Gemini requires a leading letter or underscore; OpenAI restricts
+  // the charset; 64 is the strictest length limit). Lowercase is
+  // enforced so a configured name can never resemble a derived
+  // "<Service>Service_<Method>" name and is therefore passed through
+  // untouched by downstream de-mangling heuristics. protoc-gen-go-mcp
+  // fails code generation on an invalid value, or on a duplicate name
+  // within the same service (one service is one MCP server
+  // registration; different services may reuse a name).
+  string tool_name = 58800;
+}
