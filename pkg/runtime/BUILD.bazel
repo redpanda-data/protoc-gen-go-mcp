@@ -32,6 +32,7 @@ go_test(
         "error_wrapped_bug_test.go",
         "extra_properties_edge_cases_test.go",
         "extra_properties_test.go",
+        "tool_filter_test.go",
         "transform_test.go",
         "transform_wkt_test.go",
     ],

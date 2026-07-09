@@ -87,6 +87,7 @@ func Register{{$key}}Handler(s runtime.MCPServer, srv {{$key}}Server, opts ...ru
   {{$tool_name}}Tool := {{$key}}_{{$tool_name}}Tool
   {{$tool_name}}Tool = runtime.ApplyConfig({{$tool_name}}Tool, config)
 
+  if config.ShouldRegister({{$tool_name}}Tool.Name) {
   s.AddTool({{$tool_name}}Tool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
 
@@ -126,6 +127,7 @@ func Register{{$key}}Handler(s runtime.MCPServer, srv {{$key}}Server, opts ...ru
 
     return runtime.NewToolResultJSON(structured), nil
   })
+  }
   {{- end }}
 }
 {{- end }}
@@ -161,6 +163,7 @@ func ForwardToConnect{{$key}}Client(s runtime.MCPServer, client Connect{{$key}}C
   {{$tool_name}}Tool := {{$key}}_{{$tool_name}}Tool
   {{$tool_name}}Tool = runtime.ApplyConfig({{$tool_name}}Tool, config)
 
+  if config.ShouldRegister({{$tool_name}}Tool.Name) {
   s.AddTool({{$tool_name}}Tool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
 
@@ -197,6 +200,7 @@ func ForwardToConnect{{$key}}Client(s runtime.MCPServer, client Connect{{$key}}C
     }
     return runtime.NewToolResultJSON(structured), nil
   })
+  }
   {{- end }}
 }
 {{- end }}
@@ -213,6 +217,7 @@ func ForwardTo{{$key}}Client(s runtime.MCPServer, client {{$key}}Client, opts ..
   {{$tool_name}}Tool := {{$key}}_{{$tool_name}}Tool
   {{$tool_name}}Tool = runtime.ApplyConfig({{$tool_name}}Tool, config)
 
+  if config.ShouldRegister({{$tool_name}}Tool.Name) {
   s.AddTool({{$tool_name}}Tool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
     var req {{$tool_val.RequestType}}
 
@@ -249,6 +254,7 @@ func ForwardTo{{$key}}Client(s runtime.MCPServer, client {{$key}}Client, opts ..
     }
     return runtime.NewToolResultJSON(structured), nil
   })
+  }
   {{- end }}
 }
 {{- end }}

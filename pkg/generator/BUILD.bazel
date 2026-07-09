@@ -25,6 +25,7 @@ go_test(
         "golden_test.go",
         "handler_e2e_test.go",
         "handler_rtt_test.go",
+        "tool_filter_e2e_test.go",
     ],
     data = [
         "//pkg/testdata/gen:descriptors",

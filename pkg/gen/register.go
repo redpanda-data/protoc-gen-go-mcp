@@ -51,6 +51,11 @@ type RegisterServiceOptions struct {
 	// ExtraProperties adds additional properties to all tool schemas.
 	ExtraProperties []runtime.ExtraProperty
 
+	// ToolFilter, when non-nil, is consulted with the final tool name
+	// (after NamePrefix is applied) and only tools for which it returns
+	// true are registered.
+	ToolFilter func(toolName string) bool
+
 	// NewMessage creates new proto message instances from descriptors.
 	// If nil, defaults to DynamicNewMessage (uses dynamicpb).
 	NewMessage NewMessage
@@ -116,6 +121,9 @@ func RegisterService(s runtime.MCPServer, sd protoreflect.ServiceDescriptor, han
 		// Apply name prefix and extra properties
 		if opts.NamePrefix != "" {
 			tool.Name = opts.NamePrefix + "_" + tool.Name
+		}
+		if opts.ToolFilter != nil && !opts.ToolFilter(tool.Name) {
+			continue
 		}
 		if len(opts.ExtraProperties) > 0 {
 			tool = runtime.AddExtraPropertiesToTool(tool, opts.ExtraProperties)
