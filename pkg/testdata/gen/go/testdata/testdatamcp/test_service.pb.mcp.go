@@ -40,171 +40,179 @@ func RegisterTestServiceHandler(s runtime.MCPServer, srv TestServiceServer, opts
 	CreateItemTool := TestService_CreateItemTool
 	CreateItemTool = runtime.ApplyConfig(CreateItemTool, config)
 
-	s.AddTool(CreateItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req testdata.CreateItemRequest
+	if config.ShouldRegister(CreateItemTool.Name) {
+		s.AddTool(CreateItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req testdata.CreateItemRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		// Rewrite oneof discriminated wrappers and recursion placeholders into the
-		// protojson-native shape. Errors are model-readable for self-correction.
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			// Rewrite oneof discriminated wrappers and recursion placeholders into the
+			// protojson-native shape. Errors are model-readable for self-correction.
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := srv.CreateItem(ctx, &req)
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := srv.CreateItem(ctx, &req)
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp)
-		if err != nil {
-			return nil, err
-		}
+			structured, err := runtime.EncodeMessage(resp)
+			if err != nil {
+				return nil, err
+			}
 
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 	GetItemTool := TestService_GetItemTool
 	GetItemTool = runtime.ApplyConfig(GetItemTool, config)
 
-	s.AddTool(GetItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req testdata.GetItemRequest
+	if config.ShouldRegister(GetItemTool.Name) {
+		s.AddTool(GetItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req testdata.GetItemRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		// Rewrite oneof discriminated wrappers and recursion placeholders into the
-		// protojson-native shape. Errors are model-readable for self-correction.
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			// Rewrite oneof discriminated wrappers and recursion placeholders into the
+			// protojson-native shape. Errors are model-readable for self-correction.
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := srv.GetItem(ctx, &req)
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := srv.GetItem(ctx, &req)
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp)
-		if err != nil {
-			return nil, err
-		}
+			structured, err := runtime.EncodeMessage(resp)
+			if err != nil {
+				return nil, err
+			}
 
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 	ProcessWellKnownTypesTool := TestService_ProcessWellKnownTypesTool
 	ProcessWellKnownTypesTool = runtime.ApplyConfig(ProcessWellKnownTypesTool, config)
 
-	s.AddTool(ProcessWellKnownTypesTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req testdata.ProcessWellKnownTypesRequest
+	if config.ShouldRegister(ProcessWellKnownTypesTool.Name) {
+		s.AddTool(ProcessWellKnownTypesTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req testdata.ProcessWellKnownTypesRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		// Rewrite oneof discriminated wrappers and recursion placeholders into the
-		// protojson-native shape. Errors are model-readable for self-correction.
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			// Rewrite oneof discriminated wrappers and recursion placeholders into the
+			// protojson-native shape. Errors are model-readable for self-correction.
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := srv.ProcessWellKnownTypes(ctx, &req)
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := srv.ProcessWellKnownTypes(ctx, &req)
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp)
-		if err != nil {
-			return nil, err
-		}
+			structured, err := runtime.EncodeMessage(resp)
+			if err != nil {
+				return nil, err
+			}
 
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 	TestValidationTool := TestService_TestValidationTool
 	TestValidationTool = runtime.ApplyConfig(TestValidationTool, config)
 
-	s.AddTool(TestValidationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req testdata.TestValidationRequest
+	if config.ShouldRegister(TestValidationTool.Name) {
+		s.AddTool(TestValidationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req testdata.TestValidationRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		// Rewrite oneof discriminated wrappers and recursion placeholders into the
-		// protojson-native shape. Errors are model-readable for self-correction.
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			// Rewrite oneof discriminated wrappers and recursion placeholders into the
+			// protojson-native shape. Errors are model-readable for self-correction.
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := srv.TestValidation(ctx, &req)
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := srv.TestValidation(ctx, &req)
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp)
-		if err != nil {
-			return nil, err
-		}
+			structured, err := runtime.EncodeMessage(resp)
+			if err != nil {
+				return nil, err
+			}
 
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 }
 
 // TestServiceClient is compatible with the grpc-go client interface.
@@ -232,159 +240,167 @@ func ForwardToConnectTestServiceClient(s runtime.MCPServer, client ConnectTestSe
 	CreateItemTool := TestService_CreateItemTool
 	CreateItemTool = runtime.ApplyConfig(CreateItemTool, config)
 
-	s.AddTool(CreateItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req testdata.CreateItemRequest
+	if config.ShouldRegister(CreateItemTool.Name) {
+		s.AddTool(CreateItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req testdata.CreateItemRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := client.CreateItem(ctx, connect.NewRequest(&req))
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := client.CreateItem(ctx, connect.NewRequest(&req))
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp.Msg)
-		if err != nil {
-			return nil, err
-		}
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			structured, err := runtime.EncodeMessage(resp.Msg)
+			if err != nil {
+				return nil, err
+			}
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 	GetItemTool := TestService_GetItemTool
 	GetItemTool = runtime.ApplyConfig(GetItemTool, config)
 
-	s.AddTool(GetItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req testdata.GetItemRequest
+	if config.ShouldRegister(GetItemTool.Name) {
+		s.AddTool(GetItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req testdata.GetItemRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := client.GetItem(ctx, connect.NewRequest(&req))
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := client.GetItem(ctx, connect.NewRequest(&req))
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp.Msg)
-		if err != nil {
-			return nil, err
-		}
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			structured, err := runtime.EncodeMessage(resp.Msg)
+			if err != nil {
+				return nil, err
+			}
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 	ProcessWellKnownTypesTool := TestService_ProcessWellKnownTypesTool
 	ProcessWellKnownTypesTool = runtime.ApplyConfig(ProcessWellKnownTypesTool, config)
 
-	s.AddTool(ProcessWellKnownTypesTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req testdata.ProcessWellKnownTypesRequest
+	if config.ShouldRegister(ProcessWellKnownTypesTool.Name) {
+		s.AddTool(ProcessWellKnownTypesTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req testdata.ProcessWellKnownTypesRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := client.ProcessWellKnownTypes(ctx, connect.NewRequest(&req))
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := client.ProcessWellKnownTypes(ctx, connect.NewRequest(&req))
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp.Msg)
-		if err != nil {
-			return nil, err
-		}
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			structured, err := runtime.EncodeMessage(resp.Msg)
+			if err != nil {
+				return nil, err
+			}
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 	TestValidationTool := TestService_TestValidationTool
 	TestValidationTool = runtime.ApplyConfig(TestValidationTool, config)
 
-	s.AddTool(TestValidationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req testdata.TestValidationRequest
+	if config.ShouldRegister(TestValidationTool.Name) {
+		s.AddTool(TestValidationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req testdata.TestValidationRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := client.TestValidation(ctx, connect.NewRequest(&req))
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := client.TestValidation(ctx, connect.NewRequest(&req))
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp.Msg)
-		if err != nil {
-			return nil, err
-		}
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			structured, err := runtime.EncodeMessage(resp.Msg)
+			if err != nil {
+				return nil, err
+			}
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 }
 
 // ForwardToTestServiceClient registers a gRPC client, to forward MCP calls to it.
@@ -396,157 +412,165 @@ func ForwardToTestServiceClient(s runtime.MCPServer, client TestServiceClient, o
 	CreateItemTool := TestService_CreateItemTool
 	CreateItemTool = runtime.ApplyConfig(CreateItemTool, config)
 
-	s.AddTool(CreateItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req testdata.CreateItemRequest
+	if config.ShouldRegister(CreateItemTool.Name) {
+		s.AddTool(CreateItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req testdata.CreateItemRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := client.CreateItem(ctx, &req)
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := client.CreateItem(ctx, &req)
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp)
-		if err != nil {
-			return nil, err
-		}
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			structured, err := runtime.EncodeMessage(resp)
+			if err != nil {
+				return nil, err
+			}
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 	GetItemTool := TestService_GetItemTool
 	GetItemTool = runtime.ApplyConfig(GetItemTool, config)
 
-	s.AddTool(GetItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req testdata.GetItemRequest
+	if config.ShouldRegister(GetItemTool.Name) {
+		s.AddTool(GetItemTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req testdata.GetItemRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := client.GetItem(ctx, &req)
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := client.GetItem(ctx, &req)
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp)
-		if err != nil {
-			return nil, err
-		}
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			structured, err := runtime.EncodeMessage(resp)
+			if err != nil {
+				return nil, err
+			}
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 	ProcessWellKnownTypesTool := TestService_ProcessWellKnownTypesTool
 	ProcessWellKnownTypesTool = runtime.ApplyConfig(ProcessWellKnownTypesTool, config)
 
-	s.AddTool(ProcessWellKnownTypesTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req testdata.ProcessWellKnownTypesRequest
+	if config.ShouldRegister(ProcessWellKnownTypesTool.Name) {
+		s.AddTool(ProcessWellKnownTypesTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req testdata.ProcessWellKnownTypesRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := client.ProcessWellKnownTypes(ctx, &req)
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := client.ProcessWellKnownTypes(ctx, &req)
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp)
-		if err != nil {
-			return nil, err
-		}
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			structured, err := runtime.EncodeMessage(resp)
+			if err != nil {
+				return nil, err
+			}
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 	TestValidationTool := TestService_TestValidationTool
 	TestValidationTool = runtime.ApplyConfig(TestValidationTool, config)
 
-	s.AddTool(TestValidationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req testdata.TestValidationRequest
+	if config.ShouldRegister(TestValidationTool.Name) {
+		s.AddTool(TestValidationTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req testdata.TestValidationRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := client.TestValidation(ctx, &req)
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := client.TestValidation(ctx, &req)
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp)
-		if err != nil {
-			return nil, err
-		}
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			structured, err := runtime.EncodeMessage(resp)
+			if err != nil {
+				return nil, err
+			}
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 }

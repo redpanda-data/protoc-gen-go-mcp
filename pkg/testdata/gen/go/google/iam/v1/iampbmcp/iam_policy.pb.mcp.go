@@ -38,129 +38,135 @@ func RegisterIAMPolicyHandler(s runtime.MCPServer, srv IAMPolicyServer, opts ...
 	GetIamPolicyTool := IAMPolicy_GetIamPolicyTool
 	GetIamPolicyTool = runtime.ApplyConfig(GetIamPolicyTool, config)
 
-	s.AddTool(GetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req iampb.GetIamPolicyRequest
+	if config.ShouldRegister(GetIamPolicyTool.Name) {
+		s.AddTool(GetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req iampb.GetIamPolicyRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		// Rewrite oneof discriminated wrappers and recursion placeholders into the
-		// protojson-native shape. Errors are model-readable for self-correction.
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			// Rewrite oneof discriminated wrappers and recursion placeholders into the
+			// protojson-native shape. Errors are model-readable for self-correction.
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := srv.GetIamPolicy(ctx, &req)
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := srv.GetIamPolicy(ctx, &req)
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp)
-		if err != nil {
-			return nil, err
-		}
+			structured, err := runtime.EncodeMessage(resp)
+			if err != nil {
+				return nil, err
+			}
 
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 	SetIamPolicyTool := IAMPolicy_SetIamPolicyTool
 	SetIamPolicyTool = runtime.ApplyConfig(SetIamPolicyTool, config)
 
-	s.AddTool(SetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req iampb.SetIamPolicyRequest
+	if config.ShouldRegister(SetIamPolicyTool.Name) {
+		s.AddTool(SetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req iampb.SetIamPolicyRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		// Rewrite oneof discriminated wrappers and recursion placeholders into the
-		// protojson-native shape. Errors are model-readable for self-correction.
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			// Rewrite oneof discriminated wrappers and recursion placeholders into the
+			// protojson-native shape. Errors are model-readable for self-correction.
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := srv.SetIamPolicy(ctx, &req)
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := srv.SetIamPolicy(ctx, &req)
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp)
-		if err != nil {
-			return nil, err
-		}
+			structured, err := runtime.EncodeMessage(resp)
+			if err != nil {
+				return nil, err
+			}
 
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 	TestIamPermissionsTool := IAMPolicy_TestIamPermissionsTool
 	TestIamPermissionsTool = runtime.ApplyConfig(TestIamPermissionsTool, config)
 
-	s.AddTool(TestIamPermissionsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req iampb.TestIamPermissionsRequest
+	if config.ShouldRegister(TestIamPermissionsTool.Name) {
+		s.AddTool(TestIamPermissionsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req iampb.TestIamPermissionsRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		// Rewrite oneof discriminated wrappers and recursion placeholders into the
-		// protojson-native shape. Errors are model-readable for self-correction.
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			// Rewrite oneof discriminated wrappers and recursion placeholders into the
+			// protojson-native shape. Errors are model-readable for self-correction.
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := srv.TestIamPermissions(ctx, &req)
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := srv.TestIamPermissions(ctx, &req)
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp)
-		if err != nil {
-			return nil, err
-		}
+			structured, err := runtime.EncodeMessage(resp)
+			if err != nil {
+				return nil, err
+			}
 
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 }
 
 // IAMPolicyClient is compatible with the grpc-go client interface.
@@ -186,120 +192,126 @@ func ForwardToConnectIAMPolicyClient(s runtime.MCPServer, client ConnectIAMPolic
 	GetIamPolicyTool := IAMPolicy_GetIamPolicyTool
 	GetIamPolicyTool = runtime.ApplyConfig(GetIamPolicyTool, config)
 
-	s.AddTool(GetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req iampb.GetIamPolicyRequest
+	if config.ShouldRegister(GetIamPolicyTool.Name) {
+		s.AddTool(GetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req iampb.GetIamPolicyRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := client.GetIamPolicy(ctx, connect.NewRequest(&req))
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := client.GetIamPolicy(ctx, connect.NewRequest(&req))
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp.Msg)
-		if err != nil {
-			return nil, err
-		}
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			structured, err := runtime.EncodeMessage(resp.Msg)
+			if err != nil {
+				return nil, err
+			}
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 	SetIamPolicyTool := IAMPolicy_SetIamPolicyTool
 	SetIamPolicyTool = runtime.ApplyConfig(SetIamPolicyTool, config)
 
-	s.AddTool(SetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req iampb.SetIamPolicyRequest
+	if config.ShouldRegister(SetIamPolicyTool.Name) {
+		s.AddTool(SetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req iampb.SetIamPolicyRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := client.SetIamPolicy(ctx, connect.NewRequest(&req))
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := client.SetIamPolicy(ctx, connect.NewRequest(&req))
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp.Msg)
-		if err != nil {
-			return nil, err
-		}
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			structured, err := runtime.EncodeMessage(resp.Msg)
+			if err != nil {
+				return nil, err
+			}
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 	TestIamPermissionsTool := IAMPolicy_TestIamPermissionsTool
 	TestIamPermissionsTool = runtime.ApplyConfig(TestIamPermissionsTool, config)
 
-	s.AddTool(TestIamPermissionsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req iampb.TestIamPermissionsRequest
+	if config.ShouldRegister(TestIamPermissionsTool.Name) {
+		s.AddTool(TestIamPermissionsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req iampb.TestIamPermissionsRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := client.TestIamPermissions(ctx, connect.NewRequest(&req))
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := client.TestIamPermissions(ctx, connect.NewRequest(&req))
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp.Msg)
-		if err != nil {
-			return nil, err
-		}
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			structured, err := runtime.EncodeMessage(resp.Msg)
+			if err != nil {
+				return nil, err
+			}
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 }
 
 // ForwardToIAMPolicyClient registers a gRPC client, to forward MCP calls to it.
@@ -311,118 +323,124 @@ func ForwardToIAMPolicyClient(s runtime.MCPServer, client IAMPolicyClient, opts 
 	GetIamPolicyTool := IAMPolicy_GetIamPolicyTool
 	GetIamPolicyTool = runtime.ApplyConfig(GetIamPolicyTool, config)
 
-	s.AddTool(GetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req iampb.GetIamPolicyRequest
+	if config.ShouldRegister(GetIamPolicyTool.Name) {
+		s.AddTool(GetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req iampb.GetIamPolicyRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := client.GetIamPolicy(ctx, &req)
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := client.GetIamPolicy(ctx, &req)
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp)
-		if err != nil {
-			return nil, err
-		}
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			structured, err := runtime.EncodeMessage(resp)
+			if err != nil {
+				return nil, err
+			}
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 	SetIamPolicyTool := IAMPolicy_SetIamPolicyTool
 	SetIamPolicyTool = runtime.ApplyConfig(SetIamPolicyTool, config)
 
-	s.AddTool(SetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req iampb.SetIamPolicyRequest
+	if config.ShouldRegister(SetIamPolicyTool.Name) {
+		s.AddTool(SetIamPolicyTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req iampb.SetIamPolicyRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := client.SetIamPolicy(ctx, &req)
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := client.SetIamPolicy(ctx, &req)
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp)
-		if err != nil {
-			return nil, err
-		}
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			structured, err := runtime.EncodeMessage(resp)
+			if err != nil {
+				return nil, err
+			}
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 	TestIamPermissionsTool := IAMPolicy_TestIamPermissionsTool
 	TestIamPermissionsTool = runtime.ApplyConfig(TestIamPermissionsTool, config)
 
-	s.AddTool(TestIamPermissionsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req iampb.TestIamPermissionsRequest
+	if config.ShouldRegister(TestIamPermissionsTool.Name) {
+		s.AddTool(TestIamPermissionsTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req iampb.TestIamPermissionsRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := client.TestIamPermissions(ctx, &req)
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := client.TestIamPermissions(ctx, &req)
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp)
-		if err != nil {
-			return nil, err
-		}
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			structured, err := runtime.EncodeMessage(resp)
+			if err != nil {
+				return nil, err
+			}
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 }

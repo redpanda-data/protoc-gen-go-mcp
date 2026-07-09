@@ -18,6 +18,7 @@ type ExtraProperty struct {
 type config struct {
 	ExtraProperties []ExtraProperty
 	NamePrefix      string
+	ToolFilter      func(toolName string) bool
 }
 
 // WithNamePrefix prepends prefix + "_" to every tool name at registration
@@ -36,9 +37,27 @@ func WithExtraProperties(properties ...ExtraProperty) Option {
 	}
 }
 
+// WithToolFilter registers only the tools for which keep returns true. The
+// name passed to keep is the final tool name as it will be registered, i.e.
+// after any name prefix has been applied, so callers can match against the
+// generated tool descriptors' names. Useful when a service exposes a
+// conditional subset of its tools (e.g. feature-gated writes).
+func WithToolFilter(keep func(toolName string) bool) Option {
+	return func(c *config) {
+		c.ToolFilter = keep
+	}
+}
+
 // NewConfig creates a new config instance
 func NewConfig() *config {
 	return &config{}
+}
+
+// ShouldRegister reports whether a tool with the given final name (after
+// ApplyConfig) passes the configured tool filter. Called by generated code
+// before AddTool; with no filter configured every tool is registered.
+func (c *config) ShouldRegister(toolName string) bool {
+	return c.ToolFilter == nil || c.ToolFilter(toolName)
 }
 
 // ApplyConfig applies all config options (name prefix, extra properties) to a tool.

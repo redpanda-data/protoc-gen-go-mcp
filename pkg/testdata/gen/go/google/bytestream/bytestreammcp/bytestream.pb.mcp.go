@@ -34,45 +34,47 @@ func RegisterByteStreamHandler(s runtime.MCPServer, srv ByteStreamServer, opts .
 	QueryWriteStatusTool := ByteStream_QueryWriteStatusTool
 	QueryWriteStatusTool = runtime.ApplyConfig(QueryWriteStatusTool, config)
 
-	s.AddTool(QueryWriteStatusTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req bytestream.QueryWriteStatusRequest
+	if config.ShouldRegister(QueryWriteStatusTool.Name) {
+		s.AddTool(QueryWriteStatusTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req bytestream.QueryWriteStatusRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		// Rewrite oneof discriminated wrappers and recursion placeholders into the
-		// protojson-native shape. Errors are model-readable for self-correction.
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			// Rewrite oneof discriminated wrappers and recursion placeholders into the
+			// protojson-native shape. Errors are model-readable for self-correction.
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := srv.QueryWriteStatus(ctx, &req)
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := srv.QueryWriteStatus(ctx, &req)
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp)
-		if err != nil {
-			return nil, err
-		}
+			structured, err := runtime.EncodeMessage(resp)
+			if err != nil {
+				return nil, err
+			}
 
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 }
 
 // ByteStreamClient is compatible with the grpc-go client interface.
@@ -94,42 +96,44 @@ func ForwardToConnectByteStreamClient(s runtime.MCPServer, client ConnectByteStr
 	QueryWriteStatusTool := ByteStream_QueryWriteStatusTool
 	QueryWriteStatusTool = runtime.ApplyConfig(QueryWriteStatusTool, config)
 
-	s.AddTool(QueryWriteStatusTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req bytestream.QueryWriteStatusRequest
+	if config.ShouldRegister(QueryWriteStatusTool.Name) {
+		s.AddTool(QueryWriteStatusTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req bytestream.QueryWriteStatusRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := client.QueryWriteStatus(ctx, connect.NewRequest(&req))
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := client.QueryWriteStatus(ctx, connect.NewRequest(&req))
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp.Msg)
-		if err != nil {
-			return nil, err
-		}
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			structured, err := runtime.EncodeMessage(resp.Msg)
+			if err != nil {
+				return nil, err
+			}
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 }
 
 // ForwardToByteStreamClient registers a gRPC client, to forward MCP calls to it.
@@ -141,40 +145,42 @@ func ForwardToByteStreamClient(s runtime.MCPServer, client ByteStreamClient, opt
 	QueryWriteStatusTool := ByteStream_QueryWriteStatusTool
 	QueryWriteStatusTool = runtime.ApplyConfig(QueryWriteStatusTool, config)
 
-	s.AddTool(QueryWriteStatusTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
-		var req bytestream.QueryWriteStatusRequest
+	if config.ShouldRegister(QueryWriteStatusTool.Name) {
+		s.AddTool(QueryWriteStatusTool, func(ctx context.Context, request *runtime.CallToolRequest) (*runtime.CallToolResult, error) {
+			var req bytestream.QueryWriteStatusRequest
 
-		message := request.Arguments
+			message := request.Arguments
 
-		// Extract extra properties if configured
-		for _, prop := range config.ExtraProperties {
-			if propVal, ok := message[prop.Name]; ok {
-				ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+			// Extract extra properties if configured
+			for _, prop := range config.ExtraProperties {
+				if propVal, ok := message[prop.Name]; ok {
+					ctx = context.WithValue(ctx, prop.ContextKey, propVal)
+				}
 			}
-		}
 
-		if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
-			return runtime.NewToolResultError(err.Error()), nil
-		}
+			if err := runtime.DecodeArguments(req.ProtoReflect().Descriptor(), message); err != nil {
+				return runtime.NewToolResultError(err.Error()), nil
+			}
 
-		marshaled, err := json.Marshal(message)
-		if err != nil {
-			return nil, err
-		}
+			marshaled, err := json.Marshal(message)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
-			return nil, err
-		}
+			if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(marshaled, &req); err != nil {
+				return nil, err
+			}
 
-		resp, err := client.QueryWriteStatus(ctx, &req)
-		if err != nil {
-			return runtime.HandleError(err)
-		}
+			resp, err := client.QueryWriteStatus(ctx, &req)
+			if err != nil {
+				return runtime.HandleError(err)
+			}
 
-		structured, err := runtime.EncodeMessage(resp)
-		if err != nil {
-			return nil, err
-		}
-		return runtime.NewToolResultJSON(structured), nil
-	})
+			structured, err := runtime.EncodeMessage(resp)
+			if err != nil {
+				return nil, err
+			}
+			return runtime.NewToolResultJSON(structured), nil
+		})
+	}
 }
