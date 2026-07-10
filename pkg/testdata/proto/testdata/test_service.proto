@@ -133,6 +133,20 @@ message TestValidationRequest {
   int64 timestamp = 6 [
     (buf.validate.field).int64.gt = 0
   ];
+
+  // Allowed-values constraint on a plain string
+  string action = 7 [
+    (buf.validate.field).string = {
+      in: [
+        "add",
+        "remove"
+      ]
+    },
+    (buf.validate.field).ignore = IGNORE_IF_ZERO_VALUE
+  ];
+
+  // Required via protovalidate
+  string title = 8 [(buf.validate.field).required = true];
 }
 
 message TestValidationResponse {

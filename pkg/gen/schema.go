@@ -107,7 +107,13 @@ func messageSchema(md protoreflect.MessageDescriptor, opts SchemaOptions, seen m
 				oneofMembers[string(oneof.Name())] = members
 			}
 			memberSchema := fieldSchema(nestedFd, opts, seen)
-			memberSchema["description"] = fmt.Sprintf("The value when %s=%q.", DiscriminatorKey, name)
+			// Keep the field's own comment (if any) and append the
+			// discriminator instruction, which is load-bearing for the model.
+			oneofDesc := fmt.Sprintf("The value when %s=%q.", DiscriminatorKey, name)
+			if existing, ok := memberSchema["description"].(string); ok && existing != "" {
+				oneofDesc = existing + " " + oneofDesc
+			}
+			memberSchema["description"] = oneofDesc
 			members.set(name, memberSchema)
 			continue
 		}
@@ -223,7 +229,9 @@ func FieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions) map[string
 // fieldSchema is the internal implementation that threads the seen set for cycle detection.
 func fieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions, seen map[protoreflect.FullName]int) map[string]any {
 	if fd.IsMap() {
-		return mapFieldSchema(fd, opts, seen)
+		schema := mapFieldSchema(fd, opts, seen)
+		applyFieldDescription(fd, schema)
+		return schema
 	}
 
 	var schema map[string]any
@@ -243,12 +251,36 @@ func fieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions, seen map[p
 	}
 
 	if fd.IsList() {
-		return map[string]any{
+		schema = map[string]any{
 			"type":  "array",
 			"items": schema,
 		}
 	}
+	applyFieldDescription(fd, schema)
 	return schema
+}
+
+// applyFieldDescription copies the field's leading proto comment into the
+// schema's "description". A generated description already present (well-known
+// type hints, recursion placeholders) is kept and appended after the comment,
+// since those carry input-format instructions for the model.
+func applyFieldDescription(fd protoreflect.FieldDescriptor, schema map[string]any) {
+	comment := fieldComment(fd)
+	if comment == "" {
+		return
+	}
+	if existing, ok := schema["description"].(string); ok && existing != "" {
+		comment = comment + " " + existing
+	}
+	schema["description"] = comment
+}
+
+// fieldComment returns the field's leading comment, cleaned and trimmed.
+// Descriptors without source info (e.g. compiled Go descriptors at runtime)
+// yield "".
+func fieldComment(fd protoreflect.FieldDescriptor) string {
+	loc := fd.ParentFile().SourceLocations().ByDescriptor(fd)
+	return strings.TrimSpace(CleanComment(loc.LeadingComments))
 }
 
 func mapFieldSchema(fd protoreflect.FieldDescriptor, opts SchemaOptions, seen map[protoreflect.FullName]int) map[string]any {
@@ -366,7 +398,9 @@ func KindToType(kind protoreflect.Kind) string {
 	}
 }
 
-// IsFieldRequired checks if a field has the REQUIRED field behavior annotation.
+// IsFieldRequired checks if a field is marked required, either via the
+// (google.api.field_behavior) = REQUIRED annotation or via
+// (buf.validate.field).required = true.
 func IsFieldRequired(fd protoreflect.FieldDescriptor) bool {
 	if proto.HasExtension(fd.Options(), annotations.E_FieldBehavior) {
 		behaviors := proto.GetExtension(fd.Options(), annotations.E_FieldBehavior).([]annotations.FieldBehavior)
@@ -374,6 +408,11 @@ func IsFieldRequired(fd protoreflect.FieldDescriptor) bool {
 			if behavior == annotations.FieldBehavior_REQUIRED {
 				return true
 			}
+		}
+	}
+	if proto.HasExtension(fd.Options(), validate.E_Field) {
+		if rules, ok := proto.GetExtension(fd.Options(), validate.E_Field).(*validate.FieldRules); ok && rules.GetRequired() {
+			return true
 		}
 	}
 	return false
@@ -408,6 +447,9 @@ func ExtractValidateConstraints(fd protoreflect.FieldDescriptor) map[string]any 
 		}
 		if stringRules.HasMaxLen() {
 			constraints["maxLength"] = int(stringRules.GetMaxLen())
+		}
+		if in := stringRules.GetIn(); len(in) > 0 {
+			constraints["enum"] = in
 		}
 	}
 

@@ -601,6 +601,8 @@ func TestSchemaRoundTripAllMessages(t *testing.T) {
 				Name:            "Test User",
 				Age:             30,
 				Timestamp:       1000,
+				Action:          "add",
+				Title:           "A title",
 			},
 		},
 		{
