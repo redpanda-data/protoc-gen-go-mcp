@@ -13,9 +13,9 @@ require (
 	github.com/redpanda-data/common-go/api v0.0.0-20250801174835-9eea07f1ea06
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	golang.org/x/tools v0.44.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20260316180232-0b37fe3546d5
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260316180232-0b37fe3546d5
-	google.golang.org/grpc v1.81.0
+	google.golang.org/genproto/googleapis/api v0.0.0-20260414002931-afd174a4e478
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260414002931-afd174a4e478
+	google.golang.org/grpc v1.82.1
 	google.golang.org/protobuf v1.36.11
 	honnef.co/go/tools v0.7.0
 )
