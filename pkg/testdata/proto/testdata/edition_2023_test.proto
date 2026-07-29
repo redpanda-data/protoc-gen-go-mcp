@@ -1,0 +1,102 @@
+// Copyright 2025 Redpanda Data, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2023";
+
+package testdata;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/any.proto";
+import "google/api/field_behavior.proto";
+
+// TestServiceEdition2023 provides test operations using edition 2023 syntax
+service TestServiceEdition2023 {
+  // CreateItem creates a new item
+  rpc CreateItem(CreateItemRequestEdition2023) returns (CreateItemResponseEdition2023);
+  
+  // GetItem retrieves an item by ID
+  rpc GetItem(GetItemRequestEdition2023) returns (GetItemResponseEdition2023);
+  
+  // Test well-known types handling
+  rpc ProcessWellKnownTypes(ProcessWellKnownTypesRequestEdition2023) returns (ProcessWellKnownTypesResponseEdition2023);
+}
+
+message CreateItemRequestEdition2023 {
+  // Required field
+  string name = 1 [(google.api.field_behavior) = REQUIRED];
+  
+  // Optional field (no explicit 'optional' keyword needed in edition 2023)
+  string description = 2;
+  
+  // Map field (becomes array in OpenAI mode)
+  map<string, string> labels = 3;
+  
+  // Repeated field
+  repeated string tags = 4;
+  
+  // Oneof field
+  oneof item_type {
+    ProductDetailsEdition2023 product = 5;
+    ServiceDetailsEdition2023 service = 6;
+  }
+  
+  // Bytes field (has format: byte that should be removed in OpenAI)
+  bytes thumbnail = 7;
+}
+
+message ProductDetailsEdition2023 {
+  double price = 1;
+  int32 quantity = 2;
+}
+
+message ServiceDetailsEdition2023 {
+  string duration = 1;
+  bool recurring = 2;
+}
+
+message CreateItemResponseEdition2023 {
+  string id = 1;
+  google.protobuf.Timestamp created_at = 2;
+}
+
+message GetItemRequestEdition2023 {
+  string id = 1;
+}
+
+message GetItemResponseEdition2023 {
+  ItemEdition2023 item = 1;
+}
+
+message ItemEdition2023 {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  map<string, string> labels = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message ProcessWellKnownTypesRequestEdition2023 {
+  // Well-known types that need special handling in OpenAI mode
+  google.protobuf.Struct metadata = 1;
+  google.protobuf.Value config = 2;
+  google.protobuf.Any payload = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+message ProcessWellKnownTypesResponseEdition2023 {
+  bool success = 1;
+  string message = 2;
+}
