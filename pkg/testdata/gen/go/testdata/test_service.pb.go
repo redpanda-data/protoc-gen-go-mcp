@@ -629,8 +629,12 @@ type TestValidationRequest struct {
 	// Length constraints
 	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	// Numeric constraints
-	Age           int32 `protobuf:"varint,5,opt,name=age,proto3" json:"age,omitempty"`
-	Timestamp     int64 `protobuf:"varint,6,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Age       int32 `protobuf:"varint,5,opt,name=age,proto3" json:"age,omitempty"`
+	Timestamp int64 `protobuf:"varint,6,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	// Allowed-values constraint on a plain string
+	Action string `protobuf:"bytes,7,opt,name=action,proto3" json:"action,omitempty"`
+	// Required via protovalidate
+	Title         string `protobuf:"bytes,8,opt,name=title,proto3" json:"title,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -705,6 +709,20 @@ func (x *TestValidationRequest) GetTimestamp() int64 {
 		return x.Timestamp
 	}
 	return 0
+}
+
+func (x *TestValidationRequest) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
+func (x *TestValidationRequest) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
 }
 
 type TestValidationResponse struct {
@@ -810,7 +828,7 @@ const file_testdata_test_service_proto_rawDesc = "" +
 	"\ttimestamp\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\"S\n" +
 	"\x1dProcessWellKnownTypesResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\x94\x02\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xe1\x02\n" +
 	"\x15TestValidationRequest\x127\n" +
 	"\x11resource_group_id\x18\x01 \x01(\tB\v\xbaH\b\xd8\x01\x01r\x03\xb0\x01\x01R\x0fresourceGroupId\x12\x1d\n" +
 	"\x05email\x18\x02 \x01(\tB\a\xbaH\x04r\x02`\x01R\x05email\x12?\n" +
@@ -818,7 +836,9 @@ const file_testdata_test_service_proto_rawDesc = "" +
 	"\x04name\x18\x04 \x01(\tB\t\xbaH\x06r\x04\x10\x03\x182R\x04name\x12\x1c\n" +
 	"\x03age\x18\x05 \x01(\x05B\n" +
 	"\xbaH\a\x1a\x05\x18\x96\x01(\x00R\x03age\x12%\n" +
-	"\ttimestamp\x18\x06 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\ttimestamp\"L\n" +
+	"\ttimestamp\x18\x06 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\ttimestamp\x12-\n" +
+	"\x06action\x18\a \x01(\tB\x15\xbaH\x12\xd8\x01\x01r\rR\x03addR\x06removeR\x06action\x12\x1c\n" +
+	"\x05title\x18\b \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x05title\"L\n" +
 	"\x16TestValidationResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage2\xd5\x02\n" +

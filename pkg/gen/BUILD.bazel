@@ -35,6 +35,7 @@ go_test(
         "register_panic_test.go",
         "register_test.go",
         "register_tool_filter_test.go",
+        "schema_descriptions_test.go",
         "schema_edge_cases_test.go",
         "schema_fuzz_test.go",
         "schema_map_bug_test.go",
