@@ -33,14 +33,14 @@ func main() {
 		"false",
 		"Generate client and handler interfaces with simple function signatures. This eliminates the wrapper connect.Request and connect.Response types, instead having functions directly use generated RPC request and responses. Clients and handlers will instead use context.Contexts to propagate information such as headers. Most users will be more familiar with these interfaces than the default.",
 	)
-	simple, err := getSimpleBool(*simpleString)
-	if err != nil {
-		panic(err)
-	}
 
 	protogen.Options{
 		ParamFunc: flagSet.Set,
 	}.Run(func(gen *protogen.Plugin) error {
+		simple, err := getSimpleBool(*simpleString)
+		if err != nil {
+			return err
+		}
 		for _, f := range gen.Files {
 			if !f.Generate {
 				continue
