@@ -55,10 +55,9 @@ import (
   "encoding/json"
   "google.golang.org/protobuf/encoding/protojson"
   "connectrpc.com/connect"
-  grpc "google.golang.org/grpc"
+  {{ if not .Simple }}grpc "google.golang.org/grpc"{{ end }}
   "github.com/redpanda-data/protoc-gen-go-mcp/pkg/runtime"
 )
-
 
 var (
 {{- range $key, $val := .Tools }}
@@ -136,7 +135,7 @@ func Register{{$key}}Handler(s runtime.MCPServer, srv {{$key}}Server, opts ...ru
 // {{$serviceName}}Client is compatible with the grpc-go client interface.
 type {{$serviceName}}Client interface {
   {{- range $methodName, $tool := $methods }}
-  {{$methodName}}(ctx context.Context, req *{{$tool.RequestType}}, opts ...grpc.CallOption) (*{{$tool.ResponseType}}, error)
+  {{$methodName}}(ctx context.Context, req *{{$tool.RequestType}}{{ if not $.Simple }},opts ...grpc.CallOption{{ end }}) (*{{$tool.ResponseType}}, error)
   {{- end }}
 }
 {{ end }}
@@ -268,6 +267,7 @@ type TplParams struct {
 	GoPackage   string
 	Tools       map[string]runtime.Tool
 	Services    map[string]map[string]Tool
+	Simple      bool
 }
 
 type Tool struct {
@@ -294,7 +294,7 @@ func (g *FileGenerator) getType(fd protoreflect.FieldDescriptor) map[string]any 
 	return gen.FieldSchema(fd, gen.SchemaOptions{})
 }
 
-func (g *FileGenerator) Generate(packageSuffix string) {
+func (g *FileGenerator) Generate(packageSuffix string, simple bool) {
 	file := g.f
 	if len(g.f.Services) == 0 {
 		return
@@ -387,6 +387,7 @@ func (g *FileGenerator) Generate(packageSuffix string) {
 		GoPackage:   string(g.f.GoPackageName),
 		Services:    services,
 		Tools:       tools,
+		Simple:      simple,
 	}
 	err = tpl.Execute(g.gf, params)
 	if err != nil {
