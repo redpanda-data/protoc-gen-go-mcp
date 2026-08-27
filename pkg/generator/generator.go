@@ -53,6 +53,7 @@ package {{ .GoPackage }}
 import (
   "context"
   "encoding/json"
+  "encoding/json/jsontext"
   "google.golang.org/protobuf/encoding/protojson"
   "connectrpc.com/connect"
   grpc "google.golang.org/grpc"
